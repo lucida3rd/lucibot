@@ -1,0 +1,3 @@
+###周期トゥート(t|,|hh:mm|,|xxx.txt)
+#t|,|18:00|,|ctoot_lucida3rd.txt
+
