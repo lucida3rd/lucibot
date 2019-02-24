@@ -1,25 +1,22 @@
+#!/usr/bin/python
 # coding: UTF-8
 #####################################################
-# 十八試るしぼっと
+# るしぼっと4
 #   Class   ：ログ処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2018/11/17
+#   Update  ：2019/2/24
 #####################################################
-from datetime import datetime
 import codecs
 import string
-#import re
 import global_val
 #####################################################
 class CLS_Mylog:
-	GetTD = ''			#取得日時
 	NowTimeDate  = ''	#現在日時
 
 #####################################################
 # Init
 #####################################################
 	def __init__(self):
-		self.pGetTime()
 		return
 
 
@@ -28,19 +25,11 @@ class CLS_Mylog:
 # 時間を取得する
 #####################################################
 	def pGetTime(self):
-		#############################
-		# 時間を取得
-		try:
-##			self.NowTimeDate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-			self.GetTD       = datetime.now()
-			self.NowTimeDate = self.GetTD.strftime("%Y-%m-%d %H:%M:%S")
-		except ValueError as err :
-			self.GetTD = ''
-			NowTimeDate  = 'xxxx-xx-xx xx:xx:xx'
+		wRes = global_val.gCLS_Init.cGetTime()
+		if wRes['Result']!=True :
 			return False
 		
-		#############################
-		# 取得成功
+		self.NowTimeDate = wRes['TimeDate']
 		return True
 
 
@@ -48,7 +37,8 @@ class CLS_Mylog:
 #####################################################
 # ログデータのセット
 #####################################################
-	def cLog(self,level,msg,view=False,tag=""):
+##	def cLog( self, level, msg, view=False, tag="" ):
+	def cLog( self, level, log_file, msg, view=False ):
 		
 		#############################
 		# 設定されたログレベルが適当でなければ
@@ -74,8 +64,25 @@ class CLS_Mylog:
 		self.pGetTime()
 		
 		#############################
+		# パスが無設定ならregに出力する
+		if log_file=="" :
+			wDate = NowTimeDate.split(" ")
+			if wDate[0]=="" :
+				###ありえないor時計ぶっ壊れてる？
+				global_val.gCLS_Init.cPrint( 'unknown Time = ' + msg )
+				return
+			
+			log_file = global_val.gSTR_File['RegLog'] + wDate[0] + '.log'
+		
+		#############################
+		# コンソールに表示する
+		# = システムログに出る
+		if view==True :
+			global_val.gCLS_Init.cPrint( self.NowTimeDate + ' ' + msg )
+		
+		#############################
 		# ファイルへ書き出す
-		self.pWrite(msg,tag)
+		self.pWrite( msg=msg, tag=tag )
 		return
 
 
@@ -83,15 +90,16 @@ class CLS_Mylog:
 #####################################################
 # ファイルへの書き出し
 #####################################################
-	def pWrite(self,msg,tag=""):
-		#############################
-		# ファイル名の作成
-		log_file = ''
-		if self.GetTD == '' :
-			log_file = global_val.gMyLog_path + tag + '_error.log'
-		else :
-			log_date = self.GetTD.strftime("%Y%m%d")
-			log_file = global_val.gMyLog_path + tag + log_date + '.log'
+##	def pWrite( self, msg, tag="" ):
+	def pWrite( self, log_file, msg ):
+##		#############################
+##		# ファイル名の作成
+##		log_file = ''
+##		if self.GetTD == '' :
+##			log_file = global_val.gMyLog_path + tag + '_error.log'
+##		else :
+##			log_date = self.GetTD.strftime("%Y%m%d")
+##			log_file = global_val.gMyLog_path + tag + log_date + '.log'
 		
 		#############################
 		# 追記モードで開く
@@ -105,7 +113,6 @@ class CLS_Mylog:
 		
 		#############################
 		# 書き込んで閉じる
-##		file.write( string.join(setline,'') )
 		file.writelines( setline )
 		file.close()
 		

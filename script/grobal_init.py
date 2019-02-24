@@ -11,10 +11,17 @@ import sys
 gPath = os.path.dirname(os.path.abspath(__file__)) + "/../script"
 sys.path.append(gPath)
 
+from datetime import datetime
 import time
+import subprocess as sp
 import global_val
-from config import CLS_Config
 from mylog import CLS_Mylog
+from filectrl import CLS_File
+from regist import CLS_Regist
+
+
+
+from config import CLS_Config
 from mainproc import CLS_MainProc
 
 from mastodon_use import CLS_Mastodon_Use
@@ -39,10 +46,71 @@ class CLS_Init:
 	def __init__(self):
 		
 		#############################
+		# クラスの生成
+		global_val.gCLS_Regist = CLS_Regist()
+		global_val.gCLS_File = CLS_File()
+		global_val.gCLS_Mylog = CLS_Mylog()
+		
+		#############################
 		# システム情報の取得
 		self._getLucibotVer()
 		self._getPythonVer()
+		
+		global_val.gSTR_SystemInfo['HostName'] = str(os.uname()[1]).strip()
 		return
+
+
+
+#####################################################
+# mastodonクラス生成
+#####################################################
+	def cCreateMastodon( self, base_url, reg_file, user_file ):
+		#############################
+		# ping疎通チェック
+		wDomain = base_url.split("//")
+		if self.cPing(wDomain[1])!=True :
+			return False	#失敗
+		
+		#############################
+		# レジストファイルの存在チェック
+		if global_val.gCLS_File.cExist( reg_file )!=True :
+			global_val.gCLS_Init.cPrint( "CLS_Init: cCreateMastodon: File not found: " + reg_file )
+			return False	#ファイルがない
+		
+		if global_val.gCLS_File.cExist( user_file )!=True :
+			global_val.gCLS_Init.cPrint( "CLS_Init: cCreateMastodon: File not found: " + user_file )
+			return False	#ファイルがない
+		
+		#############################
+		# mastodon APIオブジェクトを生成する
+		global_val.gCLS_Mastodon = CLS_Mastodon_Use(
+			api_base_url = base_url,
+			client_id    = reg_file,
+			access_token = user_file,
+			flg_orginit=True )
+		
+		#############################
+		# mastodonが生成されたか確認
+		if global_val.gCLS_Mastodon.Flg_Init != True :
+			return False	#失敗
+		
+		return True
+
+
+
+#####################################################
+# ping疎通確認
+#####################################################
+	def cPing( self, send_ping, count=4, timeout=5000 ):
+		index = send_ping.find(global_val.gSTR_SystemInfo['HostName'])
+		if index!=-1 :
+			return True	#自hostならやらずにOKとする
+		
+		wRes = sp.getstatusoutput( "ping -c " + str(count) + " -w " + str(timeout) + " " + str(send_ping) )
+		if wRes!=0 :
+			return False
+		
+		return True
 
 
 
@@ -229,6 +297,27 @@ class CLS_Init:
 
 
 #####################################################
+# 時間を取得する
+#####################################################
+	def cGetTime(self):
+		wRes = {
+			"Result"	: False,
+			"Object"	: "",
+			"TimeDate"	: ""
+		}
+		
+		try:
+			wRes['Object'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+			wRes['TimeDate'] = str( wRes['Object'] )
+		except ValueError as err :
+			return wRes
+		
+		wRes['Result'] = True
+		return wRes
+
+
+
+#####################################################
 # コンソールへのprint表示
 #   pythonバージョン混在回避のため関数からコールさせる
 #####################################################
@@ -243,13 +332,26 @@ class CLS_Init:
 #####################################################
 	def cViewSysinfo(self):
 		wStr = "" ;
+		
+		#############################
+		# 時間の取得
+		wRes = self.cGetTime()
+		if wRes['Result']==True :
+			wStr = wStr + wRes['TimeDate'] + '\n'
+		
+		#############################
+		# 情報組み立て
 		wStr = wStr + "Name= " + global_val.gSTR_SystemInfo['BotName'] + '\n'
 		wStr = wStr + "Date= " + global_val.gSTR_SystemInfo['BotDate'] + '\n'
 		wStr = wStr + "Ver = " + global_val.gSTR_SystemInfo['Version'] + '\n'
 		wStr = wStr + "Admin= " + global_val.gSTR_SystemInfo['Admin'] + '\n'
 		wStr = wStr + "github= " + global_val.gSTR_SystemInfo['github'] + '\n'
-##		wStr = wStr + str( global_val.gSTR_SystemInfo['PythonVer'] )
-		wStr = wStr + "Python= " + str( global_val.gSTR_SystemInfo['PythonVer'] )
+		
+		wStr = wStr + "Python= " + str( global_val.gSTR_SystemInfo['PythonVer'] )  + '\n'
+		wStr = wStr + "HostName= " + global_val.gSTR_SystemInfo['HostName'] + '\n'
+		
+		#############################
+		# コンソールに表示
 		self.cPrint( wStr )
 		return
 

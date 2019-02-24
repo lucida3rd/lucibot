@@ -1,13 +1,11 @@
+#!/usr/bin/python
 # coding: UTF-8
 #####################################################
-# 十八試るしぼっと
-#   Class   ：マストドンユーズ
+# るしぼっと4
+#   Class   ：mastodon API (v1.3改)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/2/3
+#   Update  ：2019/2/24
 #####################################################
-# astodon.py v1.3 marge
-#####################################################
-
 import os
 import os.path
 import sys
@@ -40,24 +38,26 @@ class CLS_Mastodon_Use:
 # Init
 #####################################################
 	def cInit(self):
-		#############################
-		# configの確認
-		if global_val.gConfig["BaseUrl"] == "" or \
-		   global_val.gConfig["UserBot"] == "" :
-			return
+##		#############################
+##		# configの確認
+##		if global_val.gConfig["BaseUrl"] == "" or \
+##		   global_val.gConfig["UserBot"] == "" :
+##			return
+		
+##		#############################
+##		# 自IDの設定
+##		user_list = self.cGetMyAccountInfo()
+##		if len( user_list ) == 0:
+##			return	#configファイルの設定ミスかも
+##		
+##		user_id = user_list['id']
+##		arr_user = global_val.gConfig["UserBot"].split('@')
+##		global_val.gMyID = arr_user[0]
+##		global_val.gMyIDnum = user_id
 		
 		#############################
-		# 自IDの設定
-		user_list = self.cGetMyAccountInfo()
-		if len( user_list ) == 0:
-			return	#configファイルの設定ミスかも
-		
-		user_id = user_list['id']
-		arr_user = global_val.gConfig["UserBot"].split('@')
-		global_val.gMyID = arr_user[0]
-		global_val.gMyIDnum = user_id
-		
-		self.Flg_Init = True	#初期化完了
+		# 初期化完了
+		self.Flg_Init = True
 		return
 
 
@@ -509,8 +509,7 @@ class CLS_Mastodon_Use:
 			response = requests.post(api_base_url + '/api/v1/apps', data=request_data, timeout=request_timeout)
 			response = response.json()
 		except Exception as e:
-			msg = "CLS_Mastodon_Use：create_app：Could not complete request：" + str(e)
-			cPrint(msg)
+			print( "CLS_Mastodon_Use：create_app：Could not complete request：" + str(e) )
 			return (response['client_id'], response['client_secret'])
 		
 		if to_file is not None:

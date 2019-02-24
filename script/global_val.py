@@ -7,29 +7,43 @@
 #   Update  ：2019/2/24
 #####################################################
 import os
+gScriptPath = os.path.dirname(__file__) + '/../'
 
 #############################
-# スクリプトのパス(grobal_val専用)
-gScriptPath = os.path.dirname(__file__) + '/../'
+# ユーザデータのパス(grobal_val専用)
+gUserData_Path = gScriptPath + '../botdata/'
+#############################
+
+
 
 #############################
 # システム情報
 gSTR_SystemInfo = {
+	"Client_Name"	: "るしぼっと",
 	"BotName"		: "",
 	"BotDate"		: "",
 	"Version"		: "",
 	"Admin"			: "",
 	"github"		: "",
+	
 	"PythonVer"		: 0,
+	"HostName"		: "",
 	"(dummy)"		: 0
 }
 
 #############################
-# システム情報
+# ファイルパス
 gSTR_File = {
 	"Readme"		: gScriptPath + "readme.txt",
+	"RegLog"		: gScriptPath + "_reg/",
+	"defUserdata"	: gScriptPath + "_default/",
+	
+	"RegFile"		: "/_data/reg_reg_file.txt",
+	"UserFile"		: "/_data/reg_user_file.txt",
+	
 	"(dummy)"		: 0
 }
+
 
 
 
@@ -37,7 +51,12 @@ gSTR_File = {
 
 #############################
 # クラス実体
+gCLS_Mastodon = ''				#Mastodonクラス用
+gCLS_Twitter = ''				#Twitterクラス用
 gCLS_Init = ''					#CLS_Initクラス用
+gCLS_Regist = ''				#CLS_Registクラス用
+gCLS_File = ''					#CLS_Fileクラス用
+gCLS_Mylog = ''					#CLS_Mylogクラス用
 
 
 
@@ -193,8 +212,6 @@ gClazList_file = gScriptPath + '../data/clazlist.txt'		#品詞リストファイ
 #############################
 # クラス
 gCLS_MainProc = ''											#MainProcクラス用
-gCLS_Mastodon = ''											#Mastodonクラス用
-gCLS_Twitter = ''											#Twitterクラス用
 gCLS_Config  = ''											#Configクラス用
 gCLS_RandToot = ''											#RandTootクラス用
 gCLS_LookPTL = ''											#LookPTLクラス用
@@ -204,5 +221,4 @@ gCLS_UserInfo = ''											#ユーザ情報管理クラス用
 gCLS_TootCorrect = ''										#トゥート収集処理クラス用
 gCLS_Traffic = ''											#トラヒック処理クラス用
 gCLS_LookHard = ''											#LookHardクラス用
-gCLS_Mylog = ''												#CLS_Mylogクラス用
 

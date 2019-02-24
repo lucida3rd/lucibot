@@ -25,7 +25,14 @@ def main():
 	#############################
 	# 初期化クラスの生成
 	global_val.gCLS_Init = CLS_Init()
-
+	
+	#############################
+	# データフォルダのチェック
+	if global_val.gCLS_File.cExist( global_val.gUserData_Path )!=True :
+		###通常ありえない
+		global_val.gCLS_Init.cPrint("データフォルダがありません: 設定パス: " + global_val.gUserData_Path )
+		return
+	
 	#####################################################
 	# 引数=2のコマンド群
 	if len(wARRargs)==2 :
@@ -33,6 +40,12 @@ def main():
 	# システム情報の表示
 		if wARRargs[1]=='-v' :
 			global_val.gCLS_Init.cViewSysinfo()
+			wFlg = True
+	
+	#############################
+	# ユーザ登録 一覧表示
+		elif wARRargs[1]=='-ul' :
+			global_val.gCLS_Regist.cViewList()
 			wFlg = True
 	
 	#############################
@@ -44,10 +57,28 @@ def main():
 
 	#####################################################
 	# 引数=3のコマンド群
-#	if len(wARRargs)==3 :
+	if len(wARRargs)==3 :
+	#############################
+	# ユーザ登録 登録
+		if wARRargs[1]=='-ur' :
+			global_val.gCLS_Regist.cRegist( wARRargs[2] )
+			wFlg = True
+	
+	#############################
+	# ユーザ登録 再登録
+		elif wARRargs[1]=='-uu' :
+			global_val.gCLS_Regist.cUpdate( wARRargs[2] )
+			wFlg = True
+	
+	#############################
+	# ユーザ登録 削除
+		elif wARRargs[1]=='-ud' :
+			global_val.gCLS_Regist.cDelete( wARRargs[2] )
+			wFlg = True
+	
 #	#############################
 #	# RUN メイン処理
-#		if wARRargs[1]=='-m' :
+#		elif wARRargs[1]=='-m' :
 #			self.run_main()
 #			wFlg = True
 	
@@ -55,7 +86,7 @@ def main():
 	#####################################################
 	# コマンド未実行
 	if wFlg != True :
-		global_val.gCLS_Init.cPrint("コマンドが無効です (°ω。)？")
+		global_val.gCLS_Init.cPrint("コマンドが無効です")
 	
 	return
 
