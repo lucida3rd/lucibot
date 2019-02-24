@@ -1,9 +1,10 @@
+#!/usr/bin/python
 # coding: UTF-8
 #####################################################
-# 十八試るしぼっと
+# るしぼっと4
 #   Class   ：マスター初期化処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/2/3
+#   Update  ：2019/2/24
 #####################################################
 import os
 import sys
@@ -31,7 +32,6 @@ from lookhard import CLS_LookHard
 #####################################################
 class CLS_Init:
 	FLG_MyLock    = False
-	VAL_PythonVer = 0
 
 #####################################################
 # Init
@@ -39,8 +39,9 @@ class CLS_Init:
 	def __init__(self):
 		
 		#############################
-		# Python version取得
-		_getPythonVer()
+		# システム情報の取得
+		self._getLucibotVer()
+		self._getPythonVer()
 		return
 
 
@@ -228,16 +229,71 @@ class CLS_Init:
 
 
 #####################################################
+# コンソールへのprint表示
+#   pythonバージョン混在回避のため関数からコールさせる
+#####################################################
+	def cPrint( self, message ):
+		print( message )
+		return
+
+
+
+#####################################################
+# システム情報の表示
+#####################################################
+	def cViewSysinfo(self):
+		wStr = "" ;
+		wStr = wStr + "Name= " + global_val.gSTR_SystemInfo['BotName'] + '\n'
+		wStr = wStr + "Date= " + global_val.gSTR_SystemInfo['BotDate'] + '\n'
+		wStr = wStr + "Ver = " + global_val.gSTR_SystemInfo['Version'] + '\n'
+		wStr = wStr + "Admin= " + global_val.gSTR_SystemInfo['Admin'] + '\n'
+		wStr = wStr + "github= " + global_val.gSTR_SystemInfo['github'] + '\n'
+##		wStr = wStr + str( global_val.gSTR_SystemInfo['PythonVer'] )
+		wStr = wStr + "Python= " + str( global_val.gSTR_SystemInfo['PythonVer'] )
+		self.cPrint( wStr )
+		return
+
+
+#####################################################
+# るしぼっとVersion
+#####################################################
+	def _getLucibotVer(self):
+		for line in open( global_val.gSTR_File['Readme'], 'r'):	#ファイルを開く
+			#############################
+			# 分解+要素数の確認
+			line = line.strip()
+			get_line = line.split("= ")
+			if len(get_line) != 2 :
+				continue
+			
+			get_line[0] = get_line[0].replace("::", "")
+			#############################
+			# キーがあるか確認
+			if get_line[0] not in global_val.gSTR_SystemInfo :
+				continue
+			
+			#############################
+			# キーを設定
+			global_val.gSTR_SystemInfo[get_line[0]] = get_line[1]
+		
+		return
+
+
+
+#####################################################
 # Python version取得
+#   参考：
+#   sys.version_info(major=2, minor=7, micro=5, releaselevel='final', serial=0)
 #####################################################
 	def _getPythonVer(self):
+##		global_val.gSTR_SystemInfo['PythonVer'] = sys.version_info.major
 		
-		#############################
-		# メジャーバージョンをセット
-		self.VAL_PythonVer = sys.version_info.major
-		
-		## 参考：
-		## sys.version_info(major=2, minor=7, micro=5, releaselevel='final', serial=0)
+		wCHR_version = str(sys.version_info.major) + "."
+		wCHR_version = wCHR_version + str(sys.version_info.minor) + "."
+		wCHR_version = wCHR_version + str(sys.version_info.micro) + "."
+		wCHR_version = wCHR_version + str(sys.version_info.serial) + " "
+		wCHR_version = wCHR_version + sys.version_info.releaselevel
+		global_val.gSTR_SystemInfo['PythonVer'] = wCHR_version
 		return
 
 

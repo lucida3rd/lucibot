@@ -1,9 +1,12 @@
 ---------------------------------
   るしぼっと4 設計仕様
----------------------------------
+    ::BotName= Lucibot4
+    ::BotDate= 2019/2/24
+    ::Version= 4.0.0.1
 
-制作者：Lucida（lucida3rd@mstdn.mynoghra.jp）
-github：https://github.com/lucida3rd/lucibot
+    ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）
+    ::github= https://github.com/lucida3rd/lucibot
+---------------------------------
 
 
 ★★★るしぼっとについては現在、全体を見直し中なので使用しないでください★★★
@@ -68,28 +71,35 @@ python3で作成したmastodonクラウド環境下で動くことを前提に�
 　いちおIDをメモします。※後ででもよいです
 # id [ユーザ名]
 
-2.ホームフォルダの上位フォルダにcdします。
-# cd /home
-　※centosの場合です。Linux、その他のOSの場合は適宜変更してください
+2.ユーザに切り替える。
+# su - [ユーザ名]
+$ pwd
+　ホームフォルダをメモる
 
 3.ホームフォルダにるしぼっとのcloneを作成します。
-# git clone https://github.com/lucida3rd/lucibot.git [1のユーザ名]
+$ git clone https://github.com/lucida3rd/lucibot.git bot
+　clone先のフォルダ名は任意です。
 
-4.必要なライブラリをインストールします。
-# pip install requests requests_oauthlib
-# pip install psutil
-# pip install pytz
-# pip install python-dateutil
-# pip install mecab-python
+4.るしぼっとデータ格納用のフォルダを作成します。
+$ cd ..
+$ mkdir botdata
 
-5.デフォルトエンコードを確認する。
+5.rootに戻って必要なライブラリをインストールします。
+$ exit
+# pip3 install requests requests_oauthlib
+# pip3 install psutil
+# pip3 install pytz
+# pip3 install python-dateutil
+# pip3 install mecab-python3
+
+6.デフォルトエンコードを確認する。
 　OSのデフォルトエンコードがutf-8かを確認します。
 　以下＜デフォルトエンコードの確認＞をご参照ください。
 
-6.MeCabをインストールする。
+7.MeCabをインストールする。
 　以下＜MeCabのインストール＞をご参照ください。
 
-7.cronでbotを1分ごとに定期実行するように設定します。
+8.cronでbotを1分ごとに定期実行するように設定します。
 # vi /etc/cron.d/0hourly
 
 */1 * * * * root cd [インストールしたフォルダ]; python run.py
@@ -102,9 +112,10 @@ python3で作成したmastodonクラウド環境下で動くことを前提に�
 　※forkしてる場合はforkリポジトリにmasterを反映してから実行します。
 
 1.セットアップしたサーバにログインし、るしぼっと用ユーザに切り替えます。
+　そしてるしぼっとのcloneフォルダにcdします。
 # su - [ユーザ名]
 $ pwd
-　/home/[ユーザ名]
+　/home/[ユーザ名]/bot
 　※cloneフォルダにいることを確認します
 
 2.最新版のリストをfetchします。
@@ -229,6 +240,15 @@ https://blogs.yahoo.co.jp/tsukada816/39196715.html
 ＜機能説明＞
 各機能を有効、無効、調整するにはコンフィグファイル（設定）を編集します。
 コンフィグファイルは toot/config.txt です。
+
+
+＜コマンドライン＞
+るしぼっとを実行する時にはコマンドライン引数が必要になります。
+認識外のコマンドではるしぼっとは実行されません。
+　-v：
+　　コンソールにシステム情報を表示します。
+
+
 
 
 ＜連合TL監視機能＞

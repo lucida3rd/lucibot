@@ -1,9 +1,10 @@
+#!/usr/bin/python
 # coding: UTF-8
 #####################################################
-# 十八試るしぼっと
+# るしぼっと4
 #   Class   ：マスター実行処理
-#   Site URL：https://lucida-memo.info/
-#   Update  ：2019/2/3
+#   Site URL：https://mynoghra.jp/
+#   Update  ：2019/2/24
 #####################################################
 import sys
 from datetime import datetime
@@ -19,19 +20,42 @@ def main():
 	#############################
 	# 引数を取得
 	wARRargs = sys.argv
+	wFlg = False
 	
+	#############################
+	# 初期化クラスの生成
+	global_val.gCLS_Init = CLS_Init()
+
+	#####################################################
+	# 引数=2のコマンド群
 	if len(wARRargs)==2 :
 	#############################
-	# ハード監視 メイン処理
-		if wARRargs[1]=='-h' :
-			self.hard_main()
+	# システム情報の表示
+		if wARRargs[1]=='-v' :
+			global_val.gCLS_Init.cViewSysinfo()
+			wFlg = True
 	
-	if len(wARRargs)==3 :
 	#############################
-	# RUN メイン処理
-		if wARRargs[1]=='-m' :
-#		elif wARRargs[1]=='-m' :
-			self.run_main()
+	# ハード監視 メイン処理
+#		elif wARRargs[1]=='-h' :
+#			self.hard_main()
+#			wFlg = True
+	
+
+	#####################################################
+	# 引数=3のコマンド群
+#	if len(wARRargs)==3 :
+#	#############################
+#	# RUN メイン処理
+#		if wARRargs[1]=='-m' :
+#			self.run_main()
+#			wFlg = True
+	
+
+	#####################################################
+	# コマンド未実行
+	if wFlg != True :
+		global_val.gCLS_Init.cPrint("コマンドが無効です (°ω。)？")
 	
 	return
 
@@ -43,7 +67,6 @@ def main():
 def run_main():
 	#############################
 	# 初期化処理
-	global_val.gCLS_Init = CLS_Init()
 	if global_val.gCLS_Init.cInit() != True :
 		return	#初期化失敗
 	
@@ -73,7 +96,6 @@ def run_main():
 def hard_main():
 	#############################
 	# 初期化処理
-	global_val.gCLS_Init = CLS_Init()
 	if global_val.gCLS_Init.cInit_Hard() != True :
 		return	#初期化失敗
 	

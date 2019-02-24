@@ -1,11 +1,52 @@
+#!/usr/bin/python
 # coding: UTF-8
 #####################################################
-# 十八試るしぼっと
+# るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/1/22
+#   Update  ：2019/2/24
 #####################################################
 import os
+
+#############################
+# スクリプトのパス(grobal_val専用)
+gScriptPath = os.path.dirname(__file__) + '/../'
+
+#############################
+# システム情報
+gSTR_SystemInfo = {
+	"BotName"		: "",
+	"BotDate"		: "",
+	"Version"		: "",
+	"Admin"			: "",
+	"github"		: "",
+	"PythonVer"		: 0,
+	"(dummy)"		: 0
+}
+
+#############################
+# システム情報
+gSTR_File = {
+	"Readme"		: gScriptPath + "readme.txt",
+	"(dummy)"		: 0
+}
+
+
+
+
+
+#############################
+# クラス実体
+gCLS_Init = ''					#CLS_Initクラス用
+
+
+
+
+
+
+
+
+
 
 #############################
 # スコア ※遊び要素
@@ -98,7 +139,6 @@ gFlg_1HourTime = False							#1時間経過
 												
 gTimeZone   = 9									#9=日本時間  最終更新日補正用
 
-gScriptPath = os.path.dirname(__file__) + '/'	#スクリプトのパス(grobal_val専用)
 
 gMastodonParam = {								#Mastodonクラスに与えるパラメータ
 	"RegFilePath"			: gScriptPath + "../data/reg_reg_file.txt",
@@ -165,5 +205,4 @@ gCLS_TootCorrect = ''										#トゥート収集処理クラス用
 gCLS_Traffic = ''											#トラヒック処理クラス用
 gCLS_LookHard = ''											#LookHardクラス用
 gCLS_Mylog = ''												#CLS_Mylogクラス用
-gCLS_Init = ''												#CLS_Initクラス用
 
