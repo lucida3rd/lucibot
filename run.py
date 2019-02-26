@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：マスター実行処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/2/24
+#   Update  ：2019/2/27
 #####################################################
 import sys
 from datetime import datetime
@@ -30,7 +30,15 @@ def main():
 	# データフォルダのチェック
 	if global_val.gCLS_File.cExist( global_val.gUserData_Path )!=True :
 		###通常ありえない
-		global_val.gCLS_Init.cPrint("データフォルダがありません: 設定パス: " + global_val.gUserData_Path )
+		global_val.gCLS_Init.cPrint("main(): Datafolder not found: " + global_val.gUserData_Path )
+		return
+	
+	#############################
+	# master環境情報の読み込み
+	if global_val.gCLS_Config.cGetMasterConfig()!=True :
+		#############################
+		# 環境のセットアップ
+		global_val.gCLS_Config.cMasterSetup()
 		return
 	
 	#####################################################
@@ -43,8 +51,26 @@ def main():
 			wFlg = True
 	
 	#############################
+	# master環境情報の表示
+		elif wARRargs[1]=='-vm' :
+			global_val.gCLS_Config.cCnfMasterConfig_Disp()
+			wFlg = True
+	
+	#############################
+	# master運用操作
+		elif wARRargs[1]=='-mrun' :
+			global_val.gCLS_Config.cCnfMasterRun()
+			wFlg = True
+	
+	#############################
+	# masterメンテ操作
+		elif wARRargs[1]=='-mman' :
+			global_val.gCLS_Config.cCnfMasterMainte()
+			wFlg = True
+	
+	#############################
 	# ユーザ登録 一覧表示
-		elif wARRargs[1]=='-ul' :
+		elif wARRargs[1]=='-vl' :
 			global_val.gCLS_Regist.cViewList()
 			wFlg = True
 	
@@ -59,8 +85,26 @@ def main():
 	# 引数=3のコマンド群
 	if len(wARRargs)==3 :
 	#############################
+	# master環境情報の表示・操作
+		if wARRargs[1]=='-c' and wARRargs[2]=='mconf' :
+			global_val.gCLS_Config.cCnfMasterConfig()
+			wFlg = True
+	
+	#############################
+	# AdminUserの変更
+		elif wARRargs[1]=='-c' and wARRargs[2]=='admin' :
+			global_val.gCLS_Config.cCnfAdminUser()
+			wFlg = True
+	
+	#############################
+	# MasterUserの変更
+		elif wARRargs[1]=='-c' and wARRargs[2]=='master' :
+			global_val.gCLS_Config.cCnfMasterUser()
+			wFlg = True
+	
+	#############################
 	# ユーザ登録 登録
-		if wARRargs[1]=='-ur' :
+		elif wARRargs[1]=='-ur' :
 			global_val.gCLS_Regist.cRegist( wARRargs[2] )
 			wFlg = True
 	
@@ -76,6 +120,12 @@ def main():
 			global_val.gCLS_Regist.cDelete( wARRargs[2] )
 			wFlg = True
 	
+	#############################
+	# 通信テスト
+		elif wARRargs[1]=='-utest' :
+			global_val.gCLS_Regist.cTest( wARRargs[2] )
+			wFlg = True
+	
 #	#############################
 #	# RUN メイン処理
 #		elif wARRargs[1]=='-m' :
@@ -85,8 +135,9 @@ def main():
 
 	#####################################################
 	# コマンド未実行
+	#   Help表示
 	if wFlg != True :
-		global_val.gCLS_Init.cPrint("コマンドが無効です")
+		global_val.gCLS_Init.cViewHelp()
 	
 	return
 

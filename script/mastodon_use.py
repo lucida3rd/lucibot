@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：mastodon API (v1.3改)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/2/24
+#   Update  ：2019/2/27
 #####################################################
 import os
 import os.path
@@ -30,14 +30,14 @@ class CLS_Mastodon_Use:
 	__DEFAULT_BASE_URL = 'https://mastodon.social'
 	__DEFAULT_TIMEOUT = 300
     
-	Flg_Init = False						# 初期化完了
-	Mastodon_use = ''						# Mastodonモジュール実体
+##	Flg_Init = False						# 初期化完了
+##	Mastodon_use = ''						# Mastodonモジュール実体
 
 
 #####################################################
 # Init
 #####################################################
-	def cInit(self):
+##	def cInit(self):
 ##		#############################
 ##		# configの確認
 ##		if global_val.gConfig["BaseUrl"] == "" or \
@@ -54,11 +54,27 @@ class CLS_Mastodon_Use:
 ##		arr_user = global_val.gConfig["UserBot"].split('@')
 ##		global_val.gMyID = arr_user[0]
 ##		global_val.gMyIDnum = user_id
+
+
+##		#############################
+##		# トークンのチェック
+##		if str(self.access_token)=="" :
+##			return
+##		
+##		#############################
+##		# 初期化完了
+##		self.Flg_Init = True
+##		return
+
+#####################################################
+# テスト
+#####################################################
+	def cTest(self):
+		if self.access_token=="" :
+			return False
 		
-		#############################
-		# 初期化完了
-		self.Flg_Init = True
-		return
+		###トークンが取れていれば OK
+		return True
 
 
 
@@ -577,7 +593,12 @@ class CLS_Mastodon_Use:
 				msg = "CLS_Mastodon_Use：__init__：access_token is None"
 				cPrint(msg)
 				return
-			self.cInit()
+			
+			if self.access_token=="":
+				msg = "CLS_Mastodon_Use：__init__：access_token is null"
+				cPrint(msg)
+				return
+		
 		return
 
 

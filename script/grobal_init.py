@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：マスター初期化処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/2/24
+#   Update  ：2019/2/27
 #####################################################
 import os
 import sys
@@ -18,10 +18,10 @@ import global_val
 from mylog import CLS_Mylog
 from filectrl import CLS_File
 from regist import CLS_Regist
-
-
-
 from config import CLS_Config
+
+
+
 from mainproc import CLS_MainProc
 
 from mastodon_use import CLS_Mastodon_Use
@@ -47,9 +47,10 @@ class CLS_Init:
 		
 		#############################
 		# クラスの生成
-		global_val.gCLS_Regist = CLS_Regist()
-		global_val.gCLS_File = CLS_File()
 		global_val.gCLS_Mylog = CLS_Mylog()
+		global_val.gCLS_File  = CLS_File()
+		global_val.gCLS_Regist = CLS_Regist()
+		global_val.gCLS_Config = CLS_Config()
 		
 		#############################
 		# システム情報の取得
@@ -62,55 +63,36 @@ class CLS_Init:
 
 
 #####################################################
-# mastodonクラス生成
-#####################################################
-	def cCreateMastodon( self, base_url, reg_file, user_file ):
-		#############################
-		# ping疎通チェック
-		wDomain = base_url.split("//")
-		if self.cPing(wDomain[1])!=True :
-			return False	#失敗
-		
-		#############################
-		# レジストファイルの存在チェック
-		if global_val.gCLS_File.cExist( reg_file )!=True :
-			global_val.gCLS_Init.cPrint( "CLS_Init: cCreateMastodon: File not found: " + reg_file )
-			return False	#ファイルがない
-		
-		if global_val.gCLS_File.cExist( user_file )!=True :
-			global_val.gCLS_Init.cPrint( "CLS_Init: cCreateMastodon: File not found: " + user_file )
-			return False	#ファイルがない
-		
-		#############################
-		# mastodon APIオブジェクトを生成する
-		global_val.gCLS_Mastodon = CLS_Mastodon_Use(
-			api_base_url = base_url,
-			client_id    = reg_file,
-			access_token = user_file,
-			flg_orginit=True )
-		
-		#############################
-		# mastodonが生成されたか確認
-		if global_val.gCLS_Mastodon.Flg_Init != True :
-			return False	#失敗
-		
-		return True
-
-
-
-#####################################################
 # ping疎通確認
 #####################################################
-	def cPing( self, send_ping, count=4, timeout=5000 ):
+###	def cPing( self, send_ping, count=4, timeout=5000 ):
+	def cPing( self, send_ping, count=4 ):
 		index = send_ping.find(global_val.gSTR_SystemInfo['HostName'])
-		if index!=-1 :
-			return True	#自hostならやらずにOKとする
+		#############################
+		# hostがローカルっぽい？
+		if index>=0 :
+			wHostLen = len( global_val.gSTR_SystemInfo['HostName'] )
+			wPingLen = len( send_ping )
+			if (wHostLen+index)==wPingLen :
+				return True	#自hostなら疎通チェックせずOKとする
 		
-		wRes = sp.getstatusoutput( "ping -c " + str(count) + " -w " + str(timeout) + " " + str(send_ping) )
-		if wRes!=0 :
-			return False
+###		wRes = sp.getstatusoutput( "ping -c " + str(count) + " -w " + str(timeout) + " " + str(send_ping) )
+###		status,result = sp.getstatusoutput( "ping -c " + str(count) + " -w " + str(timeout) + " " + str(send_ping) )
+		status,result = sp.getstatusoutput( "ping -c " + str(count) + " " + str(send_ping) )
+		if status==0 :
+			return True	# Link UP
 		
-		return True
+		return False	# Link Down
+
+
+
+#####################################################
+# 画面クリア
+#####################################################
+	def cDispClear( self ):
+		###os.system('cls') #windowsの場合
+		os.system('clear')
+		return
 
 
 
@@ -331,7 +313,12 @@ class CLS_Init:
 # システム情報の表示
 #####################################################
 	def cViewSysinfo(self):
-		wStr = "" ;
+		
+		###画面クリアして一覧表示する
+		global_val.gCLS_Init.cDispClear()
+		wStr = "--------------------" + '\n'
+		wStr = wStr + " システム情報" + '\n'
+		wStr = wStr + "--------------------" + '\n'
 		
 		#############################
 		# 時間の取得
@@ -356,10 +343,34 @@ class CLS_Init:
 		return
 
 
+
+#####################################################
+# HELP表示
+#####################################################
+	def cViewHelp(self):
+		if global_val.gCLS_File.cExist( global_val.gSTR_File['Readme_Command'] )!=True :
+			###イレギュラーなんだよなぁ...
+			global_val.gCLS_Init.cPrint( "cCLS_Init: cViewHelp: Readme Command file is not found: " + global_val.gSTR_File['Readme_Command'] )
+			return False
+		
+		wStr = ""
+		for line in open( global_val.gSTR_File['Readme_Command'], 'r'):	#ファイルを開く
+			wStr = wStr + line
+			
+		global_val.gCLS_Init.cPrint( wStr )
+		return True
+
+
+
 #####################################################
 # るしぼっとVersion
 #####################################################
 	def _getLucibotVer(self):
+		if global_val.gCLS_File.cExist( global_val.gSTR_File['Readme'] )!=True :
+			###イレギュラーなんだよなぁ...
+			global_val.gCLS_Init.cPrint( "cCLS_Init: cViewHelp: Readme file is not found: " + global_val.gSTR_File['Readme'] )
+			return False
+		
 		for line in open( global_val.gSTR_File['Readme'], 'r'):	#ファイルを開く
 			#############################
 			# 分解+要素数の確認
@@ -378,7 +389,7 @@ class CLS_Init:
 			# キーを設定
 			global_val.gSTR_SystemInfo[get_line[0]] = get_line[1]
 		
-		return
+		return True
 
 
 

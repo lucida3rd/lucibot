@@ -30,7 +30,10 @@ class CLS_File:
 		### os.path.isfile
 		
 		wRes = os.path.exists(path)
-		return wRes
+		if wRes==False :
+			return False
+		
+		return True
 
 
 

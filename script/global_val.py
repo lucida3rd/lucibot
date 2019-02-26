@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/2/24
+#   Update  ：2019/2/27
 #####################################################
 import os
 gScriptPath = os.path.dirname(__file__) + '/../'
@@ -13,6 +13,8 @@ gScriptPath = os.path.dirname(__file__) + '/../'
 # ユーザデータのパス(grobal_val専用)
 gUserData_Path = gScriptPath + '../botdata/'
 #############################
+
+gCHR_ExampleAccount = "lucida3rd@mstdn.mynoghra.jp"
 
 
 
@@ -27,21 +29,100 @@ gSTR_SystemInfo = {
 	"github"		: "",
 	
 	"PythonVer"		: 0,
-	"HostName"		: "",
-	"(dummy)"		: 0
+	"HostName"		: ""
 }
+
+#############################
+# master環境情報
+gSTR_masterConfig = {
+	"MasterUser"	: "",						#masterユーザ
+	"AdminUser"		: "",						#監視ユーザ(通知先)
+	
+	"Twitter"		: "off",					#twiter連携
+	"twCK"			: "",
+	"twCS"			: "",
+	"twAT"			: "",
+	"twAS"			: "",
+	
+	"Traffic"		: "off",					#トラヒック集計
+	"LookHard"		: "off",					#ハード監視
+	
+	"WordStudy"		: "off",					#ワード学習
+	"studyNum"			: 10,					#学習範囲（トゥート数）
+	"studyMax"			: 1000,					#最大学習単語数
+	"studyDay"			: 14,					#単語を覚えておく日数
+	
+	"mRun"			: "off",					#全体実行可否
+	"mMainte"		: "off"						#全体メンテモード
+}
+
+#############################
+# 環境情報
+gSTR_Config = {
+	"Multicast"		: "off",					#同報配信対象
+	
+	"RandToot"		: "off",					#ランダムトゥートモード
+	"getRandVal"		: 70,						#トゥート頻度 0-100
+	"getRandRange"		: 1000,						#トゥート頻度 乱数幅
+	
+	"PTL_Favo"		: "off",					#PTLニコる
+	"PTL_Boot"		: "off",					#PTLブースト
+	"PTL_HRip"		: "off",					#PTL紐エアリプ
+	"PTL_ARip"		: "off",					#PTLエアリプ
+	"PTL_WordOpe"	: "off",					#ワード監視
+	"getPTLnum"			: 120,					#PTL取得数
+	
+	"CircleToot"	: "off",					#周期トゥート
+	
+	"WordCorrect"	: "off",					#個別ワード収集
+	
+	"RIP_Favo"		: "off",					#リプニコる
+	"IND_Favo"		: "off",					#ファボ監視
+	"IND_Favo_Unl"	: "off",					#ファボ監視 privateの通知を許可
+	"IND_FavoTag"		: "favoind",				#ファボ監視タグ
+	"getRIPnum"			: 120,					#リプライ取得数
+	
+	"AutoFollow"	: "off",					#フォロー監視モード
+	"getFollowMnum"		: 10,					#フォロー処理数
+	
+	"JPonly"		: "off",					#日本人のみ監視
+	"LogLevel"		: "a",						#ログレベル
+												# a=a,b,c：全て出力
+												# b=a,b：警告レベルまで
+												# c=a：重要なもののみ
+	
+	"Lock"			: "on",						#排他機能
+	"Run"			: "on",						#実行可否
+	"Mainte"		: "off"						#メンテモード
+}
+
+
+
+#############################
+# その他のグローバル変数
+gCHR_masterConfig = "masterConfig"
+
+
 
 #############################
 # ファイルパス
 gSTR_File = {
-	"Readme"		: gScriptPath + "readme.txt",
-	"RegLog"		: gScriptPath + "_reg/",
-	"defUserdata"	: gScriptPath + "_default/",
+	"Readme"				: gScriptPath + "readme.txt",
+	"Readme_Command"		: gScriptPath + "readme_runcommand.txt",
+	"RegLog"				: gScriptPath + "_reg/",
+	"defUserdata"			: gScriptPath + "_default/",
+	"defMasterdata"			: gScriptPath + "_master/",
 	
-	"RegFile"		: "/_data/reg_reg_file.txt",
-	"UserFile"		: "/_data/reg_user_file.txt",
+	"masterConfig"			: gUserData_Path + gCHR_masterConfig + "/",
+	"masterConfig_file"		: gUserData_Path + gCHR_masterConfig + "/mconfig.txt",
+	"UserCorrRem_file"		: gUserData_Path + gCHR_masterConfig + "/usercorr_rem.txt",
+	"UserDicRem_file"		: gUserData_Path + gCHR_masterConfig + "/xxword.txt",
 	
-	"(dummy)"		: 0
+	"Config_file"			: "/config.txt",
+	"RegFile"				: "/_data/reg_reg_file.txt",
+	"UserFile"				: "/_data/reg_user_file.txt",
+	
+	"(dummy)"				: 0
 }
 
 
@@ -57,6 +138,7 @@ gCLS_Init = ''					#CLS_Initクラス用
 gCLS_Regist = ''				#CLS_Registクラス用
 gCLS_File = ''					#CLS_Fileクラス用
 gCLS_Mylog = ''					#CLS_Mylogクラス用
+gCLS_Config  = ''				#Configクラス用
 
 
 
@@ -77,63 +159,6 @@ gScore = {
 	"(dummy)"		: 0
 }
 
-#############################
-# config    ※いじらない。設定変更はconfigファイルをいじってロードする
-#############################
-gConfig = {
-	"UserBot"		: "",						#ユーザ情報の枠
-	"UserMaster"	: "",
-	"BaseUrl"		: "",
-	"twCK"			: "",
-	"twCS"			: "",
-	"twAT"			: "",
-	"twAS"			: "",
-	
-	"BotStart"		: "on",						#botの動作　on以外は起動しない
-	"Twitter"		: "off",					#Twitterとの連携
-	"JPonly"		: "on",						#日本人のみ監視
-	
-	"RandToot"		: "off",					#ランダムトゥートモード
-	"getRandVal"	: 70,						#トゥート頻度 0-100
-	"getRandRange"	: 1000,						#トゥート頻度 乱数幅
-	
-	"getPTLnum"			: 120,					#PTL取得数
-	"PTL_Favo"			: "off",				#PTLニコる
-	"PTL_Boot"			: "off",				#PTLブースト
-	"PTL_HRip"			: "off",				#PTL紐エアリプ
-	"PTL_ARip"			: "off",				#PTLエアリプ
-	"PTL_WordOpe"		: "off",				#ワード監視
-	
-	"CircleToot"	: "off",					#周期トゥート
-	
-	"WordStudy"		: "off",					#ワード学習
-	"studyNum"			: 10,					#学習範囲（トゥート数）
-	"studyMax"			: 1000,					#最大学習単語数
-	"studyDay"			: 14,					#単語を覚えておく日数
-	
-	"Traffic"		: "off",					#トラヒック集計
-	
-##	"LookRIP"		: "off",					#リプライ監視モード
-	"getRIPnum"			: 120,					#リプライ取得数
-	"RIP_Favo"			: "off",				#リプニコる
-##	"RIP_Boot"			: "off",				#リプブースト
-	"IND_Favo"			: "off",				#ファボ監視
-	"IND_FavoTag"		: "favoind",			#ファボ監視タグ
-	"IND_Favo_Unl"		: "off",				#ファボ監視 privateの通知を許可
-	
-	"AutoFollow"	: "off",					#フォロー監視モード
-	"getFollowMnum"		: 10,					#フォロー処理数
-	
-	"LookHard"		: "off",					#ハード監視モード
-	
-	"LogLevel"		: "a",						#ログレベル
-												# a=a,b,c：全て出力
-												# b=a,b：警告レベルまで
-												# c=a：重要なもののみ
-	
-	"Lock"			: "on",						#排他処理
-	"Mainte"		: "off"						#メンテモード
-}
 
 
 #############################
@@ -202,9 +227,9 @@ gMyLog_Hard     = 'hard'									#ログ識別子：ハード監視用
 gReplyFile_dir  = gScriptPath + '../toot/'					#リプライファイル
 
 gUserCorr_file = gScriptPath + '../user/usercorr.csv'		#ユーザ収集ファイル
-gUserCorrRem_file = gScriptPath + '../toot/usercorr_rem.txt'	#ユーザ収集除外ファイル
+##gUserCorrRem_file = gScriptPath + '../toot/usercorr_rem.txt'	#ユーザ収集除外ファイル
 gUserDic_file = gScriptPath + '../user/userdic.csv'			#ユーザ辞書ファイル
-gUserDicRem_file = gScriptPath + '../toot/xxword.txt'		#禁止ワードファイル
+##gUserDicRem_file = gScriptPath + '../toot/xxword.txt'		#禁止ワードファイル
 gClazList_file = gScriptPath + '../data/clazlist.txt'		#品詞リストファイル
 
 
@@ -212,7 +237,6 @@ gClazList_file = gScriptPath + '../data/clazlist.txt'		#品詞リストファイ
 #############################
 # クラス
 gCLS_MainProc = ''											#MainProcクラス用
-gCLS_Config  = ''											#Configクラス用
 gCLS_RandToot = ''											#RandTootクラス用
 gCLS_LookPTL = ''											#LookPTLクラス用
 gCLS_LookRIP = ''											#LookRIPクラス用

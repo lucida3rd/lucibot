@@ -1,0 +1,15 @@
+MasterUser=
+AdminUser=
+Twitter=off
+twCK=
+twCS=
+twAT=
+twAS=
+Traffic=off
+LookHard=off
+WordStudy=off
+studyNum=10
+studyMax=5000
+studyDay=14
+mRun=off
+mMainte=off
