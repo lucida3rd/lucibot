@@ -42,6 +42,13 @@ def main():
 		return
 	
 	#####################################################
+	# MasterUserが未登録
+	if global_val.gSTR_MasterConfig['MasterUser']=="" :
+		global_val.gCLS_Init.cPrint( "MasterUserが登録されていないため、bot動作ができません。MasterUserを登録します。" )
+		global_val.gCLS_Config.cCnfMasterUser()
+		return
+	
+	#####################################################
 	# 引数=2のコマンド群
 	if len(wARRargs)==2 :
 	#############################
@@ -72,6 +79,12 @@ def main():
 	# ユーザ登録 一覧表示
 		elif wARRargs[1]=='-vl' :
 			global_val.gCLS_Regist.cViewList()
+			wFlg = True
+	
+	#############################
+	# 手動トゥートモード
+		elif wARRargs[1]=='-t' :
+			global_val.gCLS_Toot.cManualToot()
 			wFlg = True
 	
 	#############################
@@ -121,6 +134,12 @@ def main():
 			wFlg = True
 	
 	#############################
+	# 同報配信トゥートモード
+		elif wARRargs[1]=='-t' and wARRargs[2]=='multi' :
+			global_val.gCLS_Toot.cMulticastToot()
+			wFlg = True
+	
+	#############################
 	# 通信テスト
 		elif wARRargs[1]=='-utest' :
 			global_val.gCLS_Regist.cTest( wARRargs[2] )
@@ -132,7 +151,6 @@ def main():
 #			self.run_main()
 #			wFlg = True
 	
-
 	#####################################################
 	# コマンド未実行
 	#   Help表示

@@ -19,7 +19,7 @@ from mylog import CLS_Mylog
 from filectrl import CLS_File
 from regist import CLS_Regist
 from config import CLS_Config
-
+from toot import CLS_Toot
 
 
 from mainproc import CLS_MainProc
@@ -51,6 +51,7 @@ class CLS_Init:
 		global_val.gCLS_File  = CLS_File()
 		global_val.gCLS_Regist = CLS_Regist()
 		global_val.gCLS_Config = CLS_Config()
+		global_val.gCLS_Toot = CLS_Toot()
 		
 		#############################
 		# システム情報の取得
@@ -120,7 +121,6 @@ class CLS_Init:
 		#############################
 		# クラスの生成
 		global_val.gCLS_Mylog = CLS_Mylog()
-		global_val.gCLS_MainProc = CLS_MainProc()
 		global_val.gCLS_RandToot = CLS_RandToot()
 		global_val.gCLS_LookPTL = CLS_LookPTL()
 		global_val.gCLS_LookRIP = CLS_LookRIP()

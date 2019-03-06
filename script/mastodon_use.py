@@ -2,9 +2,84 @@
 # coding: UTF-8
 #####################################################
 # るしぼっと4
-#   Class   ：mastodon API (v1.3改)
+#   Class   ：mastodon API (mastodon.py v1.3ベース改)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/2/27
+#   Update  ：2019/3/5
+#####################################################
+# Private Function:
+#   __initIniStatus(self):
+#   __json_date_parse(self, json_object):
+#   __datetime_to_epoch(self, date_time):
+#   __api_request(self, method, endpoint, params={}, files={}, do_ratelimiting=True):
+#   __generate_params(self, params, exclude=[]):
+#   __unpack_id(self, id):
+#   __get_token_expired(self):
+#   __set_token_expired(self, value):
+#   __get_refresh_token(self):
+#   __set_refresh_token(self, value):
+#   __delPassword( self, inParams ):
+#
+# Instance Function:
+# ◇クラスINIT and Login
+#   __init__( self, client_id, api_base_url=__DEFAULT_BASE_URL,
+#		access_token=None, flg_orginit=False ):
+#   log_in(self, username=None, password=None,
+#		code=None, redirect_uri="urn:ietf:wg:oauth:2.0:oob",
+#		refresh_token=None, scopes=['read', 'write', 'follow'], to_file=None):
+#
+# ◇mastodon初期化確認用
+#   TokenCheck(self):
+#   GetIniStatus(self):
+#
+# ◇トゥート関数
+#   Toot(self, status = None,
+#		in_reply_to_id = None, media_ids = None, sensitive = False, visibility = 'unlisted',
+#		spoiler_text = None):
+#
+# ◇TL取得系
+#   GetLocalTL(self, timeline="local", max_id=None, since_id=None, limit=None):
+#   GetHomeTL(self, timeline="home", max_id=None, since_id=None, limit=None):
+#   GetPublicTL(self, timeline="public", max_id=None, since_id=None, limit=None):
+#   GetHashtagTL(self, hashtag, local=False, max_id=None, since_id=None, limit=None, only_media=False):
+#   GetListTL( self, id, timeline="", max_id=None, since_id=None, limit=None):
+#
+# ◇一覧取得系
+#   GetNotificationList(self, id=None, max_id=None, since_id=None, limit=None):
+#   GetTootList(self, id, only_media=False, pinned=False, exclude_replies=False, max_id=None, since_id=None, limit=None):
+#   GetFavoList(self, max_id=None, since_id=None, limit=None):
+#   GetFollowingList(self, id, max_id=None, since_id=None, limit=None):
+#   GetFollowersList(self, id, max_id=None, since_id=None, limit=None):
+#
+# ◇アカウント情報取得
+#   GetMyAccountInfo(self):
+#   GetAccountStat(self, id):
+#
+# ◇リアクション系
+#   Follow( self, id, reblogs=True ):
+#   Remove(self, id):
+#   Favo(self, id):
+#   Boost(self, id):
+#   Block(self, id):
+#   Unblock(self, id):
+#   Mute(self, id):
+#   Unmute(self, id):
+#
+# ◇リスト操作系
+#   CreateList(self, title ):
+#   UpdateList(self, id, title):
+#   DeleteList(self, id):
+#   AddAccount_List( self, id, account_ids ):
+#   DelAccount_List(self, id, account_ids):
+#
+# Class Function(static):
+#   sGet_API_Resp(cls):
+#
+# Static Function:
+#   create_app( client_name, scopes=['read', 'write', 'follow'],
+#		redirect_uris=None, website=None, to_file=None,
+#		api_base_url=__DEFAULT_BASE_URL, request_timeout=__DEFAULT_TIMEOUT):
+#   __protocolize(base_url):
+#
 #####################################################
 import os
 import os.path
@@ -24,54 +99,20 @@ import re
 import copy
 import threading
 
-import global_val
 #####################################################
 class CLS_Mastodon_Use:
-	__DEFAULT_BASE_URL = 'https://mastodon.social'
-	__DEFAULT_TIMEOUT = 300
-    
-##	Flg_Init = False						# 初期化完了
-##	Mastodon_use = ''						# Mastodonモジュール実体
-
+#####################################################
+	__DEFAULT_BASE_URL = 'https://mastodon.social'	#mastodon旗艦サーバ(mastodon.py 1.3のまま)
+	__DEFAULT_TIMEOUT  = 300
+	
+	IniStatus = ""
 
 #####################################################
-# Init
+# トークンチェック
 #####################################################
-##	def cInit(self):
-##		#############################
-##		# configの確認
-##		if global_val.gConfig["BaseUrl"] == "" or \
-##		   global_val.gConfig["UserBot"] == "" :
-##			return
-		
-##		#############################
-##		# 自IDの設定
-##		user_list = self.cGetMyAccountInfo()
-##		if len( user_list ) == 0:
-##			return	#configファイルの設定ミスかも
-##		
-##		user_id = user_list['id']
-##		arr_user = global_val.gConfig["UserBot"].split('@')
-##		global_val.gMyID = arr_user[0]
-##		global_val.gMyIDnum = user_id
-
-
-##		#############################
-##		# トークンのチェック
-##		if str(self.access_token)=="" :
-##			return
-##		
-##		#############################
-##		# 初期化完了
-##		self.Flg_Init = True
-##		return
-
-#####################################################
-# テスト
-#####################################################
-	def cTest(self):
+	def TokenCheck(self):
 		if self.access_token=="" :
-			return False
+			return False	#トークンなし
 		
 		###トークンが取れていれば OK
 		return True
@@ -79,426 +120,43 @@ class CLS_Mastodon_Use:
 
 
 #####################################################
-# トゥート処理
-#   status    ：トゥート本文
-#   visibility：公開範囲
-#   in_reply_to_id：紐付けリプライID
+# 初期化状態取得
 #####################################################
-	def cToot( self, status, visibility='unlisted', in_reply_to_id=0 ):
-		res = self.__get_api_responce()
-		
-		#############################
-		# 空のトゥートは処理しない
-		if status=='' :
-			return res
-		
-		#############################
-		# 紐付けオプションによる
-		if in_reply_to_id == 0 :
-			responce = self.__status_post( status=status, visibility=visibility )
-		else :
-			responce = self.__status_post( status=status, visibility=visibility, in_reply_to_id=in_reply_to_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cToos：Post失敗：' + responce['reason'] )
-			return responce
-		
-		return responce
+	def GetIniStatus(self):
+		return self.IniStatus	#返すだけ
 
 
 
 #####################################################
-# CW付きトゥート処理
-#   spoiler_text：CWヘッダ
-#   status    ：トゥート本文
-#   visibility：公開範囲
-#   in_reply_to_id：紐付けリプライID
+# 初期化状態取得
 #####################################################
-	def cCwToot( self, spoiler_text, status, visibility='unlisted', in_reply_to_id=0 ):
-		res = self.__get_api_responce()
-		
-		#############################
-		# 空のトゥートは処理しない
-		if spoiler_text=='' or status=='' :
-			return res
-		
-		#############################
-		# 紐付けオプションによる
-		if in_reply_to_id == 0 :
-			responce = self.__status_post( spoiler_text=spoiler_text, status=status, visibility=visibility )
-		else :
-			responce = self.__status_post( spoiler_text=spoiler_text, status=status, visibility=visibility, in_reply_to_id=in_reply_to_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cCwToot：Post失敗：' + responce['reason'] )
-			return responce
-		
-		return responce
+	def __initIniStatus(self):
+		self.IniStatus = {
+			"Result"   : False,
+			"Reason"   : None,
+			"Responce" : None
+		}
+		return
 
 
 
 #####################################################
-# ローカルTL取得
+# APIレスポンス取得
 #####################################################
-	def cGetTimeline_Local( self, limit=40, max_id=0 ):
-		res = self.__get_api_responce()
+	@classmethod
+	def sGet_API_Resp(cls):
+		wRes = {
+			"Result"   : False,
+			"Reason"   : None,
+			"Responce" : None }
 		
-		#############################
-		# max_idオプションによる
-		if max_id == 0 :
-			responce = self.__timeline_local( limit=limit )
-		else :
-			responce = self.__timeline_local( limit=limit, max_id=max_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetTimeline_Local：TL取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
+		return wRes
 
 
 
-#####################################################
-# ホームTL取得
-#####################################################
-	def cGetTimeline_Home( self, limit=40, max_id=0 ):
-		res = self.__get_api_responce()
-		
-		#############################
-		# max_idオプションによる
-		if max_id == 0 :
-			responce = self.__timeline_home( limit=limit )
-		else :
-			responce = self.__timeline_home( limit=limit, max_id=max_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetTimeline_Home：TL取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
-
-
-
-#####################################################
-# 連合TL取得
-#####################################################
-	def cGetTimeline_Public( self, limit=40, max_id=0 ):
-		res = self.__get_api_responce()
-		
-		#############################
-		# max_idオプションによる
-		if max_id == 0 :
-			responce = self.__timeline_public( limit=limit )
-		else :
-			responce = self.__timeline_public( limit=limit, max_id=max_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetTimeline_Public：TL取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
-
-
-
-#####################################################
-# 通知一覧取得
-#####################################################
-	def cGetNotificationList( self, limit=40, max_id=0 ):
-		res = self.__get_api_responce()
-		
-		#############################
-		# max_idオプションによる
-		if max_id == 0 :
-			responce = self.__notification_list( limit=limit )
-		else :
-			responce = self.__notification_list( limit=limit, max_id=max_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetNotificationList：通知取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
-
-
-
-#####################################################
-# トゥート一覧取得
-#####################################################
-	def cGetTootList( self, id, limit=40, max_id=0 ):
-		res = self.__get_api_responce()
-		
-		#############################
-		# max_idオプションによる
-		if max_id == 0 :
-##			responce = self.__account_statuses( limit=limit )
-			responce = self.__account_statuses( id=id, limit=limit )
-		else :
-##			responce = self.__account_statuses( limit=limit, max_id=max_id )
-			responce = self.__account_statuses( id=id, limit=limit, max_id=max_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetTootList：TL取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
-
-
-
-#####################################################
-# ファボ一覧取得
-#####################################################
-	def cGetFavoList( self, limit=40, max_id=0 ):
-		res = self.__get_api_responce()
-		
-		#############################
-		# max_idオプションによる
-		if max_id == 0 :
-			responce = self.__favourites( limit=limit )
-		else :
-			responce = self.__favourites( limit=limit, max_id=max_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetFavoList：取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
-
-
-
-#####################################################
-# フォロー一覧取得
-#####################################################
-	def cGetFollowingList( self, id, limit=40, max_id=0 ):
-		res = self.__get_api_responce()
-		
-		#############################
-		# max_idオプションによる
-		if max_id == 0 :
-			responce = self.__account_following( limit=limit )
-		else :
-			responce = self.__account_following( limit=limit, max_id=max_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetFollowingList：取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
-
-
-
-
-#####################################################
-# フォロワー一覧取得
-#####################################################
-	def cGetFollowersList( self, id, limit=40, max_id=0 ):
-		res = self.__get_api_responce()
-		
-		#############################
-		# max_idオプションによる
-		if max_id == 0 :
-			responce = self.__account_followers( limit=limit )
-		else :
-			responce = self.__account_followers( limit=limit, max_id=max_id )
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetFollowersList：取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
-
-
-
-#####################################################
-# 自アカウント情報取得
-#####################################################
-	def cGetMyAccountInfo(self):
-		res = self.__get_api_responce()
-		
-		responce = self.__account_verify_credentials()
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetFollowersList：取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
-
-
-
-#####################################################
-# 対アカウント情報取得
-# [{ u'requested': False,
-#    u'muting': False,
-#    u'followed_by': False,
-#    u'blocking': False,
-#    u'following': False,
-#    u'id': id }]
-#####################################################
-	def cGetAccountStat( self, id ):
-		res = self.__get_api_responce()
-		
-		responce = self.__account_relationships(id)
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cGetAccountStat：取得失敗：' + responce['reason'] )
-###			return []
-		
-###		return responce['responce']
-		return responce
-
-
-
-#####################################################
-# フォローする
-#####################################################
-	def cIDFollow( self, id ):
-		res = self.__get_api_responce()
-		
-		responce = self.__account_follow(id)
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cIDFollow：フォロー失敗：' + responce['reason'] )
-###			return False
-		
-###		return True
-		return responce
-
-
-
-#####################################################
-# リムーブする
-#####################################################
-	def cIDRemove( self, id ):
-		res = self.__get_api_responce()
-		
-		responce = self.__account_unfollow(id)
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cIDRemove：リムーブ失敗：' + responce['reason'] )
-###			return False
-		
-###		return True
-		return responce
-
-
-
-#####################################################
-# ファボる
-#####################################################
-	def cFavourite( self, id ):
-		res = self.__get_api_responce()
-		
-		responce = self.__status_favourite(id)
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cFavourite：ファボ失敗：' + responce['reason'] )
-###			return False
-		
-###		return True
-		return responce
-
-
-
-#####################################################
-# ブースト
-#####################################################
-	def cBoost( self, id ):
-		res = self.__get_api_responce()
-		
-		responce = self.__status_reblog(id)
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cBoost：ファボ失敗：' + responce['reason'] )
-###			return False
-		
-###		return True
-		return responce
-
-
-
-#####################################################
-# ブロック
-#####################################################
-	def cBlock( self, id ):
-		res = self.__get_api_responce()
-		
-		responce = self.__status_block(id)
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cBlock：ブロック失敗：' + responce['reason'] )
-###			return False
-		
-###		return True
-		return responce
-
-
-
-#####################################################
-# ブロック解除
-#####################################################
-	def cUnblock( self, id ):
-		res = self.__get_api_responce()
-		
-		responce = self.__status_unblock(id)
-		
-		#############################
-		# API処理結果の検証
-		if responce['result']!=True :
-			global_val.gCLS_Mylog.cLog('a', 'CLS_Mastodon_Use：cUnblock：ブロック解除失敗：' + responce['reason'] )
-###			return False
-		
-###		return True
-		return responce
-
-
-
-#####################################################
-# API部
-#####################################################
 #####################################################
 # アプリ生成
+# ★クライアント登録などに使うほう
 #####################################################
 	@staticmethod
 	def create_app( client_name,
@@ -509,11 +167,17 @@ class CLS_Mastodon_Use:
 		
 		api_base_url = CLS_Mastodon_Use.__protocolize(api_base_url)
 		
+		#############################
+		# 応答形式の取得
+		#  {"Result" : False, "Reason" : None, "Responce" : None}
+		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		
 		request_data = {
 			'client_name': client_name,
 			'scopes': " ".join(scopes)
 		}
 		
+		response = ""
 		try:
 			if redirect_uris is not None:
 				request_data['redirect_uris'] = redirect_uris
@@ -525,15 +189,20 @@ class CLS_Mastodon_Use:
 			response = requests.post(api_base_url + '/api/v1/apps', data=request_data, timeout=request_timeout)
 			response = response.json()
 		except Exception as e:
-			print( "CLS_Mastodon_Use：create_app：Could not complete request：" + str(e) )
-			return (response['client_id'], response['client_secret'])
+			wRes['Reason']   = "CLS_Mastodon_Use：create_app：Could not complete request：" + str(e)
+			wRes['Responce'] = response
+			return wRes
 		
 		if to_file is not None:
 			with open(to_file, 'w') as secret_file:
 				secret_file.write(response['client_id'] + '\n')
 				secret_file.write(response['client_secret'] + '\n')
 		
-		return (response['client_id'], response['client_secret'])
+		wRes['Responce'] = {}
+		wRes['Responce'].update({ "client_id" : response['client_id'] })
+		wRes['Responce'].update({ "client_secret" : response['client_secret'] })
+		wRes['Result']   = True
+		return wRes
 
 
 
@@ -549,6 +218,7 @@ class CLS_Mastodon_Use:
 
 #####################################################
 # Init
+# ★オブジェクト生成時に使用
 #####################################################
 	def __init__( self, client_id, api_base_url=__DEFAULT_BASE_URL, access_token=None, flg_orginit=False ):
 		#############################
@@ -569,14 +239,18 @@ class CLS_Mastodon_Use:
 		self.ratelimit_lastcall = time.time()
 		
 		#############################
+		# Init状態
+		self.__initIniStatus()
+		
+		#############################
 		# シークレットキーの取得
 		if os.path.isfile(self.client_id):
 			with open(self.client_id, 'r') as secret_file:
 				self.client_id = secret_file.readline().rstrip()
 				self.client_secret = secret_file.readline().rstrip()
 		else:
-			msg = "CLS_Mastodon_Use：__init__：Specified client id directly, but did not supply secret"
-			cPrint(msg)
+			self.IniStatus['Reason'] = "CLS_Mastodon_Use：__init__：Specified client id directly, but did not supply secret"
+			self.IniStatus['Result'] = False
 			return
 		
 		#############################
@@ -590,21 +264,21 @@ class CLS_Mastodon_Use:
 		#   アクセストークン必須
 		if flg_orginit==True:
 			if self.access_token is None:
-				msg = "CLS_Mastodon_Use：__init__：access_token is None"
-				cPrint(msg)
+				self.IniStatus['Reason'] = "CLS_Mastodon_Use：__init__：access_token is None"
 				return
 			
 			if self.access_token=="":
-				msg = "CLS_Mastodon_Use：__init__：access_token is null"
-				cPrint(msg)
+				self.IniStatus['Reason'] = "CLS_Mastodon_Use：__init__：access_token is null"
 				return
 		
+		self.IniStatus['Result'] = True
 		return
 
 
 
 #####################################################
 # ログイン
+# ★クライアントorアプリ mastodonログイン
 #####################################################
 	def log_in(self, username=None, password=None,
 			code=None,
@@ -612,6 +286,17 @@ class CLS_Mastodon_Use:
 			refresh_token=None,
 			scopes=['read', 'write', 'follow'],
 			to_file=None):
+		
+		#############################
+		# 応答形式の取得
+		#  {"Result" : False, "Reason" : None, "Responce" : None}
+		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		
+		#############################
+		# 初期化されてるか
+		if self.IniStatus['Result']!=True :
+			wRes['Reason'] = "CLS_Mastodon_Use: log_in: Init failer: " + self.IniStatus['Reason']
+			return wRes
 		
 		if username is not None and password is not None:
 			params = self.__generate_params(locals(), ['scopes', 'to_file', 'code', 'refresh_token'])
@@ -623,21 +308,21 @@ class CLS_Mastodon_Use:
 			params = self.__generate_params(locals(), ['scopes', 'to_file', 'username', 'password', 'code'])
 			params['grant_type'] = 'refresh_token'
 		else:
-			msg = "CLS_Mastodon_Use：log_in：Invalid arguments given. username and password or code are required."
-			self.cPrint(msg)
-			return ""
+			wRes['Reason'] = "CLS_Mastodon_Use：log_in：Invalid arguments given. username and password or code are required."
+			return wRes
 		
 		params['client_id'] = self.client_id
 		params['client_secret'] = self.client_secret
 		params['scope'] = " ".join(scopes)
 		try:
 			res_api = self.__api_request('POST', '/oauth/token', params, do_ratelimiting=False)
-			if res_api['result']!=True :
-				msg = "CLS_Mastodon_Use：log_in：__api_request Failed：" + res_api['reason']
-				self.cPrint(msg)
-				return ""
-			response = res_api['responce']
+			if res_api['Result']!=True :
+				wRes['Reason'] = "CLS_Mastodon_Use：log_in：__api_request Failed：" + res_api['Reason']
+				return wRes
+			
+			response = res_api['Responce']
 			self.access_token = response['access_token']
+
 			self.__set_refresh_token(response.get('refresh_token'))
 			self.__set_token_expired(int(response.get('expires_in', 0)))
 		except Exception as e:
@@ -647,44 +332,56 @@ class CLS_Mastodon_Use:
 				msg = "CLS_Mastodon_Use：log_in：Invalid access token or redirect_uris：" + str(e)
 			else:
 				msg = "CLS_Mastodon_Use：log_in：Invalid request：" + str(e)
-			self.cPrint(msg)
-			return ""
+			
+			wRes['Reason'] = msg
+			return wRes
 		
 		requested_scopes = " ".join(sorted(scopes))
 		received_scopes = " ".join(sorted(response["scope"].split(" ")))
 		if requested_scopes != received_scopes:
-			msg = "CLS_Mastodon_Use：log_in：Granted scopes received."
-			self.cPrint(msg)
-			return ""
+			wRes['Reason'] = "CLS_Mastodon_Use：log_in：Granted scopes received."
+			return wRes
 		
 		if to_file is not None:
 			with open(to_file, 'w') as token_file:
 				token_file.write(response['access_token'] + '\n')
 		
-		return response['access_token']
+		wRes['Responce'] = response['access_token']
+		wRes['Result']   = True
+		return wRes
 
 
 
 #####################################################
-# 投稿
+# トゥート処理
+#   spoiler_textにテキストを入れるとCWトゥートになる
 #####################################################
-	def __status_post(self, status,
-			in_reply_to_id=None,
-			media_ids=None,
-			sensitive=False,
-			visibility='',
-			spoiler_text=None):
+	def Toot(self, status = None,
+			in_reply_to_id = None,
+			media_ids = None,
+			sensitive = False,
+			visibility = 'unlisted',
+			spoiler_text = None):
 		
-		response = None
-		res = self.__get_api_responce()
+		#############################
+		# 応答形式の取得
+		#  {"Result" : False, "Reason" : None, "Responce" : None}
+		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		
+		#############################
+		# 空のトゥートは処理しない
+		if status==None or status=="" :
+			wRes['Reason'] = "CLS_Mastodon_Use：Toot：Status None or null"
+			return wRes
+		
 		#############################
 		# 引数を辞書にまとめる
 		params_initial = locals()
 		
 		valid_visibilities = ['private', 'public', 'unlisted', 'direct', '']
 		if params_initial['visibility'].lower() not in valid_visibilities:
-			res['reason'] = "CLS_Mastodon_Use：__status_post：Invalid visibility value"
-			return res
+			wRes['Reason'] = "CLS_Mastodon_Use：Toot：Invalid visibility value"
+			return wRes
 		
 		if params_initial['sensitive'] is False:
 			del [params_initial['sensitive']]
@@ -698,215 +395,528 @@ class CLS_Mastodon_Use:
 					else:
 						media_ids_proper.append(media_id)
 			except Exception as e:
-				res['reason'] = "CLS_Mastodon_Use：__status_post：Invalid media：" + str(e)
-				return res
+				wRes['Reason'] = "CLS_Mastodon_Use：Toot：Invalid media：" + str(e)
+				return wRes
 			
 			params_initial["media_ids"] = media_ids_proper
 		
+		#############################
+		# APIを叩く
 		params = self.__generate_params(params_initial)
-		response = self.__api_request('POST', '/api/v1/statuses', params)
+		wRes = self.__api_request('POST', '/api/v1/statuses', params)
+		return wRes
+
+
+
+#####################################################
+# ローカルTL取得
+#####################################################
+	def GetLocalTL(self, timeline="local", max_id=None, since_id=None, limit=None):
+		#############################
+		# 引数を辞書にまとめる
+		if max_id != None:
+			max_id = self.__unpack_id(max_id)
 		
-		return response
-
-
-
-#####################################################
-# API ローカルタイムライン取得
-#####################################################
-	def __timeline_local(self, timeline="local", max_id=None, since_id=None, limit=None):
+		if since_id != None:
+			since_id = self.__unpack_id(since_id)
+		
 		params_initial = locals()
 		timeline = "public"
 		params_initial['local'] = True
 		
+		#############################
+		# APIを叩く
 		params = self.__generate_params(params_initial, ['timeline'])
 		url = '/api/v1/timelines/{0}'.format(timeline)
-		response = self.__api_request('GET', url, params)
-		return response
+		wRes = self.__api_request('GET', url, params)
+		return wRes
 
 
 
 #####################################################
-# API ホームタイムライン取得
+# ホームTL取得
 #####################################################
-	def __timeline_home(self, timeline="home", max_id=None, since_id=None, limit=None):
+	def GetHomeTL(self, timeline="home", max_id=None, since_id=None, limit=None):
+		#############################
+		# 引数を辞書にまとめる
+		if max_id != None:
+			max_id = self.__unpack_id(max_id)
+		
+		if since_id != None:
+			since_id = self.__unpack_id(since_id)
+		
 		params_initial = locals()
 		
+		#############################
+		# APIを叩く
 		params = self.__generate_params(params_initial, ['timeline'])
 		url = '/api/v1/timelines/{0}'.format(timeline)
-		response = self.__api_request('GET', url, params)
-		return response
+		wRes = self.__api_request('GET', url, params)
+		return wRes
 
 
 
 #####################################################
-# API 連合タイムライン取得
+# 連合TL取得
 #####################################################
-	def __timeline_public(self, timeline="public", max_id=None, since_id=None, limit=None):
+	def GetPublicTL(self, timeline="public", max_id=None, since_id=None, limit=None):
+		#############################
+		# 引数を辞書にまとめる
+		if max_id != None:
+			max_id = self.__unpack_id(max_id)
+		
+		if since_id != None:
+			since_id = self.__unpack_id(since_id)
+		
 		params_initial = locals()
 		
+		#############################
+		# APIを叩く
 		params = self.__generate_params(params_initial, ['timeline'])
 		url = '/api/v1/timelines/{0}'.format(timeline)
-		response = self.__api_request('GET', url, params)
-		return response
+		wRes = self.__api_request('GET', url, params)
+		return wRes
 
 
 
 #####################################################
-# API 通知一覧取得
+# ハッシュタグTL取得
 #####################################################
-	def __notification_list(self, id=None, max_id=None, since_id=None, limit=None):
+	def GetHashtagTL(self, hashtag, local=False, max_id=None, since_id=None, limit=None, only_media=False):
+		#############################
+		# 応答形式の取得
+		#  {"Result" : False, "Reason" : None, "Responce" : None}
+		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		
+		#############################
+		# ハッシュタグが設定されているか
+		if hashtag.startswith("#"):
+			wRes['Reason'] = "CLS_Mastodon_Use: GetHashtagTL: Hashtag parameter should omit leading #"
+			return wRes
+		
+		#############################
+		# 引数を辞書にまとめる
+		if max_id != None:
+			max_id = self.__unpack_id(max_id)
+		
+		if since_id != None:
+			since_id = self.__unpack_id(since_id)
+		
+		params_initial = locals()
+		
+		if local == False:
+			del params_initial['local']
+		
+		if only_media == False:
+			del params_initial['only_media']
+		
+		#############################
+		# APIを叩く
+		params = self.__generate_params(params_initial, ['hashtag'])
+		url = '/api/v1/timelines/tag/{0}'.format(hashtag)
+		wRes = self.__api_request('GET', url, params)
+		return wRes
+
+
+
+#####################################################
+# リストTL取得
+#####################################################
+	def GetListTL( self, id, timeline="", max_id=None, since_id=None, limit=None):
+		#############################
+		# ベースソースからの取り込み
+		id = self.__unpack_id(id)
+		timeline='list/{0}'.format(id)
+		
+		#############################
+		# 引数を辞書にまとめる
+		if max_id != None:
+			max_id = self.__unpack_id(max_id)
+		
+		if since_id != None:
+			since_id = self.__unpack_id(since_id)
+		
+		params_initial = locals()
+		del params_initial['id']
+		
+		#############################
+		# APIを叩く
+		params = self.__generate_params(params_initial, ['timeline'])
+		url = '/api/v1/timelines/{0}'.format(timeline)
+		wRes = self.__api_request('GET', url, params)
+		return wRes
+
+
+
+#####################################################
+# 通知一覧取得
+#####################################################
+	def GetNotificationList(self, id=None, max_id=None, since_id=None, limit=None):
+		#############################
+		# 引数を辞書にまとめる
 		if max_id != None:
 			max_id = self.__unpack_id(max_id)
 		if since_id != None:
 			since_id = self.__unpack_id(since_id)
 		
+		#############################
+		# APIを叩く
 		if id is None:
 			params = self.__generate_params(locals(), ['id'])
-			response = self.__api_request('GET', '/api/v1/notifications', params)
+			wRes = self.__api_request('GET', '/api/v1/notifications', params)
 		else:
 			id = self.__unpack_id(id)
 			url = '/api/v1/notifications/{0}'.format(str(id))
-			response = self.__api_request('GET', url)
+			wRes = self.__api_request('GET', url)
 		
-		return response
+		return wRes
 
 
 
 #####################################################
-# API トゥート一覧取得
+# トゥート一覧取得
 #####################################################
-	def __account_statuses(self, id, max_id=None, since_id=None, limit=None):
+	def GetTootList(self, id, only_media=False, pinned=False, exclude_replies=False, max_id=None, since_id=None, limit=None):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		if max_id != None:
+			max_id = self.__unpack_id(max_id)
+		if since_id != None:
+			since_id = self.__unpack_id(since_id)
+		
 		params = self.__generate_params(locals(), ['id'])
-		url = '/api/v1/accounts/{0}/statuses'.format(str(id))
-		response = self.__api_request('GET', url, params)
-		return response
-
-
-
-#####################################################
-# API ファボ一覧
-#####################################################
-	def __favourites(self, max_id=None, since_id=None, limit=None):
-		params = self.__generate_params(locals())
+		if pinned == False:
+			del params["pinned"]
+		if only_media == False:
+			del params["only_media"]
+		if exclude_replies == False:
+			del params["exclude_replies"]
 		
+		#############################
+		# APIを叩く
+		url = '/api/v1/accounts/{0}/statuses'.format(str(id))
+		wRes = self.__api_request('GET', url, params)
+		return wRes
+
+
+
+#####################################################
+# ファボ一覧
+#####################################################
+	def GetFavoList(self, max_id=None, since_id=None, limit=None):
+		#############################
+		# 引数を辞書にまとめる
+		if max_id != None:
+			max_id = self.__unpack_id(max_id)
+		if since_id != None:
+			since_id = self.__unpack_id(since_id)
+		
+		#############################
+		# APIを叩く
+		params = self.__generate_params(locals())
 		url = '/api/v1/favourites'
-		response = self.__api_request('GET', url, params)
-		return response
+		wRes = self.__api_request('GET', url, params)
+		return wRes
 
 
 
 #####################################################
-# API フォロー一覧
+# フォロー一覧
 #####################################################
-	def __account_following(self, id, max_id=None, since_id=None, limit=None):
+	def GetFollowingList(self, id, max_id=None, since_id=None, limit=None):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		if max_id != None:
+			max_id = self.__unpack_id(max_id)
+		if since_id != None:
+			since_id = self.__unpack_id(since_id)
+		
+		#############################
+		# APIを叩く
 		params = self.__generate_params(locals(), ['id'])
 		url = '/api/v1/accounts/{0}/following'.format(str(id))
-		response = self.__api_request('GET', url, params)
-		return response
+		wRes = self.__api_request('GET', url, params)
+		return wRes
 
 
 
 #####################################################
-# API フォロワー一覧
+# フォロワー一覧
 #####################################################
-	def __account_followers(self, id, max_id=None, since_id=None, limit=None):
+	def GetFollowersList(self, id, max_id=None, since_id=None, limit=None):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		if max_id != None:
+			max_id = self.__unpack_id(max_id)
+		if since_id != None:
+			since_id = self.__unpack_id(since_id)
+		
+		#############################
+		# APIを叩く
 		params = self.__generate_params(locals(), ['id'])
 		url = '/api/v1/accounts/{0}/followers'.format(str(id))
-		response = self.__api_request('GET', url, params)
-		return response
+		wRes = self.__api_request('GET', url, params)
+		return wRes
 
 
 
 #####################################################
-# API 自アカウント情報取得
+# 自アカウント情報取得
 #####################################################
-	def __account_verify_credentials(self):
+	def GetMyAccountInfo(self):
+		#############################
+		# APIを叩く
 		url = '/api/v1/accounts/verify_credentials'
-		response = self.__api_request('GET', url)
-		return response
+		wRes = self.__api_request('GET', url)
+		return wRes
 
 
 
 #####################################################
-# API 対アカウント情報取得
+# 対アカウント情報取得
 #####################################################
-	def __account_relationships(self, id):
+	def GetAccountStat(self, id):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
 		params = self.__generate_params(locals())
-		url = '/api/v1/accounts/relationships'
-		response = self.__api_request('GET', url, params)
-		return response
-
-
-
-#####################################################
-# API フォロー
-#####################################################
-	def __account_follow(self, id):
-		url = '/api/v1/accounts/{0}/follow'.format(str(id))
-		response = self.__api_request('POST', url)
-		return response
-
-
-
-#####################################################
-# API リムーブ
-#####################################################
-	def __account_unfollow(self, id):
-		url = '/api/v1/accounts/{0}/unfollow'.format(str(id))
-		response = self.__api_request('POST', url)
-		return response
-
-
-
-#####################################################
-# API ファボ
-#####################################################
-	def __status_favourite(self, id):
-		url = '/api/v1/statuses/{0}/favourite'.format(str(id))
-		response = self.__api_request('POST', url)
-		return response
-
-
-
-#####################################################
-# API ブースト
-#####################################################
-	def __status_reblog(self, id):
-		url = '/api/v1/statuses/{0}/reblog'.format(str(id))
-		response = self.__api_request('POST', url)
-		return response
-
-
-
-#####################################################
-# API ブロック
-#####################################################
-	def __status_block(self, id):
-		url = '/api/v1/accounts/{0}/block'.format(str(id))
-		response = self.__api_request('POST', url)
-		return response
-
-
-
-#####################################################
-# API ブロック解除
-#####################################################
-	def __status_unblock(self, id):
-		url = '/api/v1/accounts/{0}/unblock'.format(str(id))
-		response = self.__api_request('POST', url)
-		return response
-
-
-
-#####################################################
-# APIレスポンス取得  (**追加実装)
-#####################################################
-	def __get_api_responce(self):
-		res = { "result"   : False,
-				"reason"   : None,
-				"responce" : None }
 		
-		return res
+		#############################
+		# APIを叩く
+		url = '/api/v1/accounts/relationships'
+		wRes = self.__api_request('GET', url, params)
+		return wRes
+
+
+
+#####################################################
+# フォロー
+#####################################################
+	def Follow( self, id, reblogs=True ):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		params = self.__generate_params(locals())
+		
+		if params["reblogs"] == None:
+			del params["reblogs"]
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/accounts/{0}/follow'.format(str(id))
+		wRes = self.__api_request('POST', url)
+		return wRes
+
+
+
+#####################################################
+# リムーブ
+#####################################################
+	def Remove(self, id):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/accounts/{0}/unfollow'.format(str(id))
+		wRes = self.__api_request('POST', url)
+		return wRes
+
+
+
+#####################################################
+# ファボ
+#####################################################
+	def Favo(self, id):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/statuses/{0}/favourite'.format(str(id))
+		wRes = self.__api_request('POST', url)
+		return wRes
+
+
+
+#####################################################
+# ブースト
+#####################################################
+	def Boost(self, id):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/statuses/{0}/reblog'.format(str(id))
+		wRes = self.__api_request('POST', url)
+		return wRes
+
+
+
+#####################################################
+# ブロック
+#####################################################
+	def Block(self, id):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/accounts/{0}/block'.format(str(id))
+		wRes = self.__api_request('POST', url)
+		return wRes
+
+
+
+#####################################################
+# ブロック解除
+#####################################################
+	def Unblock(self, id):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/accounts/{0}/unblock'.format(str(id))
+		wRes = self.__api_request('POST', url)
+		return wRes
+
+
+
+#####################################################
+# ミュート
+#####################################################
+	def Mute(self, id):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/accounts/{0}/mute'.format(str(id))
+		wRes = self.__api_request('POST', url)
+		return wRes
+
+
+
+#####################################################
+# ブロック解除
+#####################################################
+	def Unmute(self, id):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/accounts/{0}/unmute'.format(str(id))
+		wRes = self.__api_request('POST', url)
+		return wRes
+
+
+
+#####################################################
+# リスト作成
+#####################################################
+	def CreateList(self, title ):
+		#############################
+		# 引数を辞書にまとめる
+		params = self.__generate_params(locals())
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/lists'
+		wRes = self.__api_request('POST', url, params)
+		return wRes
+
+
+
+#####################################################
+# リスト更新 (名前変更)
+#####################################################
+	def UpdateList(self, id, title):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		params = self.__generate_params(locals(), ['id'])
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/lists/{0}'.format(id)
+		wRes = self.__api_request('PUT', url, params)
+		return wRes
+
+
+
+#####################################################
+# リスト更新 (名前変更)
+#####################################################
+	def DeleteList(self, id):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/lists/{0}'.format(id)
+		wRes = self.__api_request('DELETE', url, params)
+		return wRes
+
+
+
+#####################################################
+# リスト アカウント追加
+#####################################################
+	def AddAccount_List( self, id, account_ids ):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		if not isinstance(account_ids, list):
+			account_ids = [account_ids]
+		
+		account_ids = list(map(lambda x: self.__unpack_id(x), account_ids))
+		params = self.__generate_params(locals(), ['id'])		
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/lists/{0}/accounts'.format(id)
+		wRes = self.__api_request('POST', url, params)
+		return wRes
+
+
+
+#####################################################
+# リスト アカウント削除
+#####################################################
+	def DelAccount_List(self, id, account_ids):
+		#############################
+		# 引数を辞書にまとめる
+		id = self.__unpack_id(id)
+		
+		if not isinstance(account_ids, list):
+			account_ids = [account_ids]
+		
+		account_ids = list(map(lambda x: self.__unpack_id(x), account_ids))
+		params = self.__generate_params(locals(), ['id'])		
+		
+		#############################
+		# APIを叩く
+		url = '/api/v1/lists/{0}/accounts'.format(id)
+		wRes = self.__api_request('DELETE', url, params)
+		return wRes
 
 
 
@@ -949,7 +959,10 @@ class CLS_Mastodon_Use:
 		headers = None
 		remaining_wait = 0
 		
-		res = self.__get_api_responce()
+		#############################
+		# 応答形式の取得
+		#  {"Result" : False, "Reason" : None, "Responce" : None}
+		wRes = CLS_Mastodon_Use.sGet_API_Resp()
 		
 		#############################
 		# リクエストヘッダー
@@ -974,38 +987,40 @@ class CLS_Mastodon_Use:
 				response_object = requests.delete(self.api_base_url + endpoint, data=params, headers=headers,
 												files=files, timeout=self.request_timeout)
 		except Exception as e:
-			res['reason'] = "API Responce：Could not complete request：" + str(e)
-			return res
+			wRes['Reason'] = "API Responce: Could not complete request: " + str(e) + " method=" + method + " endpoint=" + endpoint + " " + self.__delPassword( params )
+			return wRes
 		
 		#############################
 		# 応答があったか
 		if response_object is None:
-			res['reason'] = "API Responce：Illegal request："
-			return res
+			wRes['Reason'] = "API Responce：Illegal request：" + " method=" + method + " endpoint=" + endpoint + " " + self.__delPassword( params )
+			return wRes
 		
 		if response_object.status_code == 404:
-			res['reason'] = "API Responce：404 ERR："
-			return res
+			wRes['Reason'] = "API Responce：404 ERR：" + " method=" + method + " endpoint=" + endpoint + " " + self.__delPassword( params )
+			return wRes
 		elif response_object.status_code == 500:
-			res['reason'] = "API Responce：500 ERR："
-			return res
+			wRes['Reason'] = "API Responce：500 ERR：" + " method=" + method + " endpoint=" + endpoint + " " + self.__delPassword( params )
+			return wRes
 		elif response_object.status_code != 200:
-			res['reason'] = "API Responce：" + str(response_object.status_code) + " ERR"
-			return res
+			wRes['Reason'] = "API Responce：" + str(response_object.status_code) + " ERR" + " method=" + method + " endpoint=" + endpoint + " " + self.__delPassword( params )
+			return wRes
 		
 		#############################
 		# レスポンスを取り込む
 		try:
 			res_json = response_object.json(object_hook=self.__json_date_parse)
 		except:
-			res['reason'] = "API Responce：Could not parse response as JSON：status code：" + str(response_object.status_code)
-			res['responce'] = res_json
-			return res
+			wRes['Reason'] = "API Responce：Could not parse response as JSON：status code：" + str(response_object.status_code) \
+								+ " method=" + method + " endpoint=" + endpoint + " " + self.__delPassword( params )
+			wRes['Responce'] = res_json
+			return wRes
 		
 		if isinstance(res_json, dict) and 'error' in res_json:
-			res['reason'] = "API Responce：Mastodon API returned error：" + str(res_json['error'])
-			res['responce'] = res_json
-			return res
+			wRes['Reason'] = "API Responce：Mastodon API returned error：" + str(res_json['error']) \
+								+ " method=" + method + " endpoint=" + endpoint + " " + self.__delPassword( params )
+			wRes['Responce'] = res_json
+			return wRes
 		
 		#############################
 		# ページネーション属性を編集
@@ -1044,9 +1059,23 @@ class CLS_Mastodon_Use:
 							del prev_params['max_id']
 							res_json[0]['_pagination_prev'] = prev_params
 		
-		res['result'] = True
-		res['responce'] = res_json
-		return res
+		wRes['Responce'] = res_json
+		wRes['Result'] = True
+		return wRes
+
+#####################################################
+	def __delPassword( self, inParams ):
+		wParams = inParams
+		if 'username' in wParams :
+			del wParams['username']
+		if 'password' in wParams :
+			del wParams['password']
+		if 'client_id' in wParams :
+			del wParams['client_id']
+		if 'client_secret' in wParams :
+			del wParams['client_secret']
+		
+		return str(wParams)
 
 
 
@@ -1068,8 +1097,6 @@ class CLS_Mastodon_Use:
 				del params[key]
 		
 		return params
-
-
 
 #####################################################
 # Internal object-to-id converter
@@ -1104,19 +1131,6 @@ class CLS_Mastodon_Use:
 #####################################################
 	def __set_refresh_token(self, value):
 		self._refresh_token = value
-		return
-
-
-
-#####################################################
-# print出力
-#####################################################
-	def cPrint( self, msg ):
-##		if sys.version_info.major==3 :
-##			print(msg)
-##		else :
-##			print msg
-		print(msg)
 		return
 
 

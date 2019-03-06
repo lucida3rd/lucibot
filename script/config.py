@@ -4,26 +4,83 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/2/27
+#   Update  ：2019/3/6
 #####################################################
-import codecs
-import global_val
+# Private Function:
+#   __cnfMasterConfig_SelectDisp(self):
+#   __cnfMasterConfig_Change(self):
+#   __cnfMasterUser( self, inFulluser ):
+#
+# Instance Function:
+#   MasterConfig_Disp(self):
+#   CnfMasterConfig(self):
+#   CnfMasterUser(self):
+#   CnfAdminUser(self):
+#   CnfMasterRun(self):
+#   CnfMasterMainte(self):
+#   GetMulticastUserList(self):
+#
+# Class Function(static):
+#   sGetMasterConfig(cls):
+#   sSetMasterConfig(cls):
+#   sGetMulticast( cls, inPath ):
+#
 #####################################################
-class CLS_Config:
-	
-	FLG_Init_Master = False		#master環境情報OK
-	FLG_Init_Config = False		#環境情報OK
-	
-	STR_cnfMasterConf = [
-		'MasterUser',
-		'AdminUser',
-		'Twitter',
-		'Traffic',
-		'LookHard',
-		'WordStudy',
-		'mRun',
-		'mMainte'
-	]
+
+from osif import CLS_OSIF
+from filectrl import CLS_File
+from userdata import CLS_UserData
+from mastodon_use import CLS_Mastodon_Use
+from gval import gVal
+#####################################################
+class CLS_Config() :
+#####################################################
+
+	#############################
+	# 画面表示するMaster環境情報
+	#   True=一括設定変更可能
+	#   False=別画面で設定
+	STR_View_masterConf = {
+		"MasterUser"	: False,
+		"AdminUser"		: False,
+		"PRUser"		: False,
+		"TwitterUser"	: False,
+		"Twitter"		: True,
+		"PTL_Favo"		: True,
+		"PTL_Boot"		: True,
+		"PTL_HRip"		: True,
+		"PTL_ARip"		: True,
+		"PTL_WordOpe"	: True,
+		"RandToot"		: True,
+		"CircleToot"	: False,
+		"Traffic"		: True,
+		"LookHard"		: True,
+		"WordStudy"		: True,
+		"LogLevel"		: True,
+		"Lock"			: True,
+		"mRun"			: False,
+		"mMainte"		: False
+	}
+
+	__DEF_VIEW_MASTERCONF_LEN = 12
+
+	#############################
+	# 画面表示するUser環境情報
+	#   True=一括設定変更可能
+	#   False=別画面で設定
+	STR_View_userConf = {
+		"Multicast"		: True,
+		"RIP_Favo"		: True,
+		"IND_Favo"		: True,
+		"TrafficCnt"	: False,
+		"WordCorrect"	: False,
+		"AutoFollow"	: True,
+		"Run"			: False,
+		"Mainte"		: False,
+		"JPonly"		: True
+	}
+
+	__DEF_VIEW_USERCONF_LEN = 12
 
 #####################################################
 # Init
@@ -34,197 +91,166 @@ class CLS_Config:
 
 
 #####################################################
-# master環境情報の読み込み
+# Master環境情報の読み込み
 #####################################################
-	def cGetMasterConfig(self):
+	@classmethod
+	def sGetMasterConfig(cls):
 		#############################
 		# ファイルの存在チェック
-		if global_val.gCLS_File.cExist( global_val.gSTR_File['masterConfig_file'] )!=True :
+		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
 			return False	#ない
 		
 		#############################
 		# 読み込み
-		for line in open( global_val.gSTR_File['masterConfig_file'], 'r'):
+		for wLine in open( gVal.STR_File['MasterConfig'], 'r'):
 			#############################
 			# 分解+要素数の確認
-			line = line.strip()
-			get_line = line.split("=")
-			if len(get_line) != 2 :
+			wLine = wLine.strip()
+			wGet_Line = wLine.split("=")
+			if len(wGet_Line) != 2 :
 				continue
 			
 			#############################
 			# キーがあるか確認
-			if get_line[0] not in global_val.gSTR_masterConfig :
+			if wGet_Line[0] not in gVal.STR_MasterConfig :
 				continue
 			
 			#############################
 			# 更新する
-			global_val.gSTR_masterConfig[get_line[0]] = get_line[1]
+			gVal.STR_MasterConfig[wGet_Line[0]] = wGet_Line[1]
 		
 		#############################
 		# 文字→数値へ変換
-		global_val.gSTR_masterConfig["studyNum"] = int( global_val.gSTR_masterConfig["studyNum"] )
-		global_val.gSTR_masterConfig["studyMax"] = int( global_val.gSTR_masterConfig["studyMax"] )
-		global_val.gSTR_masterConfig["studyDay"] = int( global_val.gSTR_masterConfig["studyDay"] )
+		gVal.STR_MasterConfig["getPTLnum"]    = int( gVal.STR_MasterConfig["getPTLnum"] )
+		gVal.STR_MasterConfig["getRandVal"]   = int( gVal.STR_MasterConfig["getRandVal"] )
+		gVal.STR_MasterConfig["getRandRange"] = int( gVal.STR_MasterConfig["getRandRange"] )
+		gVal.STR_MasterConfig["studyNum"]     = int( gVal.STR_MasterConfig["studyNum"] )
+		gVal.STR_MasterConfig["studyMax"]     = int( gVal.STR_MasterConfig["studyMax"] )
+		gVal.STR_MasterConfig["studyDay"]     = int( gVal.STR_MasterConfig["studyDay"] )
+		gVal.STR_MasterConfig["getMcDelay"]   = int( gVal.STR_MasterConfig["getMcDelay"] )
 		
-		FLG_Init_Master = True
+		#############################
+		# 数値補正
+		if gVal.STR_MasterConfig["getMcDelay"]<1 or gVal.STR_MasterConfig["getMcDelay"]>30 :
+			gVal.STR_MasterConfig["getMcDelay"] = 5
+		
 		return True
 
 
 
 #####################################################
-# master環境情報の書き込み
+# Master環境情報の書き込み
 #####################################################
-	def cSetMasterConfig(self):
+	@classmethod
+	def sSetMasterConfig(cls):
 		#############################
-		# ファイルの存在チェック
-		if global_val.gCLS_File.cExist( global_val.gSTR_File['masterConfig_file'] )!=True :
-			return False	#ない
+		# 書き込みデータを作成
+		wSetLine = []
+		wKeylist = gVal.STR_MasterConfig.keys()
+		for iKey in wKeylist :
+			wLine = iKey + "=" + str(gVal.STR_MasterConfig[iKey]) + '\n'
+			wSetLine.append(wLine)
 		
 		#############################
-		# ファイルオープン
-		file = codecs.open( global_val.gSTR_File['masterConfig_file'], 'w', 'utf-8')
-		file.close()
-		file = codecs.open( global_val.gSTR_File['masterConfig_file'], 'w', 'utf-8')
-		
-		#############################
-		# 追加データを作成
-		setline = []
-		keylist = global_val.gSTR_masterConfig.keys()
-		for ikey in keylist :
-			line = ikey + "=" + str(global_val.gSTR_masterConfig[ikey]) + '\n'
-			setline.append(line)
-		
-		#############################
-		# 書き込んで閉じる
-		file.writelines( setline )
-		file.close()
-		return True
-
-
-
-#####################################################
-# master環境情報セットアップ
-#####################################################
-	def cMasterSetup(self):
-		#############################
-		# フォルダの存在チェック
-		if global_val.gCLS_File.cExist( global_val.gSTR_File['masterConfig'] )==True :
-			return False	#既にある
-		
-		global_val.gCLS_Init.cPrint( '\n' + "master環境情報が存在しないため、セットアップを行います。" )
-		global_val.gCLS_Init.cPrint( "master環境のテンプレートをコピーします....." )
-		#############################
-		# テンプレートデータのコピー(データ作成)
-		if global_val.gCLS_File.cCopyFolder(
-			global_val.gSTR_File['defMasterdata'],
-			global_val.gSTR_File['masterConfig'] )!=True :
-			###ありえない
-			global_val.gCLS_Init.cPrint( "CLS_Config: cSetMasterSetup: defaultデータコピー失敗" )
-			return False
-		
-		#############################
-		# フォルダの存在チェック
-		if global_val.gCLS_File.cExist( global_val.gSTR_File['masterConfig'] )!=True :
-			global_val.gCLS_Init.cPrint( "CLS_Config: cSetMasterSetup: データコピー失敗" )
+		# ファイル上書き書き込み
+		if CLS_File.sWriteFile( gVal.STR_File['MasterConfig'], wSetLine )!=True :
 			return False	#失敗
 		
-		#############################
-		# コピー完了
-		wRes = input("master環境情報のコピーが完了しました。リターンキーでセットアップをおこないます。[RT]")
-		
-		#############################
-		# master環境情報の変更
-		self.cCnfMasterConfig()
-		global_val.gSTR_masterConfig['mRun'] = "on"
-		global_val.gSTR_masterConfig['mMainte'] = "off"
-		
-		#############################
-		# AdminUserの変更
-		self.cCnfAdminUser()
-		
-		#############################
-		# ユーザ登録=0の時、登録させる
-		wList = global_val.gCLS_Regist.cGetUserList()
-		if len(wList)==0 :
-			wFLG_regist = False
-			while True:
-				global_val.gCLS_Init.cPrint( "ユーザの登録をおこないます。botで使うユーザ名をドメインを含めて入力してください。: 例= " + global_val.gCHR_ExampleAccount )
-				wMasterUser = input("MasterUser？ => ")
-				wRes = global_val.gCLS_Regist.cRegist( wMasterUser )
-				if wRes==True :
-					###登録できたので次へ
-					break
-				else :
-					###登録できないと、登録できるまで継続したい
-					global_val.gCLS_Init.cPrint( "ユーザの登録がないとbotが動作できません。" )
-					wRes = input("登録を中止しますか？(y)=> ")
-					if wRes=='y' :
-						global_val.gCLS_Init.cPrint( "以後のユーザ登録は、ユーザ登録コマンドで実行してください。: python3 run.py -ur [ユーザ名(@ドメインを含む)]" + '\n' )
-						break
-		
-		#############################
-		# ユーザ登録がされている時は masterユーザを変更する
-		else :
-			self.cCnfMasterUser()
-		
 		return True
 
 
 
 #####################################################
-# master環境情報 操作
+# Master環境情報 表示
 #####################################################
-	def cCnfMasterConfig(self):
+	def MasterConfig_Disp(self):
+		#############################
+		# 画面クリア
+		CLS_OSIF.sDispClr()
+		
+		#############################
+		# ヘッダ出力
+		wStr = "--------------------" + '\n'
+		wStr = wStr + " Master環境情報" + '\n'
+		wStr = wStr + "--------------------" + '\n'
+		
+		wKeylist = self.STR_View_masterConf.keys()
+		for iKey in wKeylist :
+			wLen = len(iKey)
+			if self.__DEF_VIEW_MASTERCONF_LEN>wLen :
+				wKeyname = iKey + ( " " * ( self.__DEF_VIEW_MASTERCONF_LEN-wLen ))
+			else :
+				wKeyname = iKey
+			
+			wNum = str(gVal.STR_MasterConfig[iKey])
+			if wNum=="" :
+				wNum = "(None)"
+			
+			wStr = wStr + wKeyname + " : " + wNum + '\n'
+		
+		CLS_OSIF.sPrn( wStr )
+		return
+
+
+
+#####################################################
+# Master環境情報 操作
+#####################################################
+	def CnfMasterConfig(self):
 		#############################
 		# ファイルの存在チェック
-		if global_val.gCLS_File.cExist( global_val.gSTR_File['masterConfig_file'] )!=True :
+		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
 			###ありえない
-			global_val.gCLS_Init.cPrint( "CLS_Config: cCnfMasterConfig: masterConfig file is not found : " + global_val.gSTR_File['masterConfig_file'] )
+			CLS_OSIF.sPrn( "CLS_Config: CnfMasterConfig: MasterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
 			return False	#ない
 		
-		self.cCnfMasterConfig_Disp()
-		wSelect = self._CnfMasterConfig_SelectDisp()
+		#############################
+		# 選択画面を表示する
+		self.MasterConfig_Disp()
+		wSelect = self.__cnfMasterConfig_SelectDisp()
 		if wSelect=='c' :
-			###変更
-			self._CnfMasterConfig_Change()
-			self.cSetMasterConfig()
-			global_val.gCLS_Init.cPrint( "変更した内容でmaster環境情報をセーブしました: " + global_val.gSTR_File['masterConfig_file'] + '\n' )
-			
+			###変更してセーブ
+			self.__cnfMasterConfig_Change()
+			self.sSetMasterConfig()
+			CLS_OSIF.sPrn( "変更した内容でMaster環境情報をセーブしました。" + '\n' )
 		elif wSelect=='s' :
 			###セーブ
-			self.cSetMasterConfig()
-			global_val.gCLS_Init.cPrint( "master環境情報をセーブしました: " + global_val.gSTR_File['masterConfig_file'] + '\n' )
+			CLS_Config.sSetMasterConfig()
+			CLS_OSIF.sPrn( "Master環境情報をセーブしました。" + '\n' )
 		
 		return True
 
 	#####################################################
 	# 選択メニュー表示
 	#####################################################
-	def _CnfMasterConfig_SelectDisp(self):
+	def __cnfMasterConfig_SelectDisp(self):
 		wStr = "操作メニューキーを押してください" + '\n'
 		wStr = wStr + "c: 変更 / s:セーブ+終了 / other:なにもせず終了"
-		global_val.gCLS_Init.cPrint( wStr )
-		wSelect = input("選択? => ")
+		CLS_OSIF.sPrn( wStr )
+		wSelect = CLS_OSIF.sInp( "選択？=> " )
 		return wSelect
 
 	#####################################################
 	# 変更メニュー表示
 	#####################################################
-	def _CnfMasterConfig_Change(self):
-		for ikey in self.STR_cnfMasterConf :
-			if ikey=='Twitter' and global_val.gSTR_masterConfig['twAS']=="" :
+	def __cnfMasterConfig_Change(self):
+		wKeylist = self.STR_View_masterConf.keys()
+		for iKey in wKeylist :
+			#############################
+			# 表示しないメニューは排除
+			if iKey=='Twitter' and gVal.STR_MasterConfig['twAS']=="" :
 				###twitterのキー設定がされていなければメニューを出さない
-				global_val.gSTR_masterConfig[ikey] = "off"
+				gVal.STR_MasterConfig[iKey] = "off"
 				continue
 			
-			if ikey=='MasterUser' or ikey=='AdminUser' or \
-			   ikey=='mRun' or ikey=='mMainte' :
+			if self.STR_View_masterConf[iKey]==False :
 				###これらは別メニューで変更させる
 				continue
 			
-			wStr = ikey + "= " + str( global_val.gSTR_masterConfig[ikey]) + " : "
-			if global_val.gSTR_masterConfig[ikey]=="on" :
+			#############################
+			# ON/OFFの文字作成
+			wStr = iKey + "= " + str( gVal.STR_MasterConfig[iKey]) + " : "
+			if gVal.STR_MasterConfig[iKey]=="on" :
 				wStr = wStr + "c: on→off"
 				wChg = "off"
 			else:
@@ -232,193 +258,191 @@ class CLS_Config:
 				wChg = "on"
 			
 			wStr = wStr + " / other: 変更しない"
-			global_val.gCLS_Init.cPrint( wStr )
-			wSelect = input("選択? => ")
+			
+			#############################
+			# 変更メニューの表示
+			CLS_OSIF.sPrn( wStr )
+			wSelect = CLS_OSIF.sInp( "選択? => " )
 			
 			if wSelect=="c" :
 				###変更する
-				global_val.gSTR_masterConfig[ikey] = wChg
+				gVal.STR_MasterConfig[iKey] = wChg
 		
 		return
-
-
-
-#####################################################
-# master環境情報 表示
-#####################################################
-	def cCnfMasterConfig_Disp(self):
-		wStr = "--------------------" + '\n'
-		wStr = wStr + " master環境情報" + '\n'
-		wStr = wStr + "--------------------" + '\n'
-		
-		for ikey in self.STR_cnfMasterConf :
-			wStr = wStr + ikey + " : " + str( global_val.gSTR_masterConfig[ikey])  + '\n'
-		
-		global_val.gCLS_Init.cDispClear()
-		global_val.gCLS_Init.cPrint( wStr )
-		return
-
-
-
-#####################################################
-# AdminUser変更(通知先ユーザ)
-#####################################################
-	def cCnfAdminUser(self):
-		#############################
-		# ファイルの存在チェック
-		if global_val.gCLS_File.cExist( global_val.gSTR_File['masterConfig_file'] )!=True :
-			###ありえない
-			global_val.gCLS_Init.cPrint( "CLS_Config: cCnfAdminUser: masterConfig file is not found : " + global_val.gSTR_File['masterConfig_file'] )
-			return False	#ない
-		
-		#############################
-		# 変更メニュー表示
-		if global_val.gSTR_masterConfig['AdminUser']=="" :
-			wStr = "現在AdminUserは設定されていません。設定することで登録ユーザから通知を受け取ることができるようになります。"
-			wSt2 = "AdminUserの設定をおこないますか？(y/N)=> "
-		else :
-			wStr = "現在AdminUserは次のアカウントが設定されています。: " + global_val.gSTR_masterConfig['AdminUser']
-			wSt2 = "AdminUserの設定をおこないますか？(y:変更 /D:解除 /other: キャンセル)=> "
-		
-		global_val.gCLS_Init.cPrint( wStr )
-		wSelect = input( wSt2 )
-		if wSelect=="D" :
-			###削除
-			global_val.gSTR_masterConfig['AdminUser'] = ""
-			self.cSetMasterConfig()
-			global_val.gCLS_Init.cPrint( "AdminUserの設定を解除しました。" + '\n' )
-			global_val.gCLS_Init.cPrint( "設定内容をmaster環境情報にセーブしました: " + global_val.gSTR_File['masterConfig_file'] + '\n' )
-			return True
-		elif wSelect!="y" :
-			###設定しない
-			global_val.gCLS_Init.cPrint( "キャンセルされました" )
-			return True
-		#############################
-		# 名前入力
-		wStr = "AdminUser(通知先アカウント)をドメインを含めて入力してください。 例= " + global_val.gCHR_ExampleAccount + '\n'
-		wStr = wStr + "  ※ユーザ登録してないユーザも指定できます"
-		global_val.gCLS_Init.cPrint( wStr )
-		wAdminUser = input("AdminUser？ => ")
-		
-		if wAdminUser=="" or \
-		   global_val.gSTR_masterConfig['AdminUser'] ==wAdminUser :
-			###設定しない
-			global_val.gCLS_Init.cPrint( "キャンセルされました" )
-			return True
-		
-		#############################
-		# ユーザ名の妥当性チェック
-		wSTR_user = global_val.gCLS_Regist.cUserCheck( wAdminUser )
-		if wSTR_user['Result']!=True :
-			return False
-		
-		#############################
-		# 通信テスト
-		global_val.gCLS_Init.cPrint( "mastodonとの通信テスト中..." )
-		if global_val.gCLS_Init.cPing( wSTR_user['Domain'] )!=True :
-			global_val.gCLS_Init.cPrint( "mastodonとの通信テストに失敗したため、設定をキャンセルします。" )
-			return False
-		
-		global_val.gCLS_Init.cPrint( "mastodonとの通信テストに成功しました。" + '\n' )
-		
-		#############################
-		# 変更
-		global_val.gSTR_masterConfig['AdminUser'] = wAdminUser
-		self.cSetMasterConfig()
-		global_val.gCLS_Init.cPrint( "設定内容をmaster環境情報にセーブしました: " + global_val.gSTR_File['masterConfig_file'] + '\n' )
-		return True
 
 
 
 #####################################################
 # MasterUser変更(botとして使うユーザ)
 #####################################################
-	def cCnfMasterUser( self, fulluser="" ):
+	def CnfMasterUser( self ):
 		#############################
 		# ユーザ一覧の取得
-		wList = global_val.gCLS_Regist.cGetUserList()
+		wList = CLS_UserData.sGetUserList()
 		
 		#############################
-		# 登録がない場合は、イレギュラーっぽくもある...
+		# 0件の場合は、ユーザ登録させる
 		if len(wList)==0 :
-			global_val.gCLS_Init.cPrint( "ユーザが1件も登録されていないため、MasterUserの登録ができません。" )
+			wStr = "ユーザが1件も登録されていないため、MasterUserの登録ができません。" + '\n'
+			wStr = wStr + "まずはユーザ登録をおこなってください。" + '\n'
+			CLS_OSIF.sPrn( wStr )
 			return False
 		
 		#############################
 		# 1件しかない場合かつMasterUser登録済みの場合は変更できない
-		elif len(wList)==1 and global_val.gSTR_masterConfig['MasterUser']!="" :
+		elif len(wList)==1 and gVal.STR_MasterConfig['MasterUser']!="" :
 			wStr = "ユーザが1件しか登録されていないため、MasterUserの変更はできません。" + '\n'
-			wStr = wStr + "現在のMasterUser: " + global_val.gSTR_masterConfig['MasterUser'] + '\n'
-			global_val.gCLS_Init.cPrint( wStr )
+			wStr = wStr + "現在のMasterUser: " + gVal.STR_MasterConfig['MasterUser'] + '\n'
+			CLS_OSIF.sPrn( wStr )
 			return False
 		
 		#############################
 		# 1件しかない場合かつMasterUserが未登録の場合は、
 		# その1件をMasterUserに設定してしまう
 		elif len(wList)==1 :
-			wStr = "ユーザが1件しか登録されていないため、当該ユーザをMasterUserに設定します。"  + '\n'
-			global_val.gCLS_Init.cPrint( wStr )
-			self._CnfMasterUser( wList[0] )
-			return False
+			wStr = "ユーザが1件しか登録されていないため " + wList[0] + " をMasterUserに設定します。"  + '\n'
+			CLS_OSIF.sPrn( wStr )
+			wRes = self.__cnfMasterUser( wList[0] )
+			return wRes
 		
 		#############################
 		# 2件以上の場合は選択する
 		else :
-			global_val.gCLS_Regist.cViewList()
-			wStr = "現在MasterUserに設定されているユーザは次のユーザです。: " + global_val.gSTR_masterConfig['MasterUser'] + '\n'
-			wStr = wStr + "MasterUser(botとして使うユーザ)をドメインを含めて入力してください。 例= " + global_val.gCHR_ExampleAccount
-			global_val.gCLS_Init.cPrint( wStr )
-			wMasterUser = input("MasterUser？ => ")
+			#############################
+			# ユーザ一覧の表示
+			wCLS_work = CLS_UserData()
+			wCLS_work.ViewUserList()
+			
+			#############################
+			# 登録画面
+			wStr = "現在MasterUserに設定されているユーザは次のユーザです。: " + gVal.STR_MasterConfig['MasterUser'] + '\n'
+			wStr = wStr + "MasterUser(mastodon上でbotとして使うユーザ)をドメインを含めて入力してください。 例= " + gVal.DEF_EXAMPLE_ACCOUNT
+			CLS_OSIF.sPrn( wStr )
+			wMasterUser = CLS_OSIF.sInp( "MasterUser？ => " )
 			
 			wFLG = False
-			for ikey in wList :
-				if wMasterUser==ikey :
+			for iKey in wList :
+				if wMasterUser==iKey :
 					wFLG = True
 			
 			if wFLG!=True :
-				global_val.gCLS_Init.cPrint( "登録されていないユーザです。変更をキャンセルします。" )
+				CLS_OSIF.sPrn( "登録されていないユーザです。変更をキャンセルします。" )
 				return False
 			
-			self._CnfMasterUser( wMasterUser )
+			wRes = self.__cnfMasterUser( wMasterUser )
+			if wRes!=True :
+				return False
 		
 		return True
-
-
 
 	#####################################################
 	# MasterUser変更
 	#####################################################
-	def _CnfMasterUser( self, fulluser ):
+	def __cnfMasterUser( self, inFulluser ):
 		#############################
 		# 変更＆反映
-		global_val.gSTR_masterConfig['MasterUser'] = fulluser 
-		global_val.gCLS_Config.cSetMasterConfig()
+		gVal.STR_MasterConfig['MasterUser'] = inFulluser 
+		wRes = self.sSetMasterConfig()
+		if wRes!=True :
+			return False
 		
-		wStr = fulluser + " をMasterUserに設定します。" + '\n'
-		wStr = wStr + "master環境情報をセーブしました: " + global_val.gSTR_File['masterConfig_file'] + '\n'
-		global_val.gCLS_Init.cPrint( wStr )
-		return
+		wStr = inFulluser + " をMasterUserに設定しました。" + '\n'
+		wStr = wStr + "このユーザをmastodon上でbotとして動作させます。" + '\n'
+		wStr = wStr + "Master環境情報をセーブしました: " + gVal.STR_File['MasterConfig'] + '\n'
+		CLS_OSIF.sPrn( wStr )
+		CLS_OSIF.sInp( "確認したらリターンキーを押してください。[RT]" )
+		return True
+
+
+
+#####################################################
+# AdminUser変更(通知先ユーザ)
+#####################################################
+	def CnfAdminUser(self):
+		#############################
+		# ファイルの存在チェック
+		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
+			###ありえない
+			CLS_OSIF.sPrn( "CLS_Config: cCnfAdminUser: masterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
+			return False	#ない
+		
+		#############################
+		# 変更メニュー表示
+		if gVal.STR_MasterConfig['AdminUser']=="" :
+			wStr = "現在AdminUserは設定されていません。設定することで登録ユーザから通知を受け取ることができるようになります。"
+			wSt2 = "AdminUserの設定をおこないますか？(y/N)=> "
+		else :
+			wStr = "現在AdminUserは次のアカウントが設定されています。: " + gVal.STR_MasterConfig['AdminUser']
+			wSt2 = "AdminUserの設定をおこないますか？(y:変更 /D:解除 /other: キャンセル)=> "
+		
+		CLS_OSIF.sPrn( wStr )
+		wSelect = CLS_OSIF.sInp( wSt2 )
+		if wSelect=="D" :
+			###削除
+			gVal.STR_MasterConfig['AdminUser'] = ""
+			self.sSetMasterConfig()
+			CLS_OSIF.sPrn( "AdminUserの設定を解除しました。" + '\n' )
+			CLS_OSIF.sPrn( "設定内容をMaster環境情報にセーブしました: " + gVal.STR_File['MasterConfig'] + '\n' )
+			return True
+		elif wSelect!="y" :
+			###設定しない
+			CLS_OSIF.sPrn( "キャンセルされました" )
+			return True
+		
+		#############################
+		# 名前入力
+		wStr = "AdminUser(通知先アカウント)をドメインを含めて入力してください。 例= " + gVal.DEF_EXAMPLE_ACCOUNT + '\n'
+		wStr = wStr + "  ※ユーザ登録してないユーザも指定できます"
+		CLS_OSIF.sPrn( wStr )
+		wAdminUser = CLS_OSIF.sInp("AdminUser？ => ")
+		if wAdminUser=="" or \
+		   gVal.STR_MasterConfig['AdminUser'] ==wAdminUser :
+			###設定しない
+			CLS_OSIF.sPrn( "キャンセルされました" )
+			return True
+		
+		#############################
+		# ユーザ名の妥当性チェック
+		wSTR_user = CLS_UserData.sUserCheck( wAdminUser )
+		if wSTR_user['Result']!=True :
+			return False
+		
+		#############################
+		# 通信テスト
+		CLS_OSIF.sPrn( "通信テスト中..." )
+		if gVal.gCLS_Init.cPing( wSTR_user['Domain'] )!=True :
+			CLS_OSIF.sPrn( "mastodonとの通信テストに失敗したため、設定をキャンセルします。" )
+			return False
+		
+		CLS_OSIF.sPrn( "通信OK" )
+		
+		#############################
+		# 変更
+		gVal.STR_MasterConfig['AdminUser'] = wAdminUser
+		self.sSetMasterConfig()
+		CLS_OSIF.sPrn( "設定内容をMaster環境情報にセーブしました: " + gVal.STR_File['MasterConfig'] + '\n' )
+		return True
 
 
 
 #####################################################
 # master運用操作
 #####################################################
-	def cCnfMasterRun(self):
+	def CnfMasterRun(self):
 		#############################
 		# ファイルの存在チェック
-		if global_val.gCLS_File.cExist( global_val.gSTR_File['masterConfig_file'] )!=True :
+		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
 			###ありえない
-			global_val.gCLS_Init.cPrint( "CLS_Config: cCnfMasterRun: masterConfig file is not found : " + global_val.gSTR_File['masterConfig_file'] )
+			CLS_OSIF.sPrn( "CLS_Config: cCnfMasterRun: masterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
 			return False	#ない
 		
 		#############################
 		# メニューの表示
-		wStr = '\n' + "botの運用を設定します。現在の設定。 mRun= " + global_val.gSTR_masterConfig['mRun']
-		global_val.gCLS_Init.cPrint( wStr )
+		wStr = '\n' + "botの運用を設定します。現在の設定。 mRun= " + gVal.STR_MasterConfig['mRun']
+		CLS_OSIF.sPrn( wStr )
 		
 		wStr = ""
-		if global_val.gSTR_masterConfig['mRun']=="on" :
+		if gVal.STR_MasterConfig['mRun']=="on" :
 			wStr = wStr + "c: on→off"
 			wChg = "off"
 		else:
@@ -430,17 +454,17 @@ class CLS_Config:
 		
 		if wSelect!="c" :
 			###変更しない
-			global_val.gCLS_Init.cPrint( "キャンセルされました" )
+			CLS_OSIF.sPrn( "キャンセルされました" )
 			return True
 		
 		#############################
 		# 変更
-		global_val.gSTR_masterConfig['mRun'] = wChg
-		self.cSetMasterConfig()
+		gVal.STR_MasterConfig['mRun'] = wChg
+		self.sSetMasterConfig()
 		
 		wStr = "botの運用設定を変更しました。 mRun= " + wChg + '\n'
-		wStr = wStr + "変更した内容でmaster環境情報をセーブしました: " + global_val.gSTR_File['masterConfig_file'] + '\n'
-		global_val.gCLS_Init.cPrint( wStr )
+		wStr = wStr + "変更した内容でMaster環境情報をセーブしました: " + gVal.STR_File['MasterConfig'] + '\n'
+		CLS_OSIF.sPrn( wStr )
 		return True
 
 
@@ -448,21 +472,21 @@ class CLS_Config:
 #####################################################
 # masterメンテ操作
 #####################################################
-	def cCnfMasterMainte(self):
+	def CnfMasterMainte(self):
 		#############################
 		# ファイルの存在チェック
-		if global_val.gCLS_File.cExist( global_val.gSTR_File['masterConfig_file'] )!=True :
+		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
 			###ありえない
-			global_val.gCLS_Init.cPrint( "CLS_Config: cCnfMasterMainte: masterConfig file is not found : " + global_val.gSTR_File['masterConfig_file'] )
+			CLS_OSIF.sPrn( "CLS_Config: cCnfMasterMainte: masterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
 			return False	#ない
 		
 		#############################
 		# メニューの表示
-		wStr = '\n' + "botをメンテナンス設定します。現在の設定。 mMainte= " + global_val.gSTR_masterConfig['mMainte']
-		global_val.gCLS_Init.cPrint( wStr )
+		wStr = '\n' + "botをメンテナンス設定します。現在の設定。 mMainte= " + gVal.STR_MasterConfig['mMainte']
+		CLS_OSIF.sPrn( wStr )
 		
 		wStr = ""
-		if global_val.gSTR_masterConfig['mMainte']=="on" :
+		if gVal.STR_MasterConfig['mMainte']=="on" :
 			wStr = wStr + "c: on→off"
 			wChg = "off"
 		else:
@@ -474,105 +498,355 @@ class CLS_Config:
 		
 		if wSelect!="c" :
 			###変更しない
-			global_val.gCLS_Init.cPrint( "キャンセルされました" )
+			CLS_OSIF.sPrn( "キャンセルされました" )
 			return True
 		
 		#############################
 		# 変更
-		global_val.gSTR_masterConfig['mMainte'] = wChg
-		self.cSetMasterConfig()
+		gVal.STR_MasterConfig['mMainte'] = wChg
+		self.sSetMasterConfig()
 		
 		wStr = "botをメンテナンス設定を変更しました。 mMainte= " + wChg + '\n'
-		wStr = wStr + "変更した内容でmaster環境情報をセーブしました: " + global_val.gSTR_File['masterConfig_file'] + '\n'
-		global_val.gCLS_Init.cPrint( wStr )
+		wStr = wStr + "変更した内容でMaster環境情報をセーブしました: " + gVal.STR_File['MasterConfig'] + '\n'
+		CLS_OSIF.sPrn( wStr )
 		return True
 
 
 
 #####################################################
-# 同報配信設定だけ読み込んで値を返す
+# User環境情報の読み込み
 #####################################################
-	def cGetMulticast( self, path ):
-		wRes = {
-			"Result"	: False,
-			"Flg"		: ""
-		}
+	@classmethod
+	def sGetUserConfig( cls, inFulluser ):
+		#############################
+		# 応答形式の取得(mastodon形式)
+		#   "Result" : False, "Reason" : None, "Responce" : None
+		wRes = CLS_Mastodon_Use.sGet_API_Resp()
 		
 		#############################
-		# ファイルの存在チェック
-		if global_val.gCLS_File.cExist( path )!=True :
-			###ありえない
-			global_val.gCLS_Init.cPrint( "CLS_Config: cGetMulticast: config file is not found : " + path )
-			return wRes		#ない
+		# ファイルパスの存在チェック
+		wGetRes = CLS_UserData.sGetUserPath( inFulluser )
+##		if wGetRes['Result']!=True :
+##			wRes['Reason'] = wGetRes['Reason']
+##			return wRes	#失敗
+		
+		wFilename = wGetRes['Responce'] + gVal.STR_File['UserConfig']
+		if CLS_File.sExist( wFilename )!=True :
+			wRes['Reason'] = "CLS_Config: sGetUserConfig: Can't find Config file: " + wFilename
+			return wRes
 		
 		#############################
-		# ファイルを開く
-		wFLG = ""
-		for line in open( path, 'r'):
+		# 読み込み
+		for wLine in open( wFilename, 'r'):
 			#############################
 			# 分解+要素数の確認
-			line = line.strip()
-			get_line = line.split("=")
-			if len(get_line) != 2 :
+			wLine = wLine.strip()
+			wGet_Line = wLine.split("=")
+			if len(wGet_Line) != 2 :
 				continue
 			
 			#############################
-			# 同報配信キーか
-			if get_line[0]=='Multicast' :
-				wFLG = get_line[1]
-				break
+			# キーがあるか確認
+			if wGet_Line[0] not in gVal.STR_Config :
+				continue
+			
+			#############################
+			# 更新する
+			gVal.STR_Config[wGet_Line[0]] = wGet_Line[1]
 		
 		#############################
-		# 取得できたか
-		if wFLG=="" :
-			return wRes		#ない
+		# 文字→数値へ変換
+		gVal.STR_Config["getLTLnum"] = int( gVal.STR_Config["getLTLnum"] )
+		gVal.STR_Config["getRIPnum"] = int( gVal.STR_Config["getRIPnum"] )
+		gVal.STR_Config["getFollowMnum"] = int( gVal.STR_Config["getFollowMnum"] )
 		
-		wRes['Flg']    = wFLG
+		wRes['Responce'] = wFilename
 		wRes['Result'] = True
 		return wRes
 
 
 
 #####################################################
-# 環境設定の読み込み
+# User環境情報の書き込み
 #####################################################
-	def cGet(self):
-		for line in open( global_val.gConfig_file, 'r'):	#ファイルを開く
+	@classmethod
+	def sSetUserConfig( cls, inFulluser ):
+		#############################
+		# 応答形式の取得(mastodon形式)
+		#   "Result" : False, "Reason" : None, "Responce" : None
+		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		
+		#############################
+		# ファイルパスの存在チェック
+		wGetRes = CLS_UserData.sGetUserPath( inFulluser )
+##		if wGetRes['Result']!=True :
+##			wRes['Reason'] = wGetRes['Reason']
+##			return wRes	#失敗
+		
+		wFilename = wGetRes['Responce'] + gVal.STR_File['UserConfig']
+		if CLS_File.sExist( wFilename )!=True :
+			wRes['Reason'] = "CLS_Config: sSetUserConfig: Can't find Config file: " + wFilename
+			return wRes
+		
+		#############################
+		# 書き込みデータを作成
+		wSetLine = []
+		wKeylist = gVal.STR_Config.keys()
+		for iKey in wKeylist :
+			wLine = iKey + "=" + str(gVal.STR_Config[iKey]) + '\n'
+			wSetLine.append(wLine)
+		
+		#############################
+		# ファイル上書き書き込み
+		if CLS_File.sWriteFile( wFilename, wSetLine )!=True :
+			return False	#失敗
+		
+		wRes['Result'] = True
+		return wRes
+
+
+
+#####################################################
+# User環境情報 表示
+#####################################################
+	def UserConfig_Disp( self, inFulluser=None ):
+		#############################
+		# ユーザ名がない場合、名前を入力する
+		if inFulluser==None :
+			wStr = "表示するユーザ名をドメインを含めて入力してください。 例= " + gVal.DEF_EXAMPLE_ACCOUNT
+			CLS_OSIF.sPrn( wStr )
+			inFulluser = CLS_OSIF.sInp( "\\q:戻る / User？=> " )
+##			if inFulluser=="\q" :
+			if inFulluser.find("\\q")>=0 :
+				return True
+		
+		#############################
+		# Configファイル読み込み
+		wRes = self.sGetUserConfig( inFulluser )
+		if wRes['Result']!=True :
+			CLS_OSIF.sPrn( "指定のユーザは登録されていません。: " + wRes['Reason'] )
+			return False
+		
+		#############################
+		# 画面クリア
+		CLS_OSIF.sDispClr()
+		
+		#############################
+		# ヘッダ出力
+		wStr = "--------------------" + '\n'
+		wStr = wStr + " User環境情報" + '\n'
+		wStr = wStr + "--------------------" + '\n'
+		
+		wStr = wStr + "User : " + inFulluser + '\n'
+		wKeylist = self.STR_View_userConf.keys()
+		for iKey in wKeylist :
+			wLen = len(iKey)
+			if self.__DEF_VIEW_USERCONF_LEN>wLen :
+				wKeyname = iKey + ( " " * ( self.__DEF_VIEW_USERCONF_LEN-wLen ))
+			else :
+				wKeyname = iKey
+			
+			wStr = wStr + wKeyname + " : " + str(gVal.STR_Config[iKey]) + '\n'
+		
+		CLS_OSIF.sPrn( wStr )
+		return True
+
+	#############################
+	# 一覧 (CLS_Config専用)
+	def __userList(self):
+		wList = CLS_UserData.sGetUserList()
+		if len(wList)==0 :
+			CLS_OSIF.sInp( "ユーザの登録がありません。[RT]" )
+			return
+		
+		wStr = '\n' + "ユーザ一覧" + '\n'
+		for iKey in wList :
+			wStr = wStr + iKey + '\n'
+		
+		CLS_OSIF.sPrn( wStr )
+		CLS_OSIF.sInp( "ユーザ一覧を出力しました。[RT]" )
+		return
+
+
+
+#####################################################
+# User環境情報 操作
+#####################################################
+	def CnfUserConfig(self):
+		while True:
 			#############################
-			# 分解+要素数の確認
-			line = line.strip()
-			get_line = line.split("=")
-			if len(get_line) != 2 :
+			# ユーザ名がない場合、名前を入力する
+			wStr = "変更操作するユーザ名をドメインを含めて入力してください。 例= " + gVal.DEF_EXAMPLE_ACCOUNT
+			CLS_OSIF.sPrn( wStr )
+			inFulluser = CLS_OSIF.sInp( "\\q:戻る / \\l:一覧 / User？=> " )
+##			if inFulluser=="\q" :	#終了
+			if inFulluser.find("\\q")>=0 :	#終了
+				break
+##			elif inFulluser=="\l" :	#終了
+			elif inFulluser.find("\\l")>=0 :	#終了
+				self.__userList()
 				continue
 			
 			#############################
-			# キーがあるか確認
-			if get_line[0] not in global_val.gConfig :
+			# ファイル読み込み＆選択画面を表示する
+			wRes = self.UserConfig_Disp( inFulluser )
+			if wRes!=True :
+				continue
+			
+			wSelect = self.__cnfUserConfig_SelectDisp()
+			if wSelect=="c" :
+				###変更してセーブ
+				self.__cnfUserConfig_Change()
+				self.sSetUserConfig( inFulluser )
+				CLS_OSIF.sPrn( "変更した内容でUser環境情報をセーブしました。" + '\n' )
+				break
+##			elif wSelect=="s" :
+##				###セーブ
+##				CLS_Config.sSetUserConfig( inFulluser )
+##				CLS_OSIF.sPrn( "User環境情報をセーブしました。" + '\n' )
+##				break
+			
+		return True
+
+	#####################################################
+	# 選択メニュー表示
+	#####################################################
+	def __cnfUserConfig_SelectDisp(self):
+		wStr = "操作メニューキーを押してください" + '\n'
+##		wStr = wStr + "c: 変更 / s:セーブ+終了 / other:なにもせず終了"
+		wStr = wStr + "c: 変更 / other:なにもせず終了"
+		CLS_OSIF.sPrn( wStr )
+		wSelect = CLS_OSIF.sInp( "選択？=> " )
+		return wSelect
+
+	#####################################################
+	# 変更メニュー表示
+	#####################################################
+	def __cnfUserConfig_Change(self):
+		wKeylist = self.STR_View_userConf.keys()
+		for iKey in wKeylist :
+			#############################
+			# 表示しないメニューは排除
+			if self.STR_View_userConf[iKey]==False :
+				###これらは別メニューで変更させる
 				continue
 			
 			#############################
-			# 更新する
-			global_val.gConfig[get_line[0]] = get_line[1]
-		
-		#############################
-		# 文字→数値へ変換
-		global_val.gConfig["getPTLnum"] = int( global_val.gConfig["getPTLnum"] )
-		global_val.gConfig["getRIPnum"] = int( global_val.gConfig["getRIPnum"] )
-		global_val.gConfig["getFollowMnum"] = int( global_val.gConfig["getFollowMnum"] )
-		global_val.gConfig["getRandVal"] = int( global_val.gConfig["getRandVal"] )
-		global_val.gConfig["getRandRange"] = int( global_val.gConfig["getRandRange"] )
-		
-		#############################
-		# 数値補正
-		if global_val.gConfig["getRandVal"] < 0 :
-			global_val.gConfig["getRandVal"] = 0
-		elif global_val.gConfig["getRandVal"] > 100 :
-			global_val.gConfig["getRandVal"] = 100
-		
-		if global_val.gConfig["getRandRange"] < 100 :
-			global_val.gConfig["getRandRange"] = 100
+			# ON/OFFの文字作成
+			wStr = iKey + "= " + str( gVal.STR_Config[iKey]) + " : "
+			if gVal.STR_Config[iKey]=="on" :
+				wStr = wStr + "c: on→off"
+				wChg = "off"
+			else:
+				wStr = wStr + "c: off→on"
+				wChg = "on"
+			
+			wStr = wStr + " / other: 変更しない"
+			
+			#############################
+			# 変更メニューの表示
+			CLS_OSIF.sPrn( wStr )
+			wSelect = CLS_OSIF.sInp( "選択? => " )
+			
+			if wSelect=="c" :
+				###変更する
+				gVal.STR_Config[iKey] = wChg
 		
 		return
+
+
+
+#####################################################
+# 同報配信設定だけ読み込んで、
+# 'on'だったらTrue、それ以外はFalseを返す
+#####################################################
+	@classmethod
+	def sGetMulticast( cls, inPath ):
+		#############################
+		# 応答形式の取得(mastodon形式)
+		#   "Result" : False, "Reason" : None, "Responce" : None
+		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		
+		#############################
+		# ファイルの存在チェック
+		if CLS_File.sExist( inPath )!=True :
+			###ありえない
+			wRes['Reason'] = "CLS_Config: cGetMulticast: config file is not found : " + inPath
+			wRes['Responce'] = False	#いちお結果としてoffを返す
+			return wRes
+		
+		#############################
+		# ファイルを開く
+		wCHR_flag = ""
+		for wLine in open( inPath, 'r'):
+			#############################
+			# 分解+要素数の確認
+			wLine = wLine.strip()
+			wGetLine = wLine.split("=")
+			if len(wGetLine) != 2 :
+				continue
+			
+			#############################
+			# 同報配信キーか
+			if wGetLine[0]=='Multicast' :
+				wCHR_flag = wGetLine[1]
+				break
+		
+		#############################
+		# 取得できたか
+		if wCHR_flag=="on" :
+			wRes['Responce'] = True		#'on'
+		else:
+			wRes['Responce'] = False	#'off' または見つからないor壊れてる
+		
+		wRes['Result'] = True
+		return wRes
+
+
+
+#####################################################
+# 同報配信ユーザ一覧の作成
+#####################################################
+	def GetMulticastUserList(self):
+		#############################
+		# 応答形式の取得(mastodon形式)
+		#   "Result" : False, "Reason" : None, "Responce" : None
+		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		
+		wMulticastList = []
+		
+		#############################
+		# データフォルダの一覧(トップだけ)取得
+		wList = CLS_UserData.sGetUserList()
+		
+		if len(wList)==0 :
+			###イレギュラー...
+			wRes['Reason'] = "CLS_Config: GetMulticastUserList: No user registration"
+			return wRes
+		
+		#############################
+		# MasterUserが設定されていたら
+		# 同報配信元には配信しないので抜く
+		if gVal.STR_MasterConfig['MasterUser']!="" :
+			wList.remove( gVal.STR_MasterConfig['MasterUser'] )
+		
+		#############################
+		# 登録ユーザのconfigから Multicast値 を読み込む
+		for iKey in wList :
+			wGetPath = CLS_UserData.sGetUserPath( iKey )
+##			if wGetPath['Result']!=True :
+##				continue
+			
+			wGetRes = self.sGetMulticast( wGetPath['Responce'] + gVal.STR_File['UserConfig'] )
+			if wGetRes['Result']==False :
+				continue
+			
+			if wGetRes['Responce']==True :
+				wMulticastList.append( iKey )
+		
+		wRes['Responce'] = wMulticastList
+		wRes['Result'] = True
+		return wRes
 
 
 
