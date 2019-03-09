@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ登録
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/6
+#   Update  ：2019/3/8
 #####################################################
 # Private Function:
 #   __registUser( self, inFulluser, inMail, inPass ):
@@ -517,9 +517,9 @@ class CLS_Regist() :
 #####################################################
 	def __registUser( self, inFulluser, inMail, inPass ):
 		#############################
-		# 応答形式の取得(mastodon形式)
+		# 応答形式の取得
 		#   "Result" : False, "Reason" : None, "Responce" : None
-		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		wRes = CLS_OSIF.sGet_Resp()
 		
 		#############################
 		# ユーザ名の妥当性チェック(いちお再チェック)

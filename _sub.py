@@ -2,9 +2,9 @@
 # coding: UTF-8
 #####################################################
 # るしぼっと4
-#   Class   ：コンソール実行処理
+#   Class   ：bot実行 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/3
+#   Update  ：2019/3/7
 #####################################################
 # Private Function:
 #   (none)
@@ -19,11 +19,9 @@
 import sys
 sys.path.append('script')
 
-from main_console import CLS_Main_Console
+from bot_sub import CLS_BOT_Sub
 from gval import gVal
 #####################################################
-CLS_Main_Console.sRun( sys.argv )	#コンソール起動
-									#いちお引数も渡しておく
-
+CLS_BOT_Sub.sRun()	#起動
 
 

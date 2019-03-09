@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/6
+#   Update  ：2019/3/9
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -30,7 +30,7 @@
 from osif import CLS_OSIF
 from filectrl import CLS_File
 from userdata import CLS_UserData
-from mastodon_use import CLS_Mastodon_Use
+##from mastodon_use import CLS_Mastodon_Use
 from gval import gVal
 #####################################################
 class CLS_Config() :
@@ -58,7 +58,6 @@ class CLS_Config() :
 		"WordStudy"		: True,
 		"LogLevel"		: True,
 		"Lock"			: True,
-		"mRun"			: False,
 		"mMainte"		: False
 	}
 
@@ -75,7 +74,6 @@ class CLS_Config() :
 		"TrafficCnt"	: False,
 		"WordCorrect"	: False,
 		"AutoFollow"	: True,
-		"Run"			: False,
 		"Mainte"		: False,
 		"JPonly"		: True
 	}
@@ -410,7 +408,7 @@ class CLS_Config() :
 		#############################
 		# 通信テスト
 		CLS_OSIF.sPrn( "通信テスト中..." )
-		if gVal.gCLS_Init.cPing( wSTR_user['Domain'] )!=True :
+		if CLS_OSIF.sPing( wSTR_user['Domain'] )!=True :
 			CLS_OSIF.sPrn( "mastodonとの通信テストに失敗したため、設定をキャンセルします。" )
 			return False
 		
@@ -519,9 +517,9 @@ class CLS_Config() :
 	@classmethod
 	def sGetUserConfig( cls, inFulluser ):
 		#############################
-		# 応答形式の取得(mastodon形式)
+		# 応答形式の取得
 		#   "Result" : False, "Reason" : None, "Responce" : None
-		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		wRes = CLS_OSIF.sGet_Resp()
 		
 		#############################
 		# ファイルパスの存在チェック
@@ -572,9 +570,9 @@ class CLS_Config() :
 	@classmethod
 	def sSetUserConfig( cls, inFulluser ):
 		#############################
-		# 応答形式の取得(mastodon形式)
+		# 応答形式の取得
 		#   "Result" : False, "Reason" : None, "Responce" : None
-		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		wRes = CLS_OSIF.sGet_Resp()
 		
 		#############################
 		# ファイルパスの存在チェック
@@ -763,9 +761,9 @@ class CLS_Config() :
 	@classmethod
 	def sGetMulticast( cls, inPath ):
 		#############################
-		# 応答形式の取得(mastodon形式)
+		# 応答形式の取得
 		#   "Result" : False, "Reason" : None, "Responce" : None
-		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		wRes = CLS_OSIF.sGet_Resp()
 		
 		#############################
 		# ファイルの存在チェック
@@ -809,9 +807,9 @@ class CLS_Config() :
 #####################################################
 	def GetMulticastUserList(self):
 		#############################
-		# 応答形式の取得(mastodon形式)
+		# 応答形式の取得
 		#   "Result" : False, "Reason" : None, "Responce" : None
-		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		wRes = CLS_OSIF.sGet_Resp()
 		
 		wMulticastList = []
 		

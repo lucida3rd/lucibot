@@ -15,7 +15,6 @@ WordCorrect=off
 AutoFollow=off
 getFollowMnum=5
 
-Run=off
 Mainte=off
 
 JPonly=off

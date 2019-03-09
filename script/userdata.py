@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/6
+#   Update  ：2019/3/8
 #####################################################
 # Private Function:
 #   (none)
@@ -21,7 +21,7 @@
 
 from osif import CLS_OSIF
 from filectrl import CLS_File
-from mastodon_use import CLS_Mastodon_Use
+##from mastodon_use import CLS_Mastodon_Use
 from gval import gVal
 #####################################################
 class CLS_UserData() :
@@ -123,9 +123,9 @@ class CLS_UserData() :
 	@classmethod
 	def sGetUserPath( cls, inFulluser ):
 		#############################
-		# 応答形式の取得(mastodon形式)
+		# 応答形式の取得
 		#   "Result" : False, "Reason" : None, "Responce" : None
-		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		wRes = CLS_OSIF.sGet_Resp()
 		
 		#############################
 		# フォルダの存在チェック

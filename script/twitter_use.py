@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ついったーユーズ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/4
+#   Update  ：2019/3/8
 #####################################################
 # Private Function:
 #   __conn(self):
@@ -24,7 +24,7 @@ from requests_oauthlib import OAuth1Session
 
 from osif import CLS_OSIF
 from toot import CLS_Toot
-from mastodon_use import CLS_Mastodon_Use
+##from mastodon_use import CLS_Mastodon_Use
 from gval import gVal
 #####################################################
 class CLS_Twitter_Use():
@@ -110,7 +110,7 @@ class CLS_Twitter_Use():
 		#############################
 		# 応答形式の取得
 		#  {"Result" : False, "Reason" : None, "Responce" : None}
-		wRes = CLS_Toot.sGet_API_Resp()
+		wRes = CLS_OSIF.sGet_Resp()
 		
 		#############################
 		# Twitterが利用可能か

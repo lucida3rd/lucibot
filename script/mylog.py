@@ -4,16 +4,17 @@
 # るしぼっと4
 #   Class   ：ログ処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/3
+#   Update  ：2019/3/9
 #####################################################
 # Private Function:
-#   __write( cls, inLogFile, inDate, inMsg ):
+#   __write( self, inLogFile, inDate, inMsg ):
 #
 # Instance Function:
-#   (none)
+#   __init__( self, inPath ):
+#   Log( cls, inLevel, inMsg, inView=False ):
 #
 # Class Function(static):
-#   sLog( cls, inLevel, inLogFile, inMsg, inView=False ):
+#   (none)
 #
 #####################################################
 ###import string
@@ -24,17 +25,41 @@ from gval import gVal
 #####################################################
 class CLS_Mylog():
 #####################################################
+
+	CHR_LogPath = ""
+
+#####################################################
+# 初期化
+#####################################################
+	def __init__( self, inPath ):
+		#############################
+		# ログフォルダの存在チェック
+		if CLS_File.sExist( inPath )!=True :
+			self.CHR_LogPath = ""
+			return 		#ない
+		
+		self.CHR_LogPath = inPath
+		return
+
+
+
+#####################################################
 # ログデータのセット
 #####################################################
-	@classmethod
-	def sLog( cls, inLevel, inLogPath, inMsg, inView=False ):
+	def Log( self, inLevel, inMsg, inView=False ):
+		#############################
+		# ログレベル：LogLevel
+		#  a：全てのログを記録　　　　　　　（LevelA,B,C）
+		#  b：重要なログと気になるログを記録（LevelA,Bのみ、LevelCは記録しない）
+		#  c：重要なログだけ記録　　　　　　（LevelAログのみ、LevelB,Cは記録しない）
+		
 		#############################
 		# 設定されたログレベルが適当でなければ
 		# 'a'を設定しなおす
 		if inLevel != 'a' and inLevel != 'b' and inLevel != 'c' :
-			wLevel = inLevel
-		else :
 			wLevel = 'a'
+		else :
+			wLevel = inLevel
 		
 		#############################
 		# ログレベルで出力が有効か
@@ -56,7 +81,7 @@ class CLS_Mylog():
 		wDate = wTD['TimeDate'].split(" ")
 		#############################
 		# パスが無設定 or 時計異常？
-		if inLogPath=="" or wDate[0]=="" :
+		if self.CHR_LogPath=="" or wDate[0]=="" :
 			###時間取得失敗  時計壊れた？
 			CLS_OSIF.sPrn( inMsg )
 			return
@@ -69,8 +94,8 @@ class CLS_Mylog():
 		
 		#############################
 		# ファイルへ書き出す
-		wLogFile = inLogPath + wDate[0] + ".log"
-		cls().__write( wLogFile, inDate, inMsg )
+		wLogFile = self.CHR_LogPath + wDate[0] + ".log"
+		self.__write( wLogFile, wDate, inMsg )
 		return
 
 
@@ -78,26 +103,31 @@ class CLS_Mylog():
 #####################################################
 # ファイルへの書き出し
 #####################################################
-	def __write( cls, inLogFile, inDate, inMsg ):
+	def __write( self, inLogFile, inDate, inMsg ):
 		#############################
 		# データを作成
+		wTimeDate = inDate[0] + " " + inDate[1]
+		
 		wSetLine = []
 			# 2行目以降のブランク文字列
-		wBlank   = " " * len(inDate)
+		wBlank   = " " * len(wTimeDate)
 			# 2行目以降の文字列リスト作成
 		wMsgLine = inMsg.split('\n')
-		wMsgLine.remove(0)
+		wMsg1 = wMsgLine[0]
+		if len(wMsgLine)>1 :
+			del wMsgLine[0]
 		
 		#############################
 		# 1行目
-		wLine = inDate + ' ' + inMsg + '\n'
+		wLine = wTimeDate + ' ' + wMsg1 + '\n'
 		wSetLine.append( wLine )
 		
 		#############################
 		# 2行目以降
-		for wLine in wMsgLine :
-			wIncLine = wBlank + ' ' + wLine + '\n'
-			wSetLine.append( wIncLine )
+		if len(wMsgLine)>0 :
+			for wLine in wMsgLine :
+				wIncLine = wBlank + ' ' + wLine + '\n'
+				wSetLine.append( wIncLine )
 		
 		#############################
 		# ファイル追加書き込み

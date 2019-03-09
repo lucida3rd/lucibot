@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/6
+#   Update  ：2019/3/7
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -29,6 +29,7 @@ from toot import CLS_Toot
 from config import CLS_Config
 from regist import CLS_Regist
 from userdata import CLS_UserData
+from botjob import CLS_Botjob
 from gval import gVal
 #####################################################
 class CLS_Main_Console() :
@@ -38,9 +39,7 @@ class CLS_Main_Console() :
 # 実行
 #####################################################
 	@classmethod
-	def sRun( cls, inARRarg ):
-###		print( "arg= "+inARRarg[0] )
-		
+	def sRun(cls):
 		#############################
 		# システム情報を取得する
 		cls().__getSystemInfo()

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/3
+#   Update  ：2019/3/7
 #####################################################
 
 #####################################################
@@ -62,6 +62,8 @@ class gVal() :
 		
 		"CircleToot"	: "off",					#周期トゥート
 		
+		"Multicast"		: "off",					#同報配信リプライ 有効
+		
 		"Traffic"		: "off",					#トラヒック集計
 		
 		"LookHard"		: "off",					#ハード監視
@@ -73,13 +75,12 @@ class gVal() :
 		
 		"getMcDelay"			: 5,						#同報配信ディレイ
 		
-		"LogLevel"			: "a",						#ログレベル
-														# a=a,b,c：全て出力
-														# b=a,b：警告レベルまで
-														# c=a：重要なもののみ
+		"LogLevel"		: "a",						#ログレベル
+													# a=a,b,c：全て出力
+													# b=a,b：警告レベルまで
+													# c=a：重要なもののみ
 		
 		"Lock"			: "on",							#排他機能
-		"mRun"			: "off",					#全体実行可否
 		"mMainte"		: "off",					#全体メンテモード
 		
 		"DataVer"		: DEF_CONFIG_VER				#データversion
@@ -105,7 +106,6 @@ class gVal() :
 		"AutoFollow"	: "off",					#フォロー監視モード
 		"getFollowMnum"		: 10,						#フォロー処理数
 		
-		"Run"			: "on",						#実行可否
 		"Mainte"		: "off",					#メンテモード
 		
 		"JPonly"		: "off"						#日本人のみ監視
@@ -153,6 +153,25 @@ class gVal() :
 ###	'public'   ..公開
 ###	'unlisted' ..未収載
 ###	'private'  ..非公開
+
+#############################
+# Cron情報
+	STR_CronInfo = {
+						##TestLog Enable
+		"_master.py"	: True,
+		"_sub.py"		: True,
+		"_back.py"		: True,
+		
+		"CronName"		: "lucibot",
+		"Log_path"		: STR_File['MasterLog_path'],
+		"(dummy)"		: 0
+	}
+	
+	DEF_CRON_MASTER = "_master.py"
+	DEF_CRON_SUB    = "_sub.py"
+	DEF_CRON_BACK   = "_back.py"
+	
+	DEF_CRON_ACCOUNT_BACKGROUND = "BACKGROUND"
 
 
 

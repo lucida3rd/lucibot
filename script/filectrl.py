@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ファイル制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/3
+#   Update  ：2019/3/7
 #####################################################
 # Private Function:
 #   (none)
@@ -27,9 +27,12 @@
 import os
 import shutil
 import codecs
-from gval import gVal
+
 #####################################################
 class CLS_File() :
+
+	DEF_MOJI_ENCODE = 'utf-8'								#文字エンコード
+
 #####################################################
 # 存在チェック
 #####################################################
@@ -154,7 +157,7 @@ class CLS_File() :
 		#############################
 		# 中身クリア
 		try:
-			wFile = codecs.open( inPath, 'w', gVal.DEF_MOJI_ENCODE )
+			wFile = codecs.open( inPath, 'w', cls.DEF_MOJI_ENCODE )
 			wFile.close()
 		except ValueError as err :
 			return False
@@ -176,7 +179,7 @@ class CLS_File() :
 		#############################
 		# 書き込み
 		try:
-			wFile = codecs.open( inPath, 'w', gVal.DEF_MOJI_ENCODE )
+			wFile = codecs.open( inPath, 'w', cls.DEF_MOJI_ENCODE )
 			wFile.writelines( inSetLine )
 			wFile.close()
 		except ValueError as err :
@@ -190,16 +193,17 @@ class CLS_File() :
 # ファイル追加書き込み
 #####################################################
 	@classmethod
-	def sAddFile( cls, inPath, inSetLine ):
+	def sAddFile( cls, inPath, inSetLine, inExist=False ):
 		#############################
 		# 存在チェック
-		if cls().sExist( inPath )!=True :
-			return False
+		if inExist==True :
+			if cls().sExist( inPath )!=True :
+				return False
 		
 		#############################
 		# 書き込み
 		try:
-			wFile = codecs.open( inPath, 'a', gVal.DEF_MOJI_ENCODE )
+			wFile = codecs.open( inPath, 'a', cls.DEF_MOJI_ENCODE )
 			wFile.writelines( inSetLine )
 			wFile.close()
 		except ValueError as err :

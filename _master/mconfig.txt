@@ -25,6 +25,8 @@ getRandRange=1000
 
 CircleToot=off
 
+Multicast=off
+
 Traffic=off
 
 LookHard=off
@@ -40,5 +42,4 @@ LogLevel=c
 
 Lock=on
 
-mRun=off
 mMainte=off

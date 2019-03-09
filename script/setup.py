@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：セットアップ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/6
+#   Update  ：2019/3/7
 #####################################################
 # Private Function:
 #   (none)
@@ -23,6 +23,7 @@ from filectrl import CLS_File
 from config import CLS_Config
 from regist import CLS_Regist
 from userdata import CLS_UserData
+from botjob import CLS_Botjob
 from gval import gVal
 #####################################################
 class CLS_Setup():
@@ -73,6 +74,7 @@ class CLS_Setup():
 		# 使うクラスの作成
 		wCLS_Config = CLS_Config()
 		wCLS_Regist = CLS_Regist()
+		wCLS_Botjob = CLS_Botjob()
 		
 		#############################
 		# Master環境情報の変更
@@ -86,13 +88,11 @@ class CLS_Setup():
 				return False	#失敗
 		
 		#############################
-		# 初期起動直後なので、運用、メンテをOFFにする
-
-##************あとでcrontab設定を消す処理を入れる
-		gVal.STR_MasterConfig['mRun']    = "off"
+		# 初期起動直後なので、メンテをOFFにする
+		# cronを全て剥がす
 		gVal.STR_MasterConfig['mMainte'] = "off"
-
-
+		wCLS_Botjob.Stop()
+		
 		#############################
 		# ユーザ登録=0の時、ユーザ登録させる
 		wList = CLS_UserData.sGetUserList()

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/6
+#   Update  ：2019/3/7
 #####################################################
 # Private Function:
 #   (none)
@@ -14,6 +14,8 @@
 #   Get_HostName(self):
 #
 # Class Function(static):
+#   sGet_Resp(cls):
+#   sGetArg(cls):
 #   sGetTime(cls):
 #   sPing( cls, inSend_Ping, inCount=4 ):
 #   sDispClr( cls ):
@@ -40,6 +42,36 @@ class CLS_OSIF() :
 		"friends.nico",
 		"(dummy)"
 	]
+
+#####################################################
+# 共通レスポンス取得
+#####################################################
+
+##		#############################
+##		# 応答形式の取得
+##		#   "Result" : False, "Reason" : None, "Responce" : None
+##		wRes = CLS_OSIF.sGet_Resp()
+
+	@classmethod
+	def sGet_Resp(cls):
+		wRes = {
+			"Result"   : False,
+			"Reason"   : None,
+			"Responce" : None }
+		
+		return wRes
+
+
+
+#####################################################
+# 引数取得
+#####################################################
+	@classmethod
+	def sGetArg(cls):
+		wArg = sys.argv
+		return wArg
+
+
 
 #####################################################
 # 時間を取得する

@@ -1,8 +1,8 @@
 ---------------------------------
   るしぼっと4 設計仕様
     ::BotName= Lucibot4
-    ::BotDate= 2019/3/7
-    ::Version= 4.0.1.2
+    ::BotDate= 2019/3/9
+    ::Version= 4.0.1.5
 
     ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）
     ::github= https://github.com/lucida3rd/lucibot
@@ -249,11 +249,6 @@ APIを取得したアカウントに連携し、トゥートをツイートし�
 　　a：全てのログを記録　　　　　　　（LevelA,B,C）
 　　b：重要なログと気になるログを記録（LevelA,Bのみ、LevelCは記録しない）
 　　c：重要なログだけ記録　　　　　　（LevelAログのみ、LevelB,Cは記録しない）
-
-
-＜bot停止機能＞
-bot活動を停止できます。
-　機能有効(停止するとき)：BotStart=off
 
 
 ＜bot排他機能＞
