@@ -259,12 +259,12 @@ class CLS_Main_Console() :
 			wCLS_work = CLS_Config()
 			wCLS_work.CnfMasterRun()
 			wFlg = True
-		#############################
-		# masterメンテ操作
-		elif inCommand=="-men" :
-			wCLS_work = CLS_Config()
-			wCLS_work.CnfMasterMainte()
-			wFlg = True
+##		#############################
+##		# masterメンテ操作
+##		elif inCommand=="-men" :
+##			wCLS_work = CLS_Config()
+##			wCLS_work.CnfMasterMainte()
+##			wFlg = True
 		
 		return wFlg
 

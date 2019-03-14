@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/8
+#   Update  ：2019/3/13
 #####################################################
 # Private Function:
 #   (none)
@@ -16,6 +16,7 @@
 #   sGetUserList(cls):
 #   sGetUserPath( cls, inFulluser ):
 #   sUserCheck( cls, inFulluser ):
+#   sGetFulluser( cls, inUsername, inUrl ):
 #
 #####################################################
 
@@ -110,7 +111,8 @@ class CLS_UserData() :
 		
 		#############################
 		# masterConfigを抜く
-		wList.remove( gVal.DEF_MASTERCONFIG_NAME )
+		if gVal.DEF_MASTERCONFIG_NAME in wList :
+			wList.remove( gVal.DEF_MASTERCONFIG_NAME )
 		
 		return wList
 
@@ -181,6 +183,41 @@ class CLS_UserData() :
 		#############################
 		# 重複チェック
 		wRes['Registed'] = CLS_File.sFolderExist( gVal.DEF_USERDATA_PATH, inFulluser )
+		return wRes
+
+
+
+#####################################################
+# ユーザ名の変換
+#####################################################
+	@classmethod
+	def sGetFulluser( cls, inUsername, inUrl ):
+		
+		#############################
+		# 応答データ
+		wRes = {
+			"Result"	: False,
+			"Fulluser"	: "",
+			"Username"	: "",
+			"Domain"	: "",
+			"Reason"	: ""
+		}
+		
+		#############################
+		# URLからドメインを取得
+		wIndex  = inUrl.find('/@')
+		wDomain = inUrl[8:wIndex]
+		# https://
+		wIndex = wDomain.find('/')
+		if wIndex>=0 :
+			wDomain = wDomain[0:wIndex]
+		
+		#############################
+		# 返す
+		wRes['Fulluser'] = inUsername + '@' + wDomain
+		wRes['Username'] = inUsername
+		wRes['Domain']   = wDomain
+		wRes['Result']   = True
 		return wRes
 
 

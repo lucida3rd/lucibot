@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/7
+#   Update  ：2019/3/14
 #####################################################
 
 #####################################################
@@ -70,8 +70,9 @@ class gVal() :
 		
 		"WordStudy"		: "off",					#ワード学習
 		"studyNum"			: 10,					#学習範囲（トゥート数）
-		"studyMax"			: 1000,					#最大学習単語数
+		"studyMax"			: 5000,					#最大学習単語数
 		"studyDay"			: 14,					#単語を覚えておく日数
+		"clazListNum"		: 100,					#品詞リスト登録数
 		
 		"getMcDelay"			: 5,						#同報配信ディレイ
 		
@@ -80,8 +81,8 @@ class gVal() :
 													# b=a,b：警告レベルまで
 													# c=a：重要なもののみ
 		
-		"Lock"			: "on",							#排他機能
-		"mMainte"		: "off",					#全体メンテモード
+##		"Lock"			: "on",							#排他機能
+##		"mMainte"		: "off",					#全体メンテモード
 		
 		"DataVer"		: DEF_CONFIG_VER				#データversion
 	}
@@ -106,7 +107,7 @@ class gVal() :
 		"AutoFollow"	: "off",					#フォロー監視モード
 		"getFollowMnum"		: 10,						#フォロー処理数
 		
-		"Mainte"		: "off",					#メンテモード
+##		"Mainte"		: "off",					#メンテモード
 		
 		"JPonly"		: "off"						#日本人のみ監視
 	}
@@ -123,15 +124,33 @@ class gVal() :
 		"defUserdata_path"		: "_default/",
 		"defMasterdata_path"	: "_master/",
 		"defMasterConfig"		: "_master/mconfig.txt",
+		"LockFile"				: "data/_lock.txt",
+		"Chk1HourFile"			: "data/_chk1hour.txt",
 		
 		"MasterConfig_path"		: DEF_MASTERCONFIG,
 		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig.txt",
 		"MasterLog_path"		: DEF_MASTERCONFIG + "log/",
+		"MasterNowTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_now.txt",
+		"MasterRatTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_rat.txt",
+		
+		"DomainREMFile"			: DEF_MASTERCONFIG + "user/xxdomain.txt",
+		"WordREMFile"			: DEF_MASTERCONFIG + "user/xxword.txt",
+		"UserinfoCSVFile"		: DEF_MASTERCONFIG + "user/userinfo.csv",
+		"WorddicCSVFile"		: DEF_MASTERCONFIG + "user/worddic.csv",
 		
 		"UserConfig"			: "config.txt",
 		"Reg_RegFile"			: "data/reg_reg_file.txt",
 		"Reg_UserFile"			: "data/reg_user_file.txt",
 		"UserLog_path"			: "log/",
+		
+		"TrafficFile"			: "data/traffic_count.txt",
+		"UserinfoFile"			: "data/userinfo.txt",
+		"WorddicFile"			: "data/worddic.txt",
+		"ClazListFile"			: "data/clazlist.txt",
+		"Rate_LTLFile"			: "data/rltl.txt",
+		"Rate_PTLFile"			: "data/rptl.txt",
+		"Rate_RipFile"			: "data/rreply.txt",
+		"Rate_FavFile"			: "data/rfav.txt",
 		
 		"(dummy)"				: 0
 	}
@@ -173,6 +192,19 @@ class gVal() :
 	
 	DEF_CRON_ACCOUNT_BACKGROUND = "BACKGROUND"
 
+#############################
+# 時間情報
+	STR_TimeInfo = {
+		"Result"		: False,
+		
+		"Object"		: "",
+		"TimeDate"		: "",
+		"Hour"			: 0,
+		"Week"			: 0,
+		
+		"OneHour"		: False
+	}
+
 
 
 #############################
@@ -199,11 +231,20 @@ class gVal() :
 	
 	DEF_PROF_SUBURL = "/web/accounts/"						#プロフ用サブURL
 
+	DEF_LOCK_LOOPTIME = 2									#ロック解除待ち
+	DEF_LOCK_WAITCNT  = 30									#  待ち時間: DEF_LOCK_LOOPTIME * DEF_LOCK_WAITCNT
+	DEF_TEST_MODE     = "bottest"							#テストモード(引数文字)
+	DEF_DATA_BOUNDARY = "|,|"
+
 
 
 #############################
 # 変数
 	FLG_Console_Mode = False								#画面出力の有無
+	FLG_Test_Mode    = False								#テストモード有無
+	
+	STR_DomainREM = []										#除外ドメイン
+	STR_WordREM   = []										#禁止ワード
 
 
 

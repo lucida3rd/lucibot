@@ -1,8 +1,8 @@
 ---------------------------------
   るしぼっと4 設計仕様
     ::BotName= Lucibot4
-    ::BotDate= 2019/3/9
-    ::Version= 4.0.1.5
+    ::BotDate= 2019/3/14
+    ::Version= 4.0.2.0
 
     ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）
     ::github= https://github.com/lucida3rd/lucibot

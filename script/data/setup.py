@@ -90,7 +90,7 @@ class CLS_Setup():
 		#############################
 		# 初期起動直後なので、メンテをOFFにする
 		# cronを全て剥がす
-		gVal.STR_MasterConfig['mMainte'] = "off"
+##		gVal.STR_MasterConfig['mMainte'] = "off"
 		wCLS_Botjob.Stop()
 		
 		#############################

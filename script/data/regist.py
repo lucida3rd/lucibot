@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ登録
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/8
+#   Update  ：2019/3/11
 #####################################################
 # Private Function:
 #   __registUser( self, inFulluser, inMail, inPass ):
@@ -126,8 +126,8 @@ class CLS_Regist() :
 		self.STR_Mastodon.update({ inFulluser : CLS_Mastodon_Use(
 			api_base_url = "https://" + wSTR_user['Domain'],
 			client_id    = wRegFile,
-			access_token = wUserFile,
-			flg_orginit=True ) })
+			access_token = wUserFile ) })
+###			flg_orginit=True ) })
 		
 		wIniStatus = self.STR_Mastodon[inFulluser].GetIniStatus()
 		if wIniStatus['Result']!=True :

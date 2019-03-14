@@ -4,14 +4,14 @@
 # るしぼっと4
 #   Class   ：cronテスト
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/9
+#   Update  ：2019/3/10
 #####################################################
 # Private Function:
 #   __testLog( self, inKind, inAccount  ):
 #
 # Instance Function:
 #   __init__(self):
-#   Run( self, inTest=False ):
+#   Run(self):
 #
 # Class Function(static):
 #   (none)
@@ -21,6 +21,7 @@
 from osif import CLS_OSIF
 from filectrl import CLS_File
 from config import CLS_Config
+from userdata import CLS_UserData
 from botjob import CLS_Botjob
 from gval import gVal
 #####################################################
@@ -43,11 +44,12 @@ class CLS_CronTest():
 #       ユーザ登録チェック(Master、Subの場合)
 #     2.データフォルダチェック
 #     3.Master環境情報ロード(チェック)
-#     4.User環境情報ロード(チェック)
-#     5.実行権限チェック
-#     6.testログ
+#     4.Userフォルダチェック
+#     5.User環境情報ロード(チェック)
+#     6.実行権限チェック
+#     7.testログ
 #####################################################
-	def Run( self, inTest=False ):
+	def Run(self):
 		#############################
 		# 応答形式の取得
 		#   "Result" : False, "Reason" : None, "Responce" : None
@@ -56,7 +58,11 @@ class CLS_CronTest():
 		#############################
 		# 引数取得
 		wArg = CLS_OSIF.sGetArg()
-		if len(wArg)!=2 :	#引数が足りない
+		if len(wArg)==3 :	#テストモードか
+			if wArg[2]==gVal.DEF_TEST_MODE :
+				gVal.FLG_Test_Mode = True
+		
+		elif len(wArg)!=2 :	#引数が足りない
 			wStr = "CLS_CronTest: Argument deficiency: argument=" + str( wArg )
 			CLS_OSIF.sPrn( wStr  )	#メールに頼る
 			return wRes
@@ -75,7 +81,7 @@ class CLS_CronTest():
 			CLS_OSIF.sPrn( wStr  )	#メールに頼る
 			return wRes
 		
-		if wRes['Responce']['isJob']==False and inTest==False :
+		if wRes['Responce']['isJob']==False and gVal.FLG_Test_Mode==False :
 			wStr = "CLS_CronTest: Job is not found: kind=" + wKind + ": account=" + wAccount
 			CLS_OSIF.sPrn( wStr  )	#メールに頼る
 			
@@ -109,7 +115,25 @@ class CLS_CronTest():
 			return wRes
 		
 		#############################
-		# 4.User環境情報の読み込み
+		# 4.Userフォルダチェック
+		wRes = CLS_UserData.sGetUserPath( wAccount )
+		if wRes['Result']!=True :
+			wRes = wCLS_Botjob.Del( wKind, wAccount )	#cronを削除する
+			if wRes['Result']!=True :
+				wStr = "CLS_CronTest: Cron delete failed: " + wRes['Reason']
+				CLS_OSIF.sPrn( wStr  )	#メールに頼る
+			
+			wStr = "Userフォルダが存在しないため、" + wAccount
+			wStr = wStr + "のcronを停止しました。"
+			CLS_OSIF.sPrn( wStr  )		#メールに頼る
+			
+			wRes['Result'] = False	#テストはNG
+			return wRes
+		
+		wUserPath = wRes['Responce']
+		
+		#############################
+		# 5.User環境情報の読み込み
 		wRes = CLS_Config.sGetUserConfig( wAccount )
 		if wRes['Result']!=True :
 			wRes = wCLS_Botjob.Del( wKind, wAccount )	#cronを削除する
@@ -125,7 +149,7 @@ class CLS_CronTest():
 			return wRes
 		
 		#############################
-		# 5.実行権限チェック
+		# 6.実行権限チェック
 		wFlg_Authority = True
 		#############################
 		# コマンドの組み立て
@@ -163,11 +187,11 @@ class CLS_CronTest():
 		#############################
 		
 		#############################
-		# 6.testログ
+		# 7.testログ
 		self.__testLog( wKind, wAccount )
 		
 		wRes['Responce'] = {}
-		wRes['Responce'].update({ "Kind" : wKind, "Account" : wAccount })
+		wRes['Responce'].update({ "Kind" : wKind, "Account" : wAccount, "User_path" : wUserPath })
 		wRes['Result'] = True
 		return wRes
 
@@ -197,7 +221,7 @@ class CLS_CronTest():
 		#############################
 		# テストログ書き込み
 		wLogFile = gVal.STR_CronInfo['Log_path'] + wDate[0] + "_cron" + wExeName[0] + "_" + inAccount + ".log"
-		CLS_File.sAddFile( wLogFile, wSetLine )
+		CLS_File.sAddFile( wLogFile, wSetLine, inExist=False )
 		return
 
 

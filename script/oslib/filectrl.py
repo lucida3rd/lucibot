@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ファイル制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/7
+#   Update  ：2019/3/13
 #####################################################
 # Private Function:
 #   (none)
@@ -22,8 +22,10 @@
 #   sClrFile( cls, inPath ):
 #   sWriteFile( cls, inPath, inSetLine ):
 #   sAddFile( cls, inPath, inSetLine ):
+#   sReadFile( cls, inPath, outLine ):
 #
 #####################################################
+from datetime import datetime
 import os
 import shutil
 import codecs
@@ -170,17 +172,28 @@ class CLS_File() :
 # ファイル上書き書き込み
 #####################################################
 	@classmethod
-	def sWriteFile( cls, inPath, inSetLine ):
+	def sWriteFile( cls, inPath, inSetLine, inExist=True, inRT=False ):
 		#############################
-		# 中身クリア
-		if cls().sClrFile( inPath )!=True :
-			return False
+		# 存在チェック
+		if inExist==True :
+			if cls().sExist( inPath )!=True :
+				return False
+		
+		#############################
+		# 改行を付加
+		wSetLine = []
+		if inRT==True :
+			for wLine in inSetLine :
+				wLine = str(wLine) + '\n'
+				wSetLine.append( wLine )
+		else:
+			wSetLine = inSetLine
 		
 		#############################
 		# 書き込み
 		try:
 			wFile = codecs.open( inPath, 'w', cls.DEF_MOJI_ENCODE )
-			wFile.writelines( inSetLine )
+			wFile.writelines( wSetLine )
 			wFile.close()
 		except ValueError as err :
 			return False
@@ -193,7 +206,7 @@ class CLS_File() :
 # ファイル追加書き込み
 #####################################################
 	@classmethod
-	def sAddFile( cls, inPath, inSetLine, inExist=False ):
+	def sAddFile( cls, inPath, inSetLine, inExist=True, inRT=False ):
 		#############################
 		# 存在チェック
 		if inExist==True :
@@ -201,15 +214,77 @@ class CLS_File() :
 				return False
 		
 		#############################
+		# 改行を付加
+		wSetLine = []
+		if inRT==True :
+			for wLine in inSetLine :
+				wLine = str(wLine) + '\n'
+				wSetLine.append( wLine )
+		else:
+			wSetLine = inSetLine
+		
+		#############################
 		# 書き込み
 		try:
 			wFile = codecs.open( inPath, 'a', cls.DEF_MOJI_ENCODE )
-			wFile.writelines( inSetLine )
+			wFile.writelines( wSetLine )
 			wFile.close()
 		except ValueError as err :
 			return False
 		
 		return True
+
+
+
+#####################################################
+# ファイル読み込み
+#####################################################
+	@classmethod
+	def sReadFile( cls, inPath, outLine ):
+		
+		pList = outLine		#アドレス渡し
+		#############################
+		# 読み出し先がリスト型か
+		if isinstance( pList, list )!=True :
+			return False
+		
+###		if len(pList)!=0 :
+###			return False
+		
+		#############################
+		# 存在チェック
+		if cls().sExist( inPath )!=True :
+			return False
+		
+		#############################
+		# 読み出し先に読み出す
+		try:
+			for wLine in open( inPath, 'r'):	#ファイルを開く
+				wLine = wLine.strip()
+				pList.append( wLine )
+		except ValueError as err :
+			return False
+		
+		return True
+
+
+
+#####################################################
+# ファイルの日時取得
+#####################################################
+	@classmethod
+	def sGetTimedate( cls, inPath ) :
+		#############################
+		# 存在チェック
+		if cls().sExist( inPath )!=True :
+			return ""
+		
+		#############################
+		# 周期トゥートパターンファイルの日時取得
+		wTD = datetime.fromtimestamp( os.stat( inPath ).st_mtime )
+		wTD = wdt.strftime("%Y-%m-%d %H:%M:%S")
+		
+		return wTD
 
 
 

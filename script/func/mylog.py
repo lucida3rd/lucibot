@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ログ処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/9
+#   Update  ：2019/3/14
 #####################################################
 # Private Function:
 #   __write( self, inLogFile, inDate, inMsg ):
@@ -17,7 +17,6 @@
 #   (none)
 #
 #####################################################
-###import string
 
 from osif import CLS_OSIF
 from filectrl import CLS_File
@@ -87,15 +86,16 @@ class CLS_Mylog():
 			return
 		
 		#############################
+		# ファイルへ書き出す
+		wLogFile = self.CHR_LogPath + wDate[0] + ".log"
+		wOutLog = self.__write( wLogFile, wDate, inMsg )
+		
+		#############################
 		# コンソールに表示する
 		# = システムログに出る
 		if inView==True :
-			CLS_OSIF.sPrn( wTD['TimeDate'] + ' ' + inMsg )
+			CLS_OSIF.sPrn( wOutLog )
 		
-		#############################
-		# ファイルへ書き出す
-		wLogFile = self.CHR_LogPath + wDate[0] + ".log"
-		self.__write( wLogFile, wDate, inMsg )
 		return
 
 
@@ -114,13 +114,14 @@ class CLS_Mylog():
 			# 2行目以降の文字列リスト作成
 		wMsgLine = inMsg.split('\n')
 		wMsg1 = wMsgLine[0]
-		if len(wMsgLine)>1 :
-			del wMsgLine[0]
+		del wMsgLine[0]
 		
+		wOutLine = ""
 		#############################
 		# 1行目
 		wLine = wTimeDate + ' ' + wMsg1 + '\n'
 		wSetLine.append( wLine )
+		wOutLine = wLine
 		
 		#############################
 		# 2行目以降
@@ -128,13 +129,12 @@ class CLS_Mylog():
 			for wLine in wMsgLine :
 				wIncLine = wBlank + ' ' + wLine + '\n'
 				wSetLine.append( wIncLine )
+				wOutLine = wOutLine + wIncLine
 		
 		#############################
 		# ファイル追加書き込み
-		if CLS_File.sAddFile( inLogFile, wSetLine )!=True :
-			return False	#失敗
+		CLS_File.sAddFile( inLogFile, wSetLine, inExist=False )
 		
-		return True
-
-
+		wOutLine = wOutLine.strip()
+		return wOutLine
 

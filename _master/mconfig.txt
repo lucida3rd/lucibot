@@ -35,11 +35,8 @@ WordStudy=off
 studyNum=10
 studyMax=5000
 studyDay=14
+clazListNum=100
 
 getMcDelay=5
 
 LogLevel=c
-
-Lock=on
-
-mMainte=off

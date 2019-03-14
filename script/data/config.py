@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/9
+#   Update  ：2019/3/14
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -56,9 +56,9 @@ class CLS_Config() :
 		"Traffic"		: True,
 		"LookHard"		: True,
 		"WordStudy"		: True,
-		"LogLevel"		: True,
-		"Lock"			: True,
-		"mMainte"		: False
+		"LogLevel"		: True
+##		"Lock"			: True,
+##		"mMainte"		: False
 	}
 
 	__DEF_VIEW_MASTERCONF_LEN = 12
@@ -71,10 +71,10 @@ class CLS_Config() :
 		"Multicast"		: True,
 		"RIP_Favo"		: True,
 		"IND_Favo"		: True,
-		"TrafficCnt"	: False,
-		"WordCorrect"	: False,
-		"AutoFollow"	: True,
-		"Mainte"		: False,
+		"TrafficCnt"	: True,
+		"WordCorrect"	: True,
+		"AutoFollow"	: False,
+##		"Mainte"		: False,
 		"JPonly"		: True
 	}
 
@@ -125,6 +125,7 @@ class CLS_Config() :
 		gVal.STR_MasterConfig["studyNum"]     = int( gVal.STR_MasterConfig["studyNum"] )
 		gVal.STR_MasterConfig["studyMax"]     = int( gVal.STR_MasterConfig["studyMax"] )
 		gVal.STR_MasterConfig["studyDay"]     = int( gVal.STR_MasterConfig["studyDay"] )
+		gVal.STR_MasterConfig["clazListNum"]  = int( gVal.STR_MasterConfig["clazListNum"] )
 		gVal.STR_MasterConfig["getMcDelay"]   = int( gVal.STR_MasterConfig["getMcDelay"] )
 		
 		#############################
@@ -470,44 +471,44 @@ class CLS_Config() :
 #####################################################
 # masterメンテ操作
 #####################################################
-	def CnfMasterMainte(self):
-		#############################
-		# ファイルの存在チェック
-		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
-			###ありえない
-			CLS_OSIF.sPrn( "CLS_Config: cCnfMasterMainte: masterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
-			return False	#ない
-		
-		#############################
-		# メニューの表示
-		wStr = '\n' + "botをメンテナンス設定します。現在の設定。 mMainte= " + gVal.STR_MasterConfig['mMainte']
-		CLS_OSIF.sPrn( wStr )
-		
-		wStr = ""
-		if gVal.STR_MasterConfig['mMainte']=="on" :
-			wStr = wStr + "c: on→off"
-			wChg = "off"
-		else:
-			wStr = wStr + "c: off→on"
-			wChg = "on"
-		
-		wStr = wStr + " / other: 変更しない => "
-		wSelect = input( wStr )
-		
-		if wSelect!="c" :
-			###変更しない
-			CLS_OSIF.sPrn( "キャンセルされました" )
-			return True
-		
-		#############################
-		# 変更
-		gVal.STR_MasterConfig['mMainte'] = wChg
-		self.sSetMasterConfig()
-		
-		wStr = "botをメンテナンス設定を変更しました。 mMainte= " + wChg + '\n'
-		wStr = wStr + "変更した内容でMaster環境情報をセーブしました: " + gVal.STR_File['MasterConfig'] + '\n'
-		CLS_OSIF.sPrn( wStr )
-		return True
+##	def CnfMasterMainte(self):
+##		#############################
+##		# ファイルの存在チェック
+##		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
+##			###ありえない
+##			CLS_OSIF.sPrn( "CLS_Config: cCnfMasterMainte: masterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
+##			return False	#ない
+##		
+##		#############################
+##		# メニューの表示
+##		wStr = '\n' + "botをメンテナンス設定します。現在の設定。 mMainte= " + gVal.STR_MasterConfig['mMainte']
+##		CLS_OSIF.sPrn( wStr )
+##		
+##		wStr = ""
+##		if gVal.STR_MasterConfig['mMainte']=="on" :
+##			wStr = wStr + "c: on→off"
+##			wChg = "off"
+##		else:
+##			wStr = wStr + "c: off→on"
+##			wChg = "on"
+##		
+##		wStr = wStr + " / other: 変更しない => "
+##		wSelect = input( wStr )
+##		
+##		if wSelect!="c" :
+##			###変更しない
+##			CLS_OSIF.sPrn( "キャンセルされました" )
+##			return True
+##		
+##		#############################
+##		# 変更
+##		gVal.STR_MasterConfig['mMainte'] = wChg
+##		self.sSetMasterConfig()
+##		
+##		wStr = "botをメンテナンス設定を変更しました。 mMainte= " + wChg + '\n'
+##		wStr = wStr + "変更した内容でMaster環境情報をセーブしました: " + gVal.STR_File['MasterConfig'] + '\n'
+##		CLS_OSIF.sPrn( wStr )
+##		return True
 
 
 

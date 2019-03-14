@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/7
+#   Update  ：2019/3/13
 #####################################################
 # Private Function:
 #   (none)
@@ -17,24 +17,33 @@
 #   sGet_Resp(cls):
 #   sGetArg(cls):
 #   sGetTime(cls):
+#   sTimeLag( cls, inTimedate, inThreshold=300, inTimezone=cls.DEF_TIMEZONE ):
+#   sGetTimeformat( cls, inTimedate, inTimezone=__DEF_TIMEZONE ):
 #   sPing( cls, inSend_Ping, inCount=4 ):
 #   sDispClr( cls ):
 #   sGetCwd( cls ):
 #   sPrn( cls, inMsg ):
 #   sInp( cls, inMsg ):
 #   sGpp( cls, inMsg ):
+#   sDel_HTML( cls, inCont ):
+#   sRe_Search( cls, inPatt, inCont ):
 #
 #####################################################
 from datetime import datetime
+from datetime import timedelta
 import time
 import os
 import sys
+import re
 import subprocess as sp
 from getpass import getpass
+import random
 
 #####################################################
 class CLS_OSIF() :
 #####################################################
+
+	__DEF_TIMEZONE = 9	#タイムゾーン: 9=東京
 
 	#############################
 	# ping除外
@@ -81,16 +90,106 @@ class CLS_OSIF() :
 		wRes = {
 			"Result"	: False,
 			"Object"	: "",
-			"TimeDate"	: ""
+			"TimeDate"	: "",
+			"Hour"		: 0,
+			"Week"		: 0,
+			"(dummy)"	: 0
 		}
 		
 		try:
-			wRes['Object']   = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-			wRes['TimeDate'] = str( wRes['Object'] )
+			wNow_TD = datetime.now()
+			wRes['Object']   = wNow_TD
+			wRes['TimeDate'] = wNow_TD.strftime("%Y-%m-%d %H:%M:%S")
+			wRes['Hour']     = wNow_TD.strftime("%H")		#時間だけ
+			wRes['Week']     = str( wNow_TD.weekday() )		#曜日 0=月,1=火,2=水,3=木,4=金,5=土,6=日
 		except ValueError as err :
 			return wRes
 		
 		wRes['Result'] = True
+		return wRes
+
+
+
+#####################################################
+# 計算しやすいように時間フォーマットを変更する
+# (mastodon時間)
+#####################################################
+	@classmethod
+	def sGetTimeformat( cls, inTimedate, inTimezone=__DEF_TIMEZONE ):
+		wRes = {
+			"Result"	: False,
+			"TimeDate"	: ""
+		}
+		
+		#############################
+		# 入力時間の整形
+		wTD = str( inTimedate )
+			##形式合わせ +、.を省く（鯖によって違う？
+		wIfind = wTD.find('+')
+		wTD = wTD[0:wIfind]
+		wIfind = wTD.find('.')
+		if wIfind>=0 :
+			wTD = wTD[0:wIfind]
+		
+		#############################
+		# タイムゾーンで時間補正
+		try:
+			wRes['TimeDate'] = datetime.strptime( wTD, "%Y-%m-%d %H:%M:%S") + timedelta( hours=inTimezone )
+		except:
+			return wRes	#失敗
+		
+		wRes['Result'] = True
+		return wRes
+
+
+
+#####################################################
+# 時間差
+#    Threshold = 300	# 60(s) * 5(m)
+#####################################################
+	@classmethod
+	def sTimeLag( cls, inTimedate, inThreshold=300, inTimezone=__DEF_TIMEZONE ):
+		wRes = {
+			"Result"	: False,
+			"Beyond"	: False,
+			"InputTime"	: "",
+			"NowTime"	: ""
+		}
+		
+		#############################
+		# 入力時間の整形
+		wTD = str( inTimedate )
+			##形式合わせ +、.を省く（鯖によって違う？
+		wIfind = wTD.find('+')
+		wTD = wTD[0:wIfind]
+		wIfind = wTD.find('.')
+		if wIfind>=0 :
+			wTD = wTD[0:wIfind]
+		
+		#############################
+		# 現時間の取得
+		wNowTime = cls().sGetTime()
+		if wNowTime['Result']!=True :
+			return wRes	#失敗
+		
+		#############################
+		# タイムゾーンで時間補正
+		try:
+			wTD = datetime.strptime( wTD, "%Y-%m-%d %H:%M:%S") + timedelta( hours=inTimezone )
+		except:
+			return wRes	#失敗
+		
+		#############################
+		# 差を求める(秒差)
+		wRatetime = wNowTime['Object'] - wTD
+		wRatetime = wRatetime.total_seconds()
+		
+		if wRatetime > inThreshold :
+			wRes['Beyond'] = True	#差あり
+		
+		wRes['InputTime'] = wTD
+		wRes['NowTime']   = wNowTime['TimeDate']
+		wRes['Result']    = True
 		return wRes
 
 
@@ -216,6 +315,48 @@ class CLS_OSIF() :
 	def sGpp( cls, inMsg ):
 		wInput = getpass( inMsg ).strip()
 		return wInput
+
+
+
+#####################################################
+# row['content']からHTMLタグを除去
+#####################################################
+	@classmethod
+	def sDel_HTML( cls, inCont ):
+		wPatt = re.compile(r"<[^>]*?>")
+		wD_Cont = wPatt.sub( "", inCont )
+		return wD_Cont
+
+
+
+#####################################################
+# 文字列からパターン検索
+#####################################################
+	@classmethod
+	def sRe_Search( cls, inPatt, inCont ):
+		try:
+			wRes = re.search( inPatt, inCont )
+		except:
+			return False
+		
+		return wRes
+
+
+
+#####################################################
+# ランダム値を取得
+#####################################################
+	@classmethod
+	def sGetRand( cls, inValue ):
+		if not isinstance( inValue, int ):
+			return -1
+		
+		try:
+			wVal = random.randrange( inValue )
+		except:
+			return -1
+		
+		return wVal
 
 
 
