@@ -2,9 +2,9 @@
 # coding: UTF-8
 #####################################################
 # るしぼっと4
-#   Class   ：リプライ監視処理
+#   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/3/15
 #####################################################
 # Private Function:
 #   __run(self):
@@ -52,6 +52,9 @@ class CLS_LookRIP():
 		"Ind_Fail"	 : 0,		#処理失敗で破棄
 		
 		"Now_Cope"   : 0,		#処理した新トゥート数
+		"Now_Favo"   : 0,		#処理したふぁぼ通知
+		"Now_Follow" : 0,		#処理したふぉろー通知
+		"Now_Rip"    : 0,		#処理したリプ
 		
 		"dummy"     : 0	#(未使用)
 	}
@@ -88,16 +91,30 @@ class CLS_LookRIP():
 		
 		#############################
 		# TL解析パターン読み込み
-
-
-
+		###LTLでは実装しない
+		
+		#############################
+		# 過去ふぁぼの読み込み
+		wRes = self.Get_RateFV()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: Get_RateFV failed" )
+			return
 		
 		#############################
 		# 過去RIPの読み込み
-##		wRes = self.Get_RateRIP()
-##		if wRes!=True :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: Get_RateRIP failed" )
-##			return
+		wRes = self.Get_RateRIP()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: Get_RateRIP failed" )
+			return
+		
+		#############################
+		# 現時刻の取得
+		wTime = CLS_OSIF.sGetTime()
+		if wTime['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get time failed" )
+			return
+		
+		wTime = str(wTime['TimeDate'])
 		
 		#############################
 		# TLチェック
@@ -110,7 +127,7 @@ class CLS_LookRIP():
 			for wKey in wKeylist :
 				#############################
 				# チェックするので新過去ふぁぼに保管
-				wSetFV = self.ARR_NewFavo[wKey]['status_id'] + "," + self.ARR_NewFavo[wKey]['Timedate']
+				wSetFV = self.ARR_NewFavo[wKey]['status_id'] + "," + wTime
 				self.ARR_UpdateFV.append( wSetFV )
 				
 				#############################
@@ -152,7 +169,7 @@ class CLS_LookRIP():
 			
 			#############################
 			# 過去チェックしたトゥートか
-			if self.ARR_NewRip['id'] in self.ARR_RateTL :
+			if self.ARR_NewRip[wKey]['id'] in self.ARR_RateTL :
 				continue
 			
 			#############################
@@ -161,18 +178,25 @@ class CLS_LookRIP():
 			self.STR_Cope["Now_Cope"] += 1
 		
 		#############################
+		# 新・過去ふぁぼ保存
+		wRes = self.Set_RateFV()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateFV failed" )
+			return
+		
+		#############################
 		# 新・過去RIP保存
-##		wRes = self.Set_RateRIP()
-##		if wRes!=True :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateRIP failed" )
-##			return
+		wRes = self.Set_RateRIP()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateRIP failed" )
+			return
 		
 		#############################
 		# 処理結果ログ
-		wStr = self.CHR_LogName + " 結果: 新Riply=" + str(len(self.ARR_NewRip)) + '\n'
+		wStr = self.CHR_LogName + " 結果: 新Riply=" + str(self.STR_Cope['Now_Cope']) + " Ans=" + str(self.STR_Cope['Now_Rip']) + '\n'
 		wStr = wStr + "Ind=[Cope:" + str(self.STR_Cope['Ind_Cope']) + " On:" + str(self.STR_Cope['Ind_On']) + " Off:" + str(self.STR_Cope['Ind_Off'])
 		wStr = wStr + " Invalid:" + str(self.STR_Cope['Ind_Inv']) + " Failed:" + str(self.STR_Cope['Ind_Fail']) + "]"
-		wStr = wStr + " Favo=" + str(len(self.ARR_NewFavo)) + " Follow=" + str(len(self.ARR_NewFollow))
+		wStr = wStr + " Favo=" + str(self.STR_Cope['Now_Favo']) + " Follow=" + str(self.STR_Cope['Now_Follow'])
 		if gVal.FLG_Test_Mode==False :
 			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
 		else:
@@ -224,7 +248,9 @@ class CLS_LookRIP():
 		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
 		if wRes['Result']!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeFavo: Mastodon error: " + wRes['Reason'] )
+			return
 		
+		self.STR_Cope['Now_Favo'] += 1
 		return
 
 
@@ -233,50 +259,29 @@ class CLS_LookRIP():
 # 新ふぉろー通知への対応
 #####################################################
 	def __copeFollow( self, inROW ) :
-
-
-
-
-
-
+		#############################
+		# 自アカウント情報
+		wAccount = self.Obj_Parent.CHR_Account.split("@")
+		
+		#############################
+		# トゥートの組み立て
+		wToot = "[Info] " + inROW['display_name'] + " (@" + inROW['Fulluser'] + ") にフォローされました。"
+		wToot = wToot + " " + gVal.STR_Config['IND_FavoTag']
+		
+		#############################
+		# 管理者がいれば通知する
+		if gVal.STR_MasterConfig['AdminUser']!="" :
+			wToot = wToot + '\n' + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+		
+		#############################
+		# トゥートの送信
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeFollow: Mastodon error: " + wRes['Reason'] )
+			return
+		
+		self.STR_Cope['Now_Follow'] += 1
 		return
-
-
-
-##		#############################
-##		# 自アカウント情報
-##		wAccount = self.Obj_Parent.CHR_Account.split("@")
-##		
-##		#############################
-##		# ファボられたトゥートURL
-##		wToot_Url = ""
-##		if inROW['status_id']!=None :
-##			wToot_Url = "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
-##		
-##		#############################
-##		# トゥートの組み立て
-##		wToot = inROW['display_name']
-##		if inRecInd==True :
-##			wToot = wToot + " (@" + inROW['Fulluser'] + ") "
-##		else:
-##			wToot = wToot + " (" + inROW['Fulluser'] + ") "
-##		
-##		wToot = wToot + inMsg + " " + gVal.STR_Config['IND_FavoTag'] + '\n'
-##		if inROW['status_id']!=None :
-##			wToot = wToot + wToot_Url + '\n'
-##		
-##		#############################
-##		# 管理者がいれば通知する
-##		if gVal.STR_MasterConfig['AdminUser']!="" :
-##			wToot = wToot + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
-##		
-##		#############################
-##		# トゥートの送信
-##		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inVisibillity )
-##		if wRes['Result']!=True :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __sendIndToot: Mastodon error: " + wRes['Reason'] )
-
-
 
 
 
@@ -285,21 +290,25 @@ class CLS_LookRIP():
 #####################################################
 	def __copeRIP( self, inROW ) :
 		#############################
-		#トゥートからHTMLタグを除去
-		#### LTLでは実装しない
+		# directかprivateリプライの場合はニコる
+		if inROW['visibility']=="direct" or \
+		   ( inROW['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" ) :
+
+			wRes = self.Obj_Parent.OBJ_MyDon.Favo( inROW['status_id'] )
+			if wRes['Result']!=True :
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeRIP: Favo error: " + wRes['Reason'] )
+				return
 		
 		#############################
-		#解析種類の判定
-		#### LTLでは実装しない
+		# public、unlistedの場合はブーストする
+		else :
+			wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['status_id'] )
+			if wRes['Result']!=True :
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeRIP: Boost error: " + wRes['Reason'] )
+				return
 		
+		self.STR_Cope['Now_Rip'] += 1
 		return
-
-
-
-
-
-
-
 
 
 
@@ -359,6 +368,7 @@ class CLS_LookRIP():
 		
 		#############################
 		# type別に取り込み先を振り分け
+		wFavID = []
 		for wToot in wGet_TootList :
 			self.STR_Cope['Ind_Cope'] += 1
 			
@@ -401,6 +411,12 @@ class CLS_LookRIP():
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				
+				### この周では既に通知を出してるid
+				if wToot['status']['id'] in wFavID :
+					self.STR_Cope['Ind_Inv'] += 1
+					continue
+				
+				wFavID.append( wToot['status']['id'] )	#被り防止
 				self.__setNewRIP( self.ARR_NewFavo, wFulluser['Fulluser'], wGetTime, wToot )
 				self.STR_Cope['Ind_On'] += 1
 			
@@ -438,13 +454,14 @@ class CLS_LookRIP():
 		outARRrip[wIndex].update({ "Fulluser"     : inFulluser })
 		outARRrip[wIndex].update({ "display_name" : inToot['account']['display_name'] })
 		outARRrip[wIndex].update({ "Timedate"     : inTime })
+		outARRrip[wIndex].update({ "visibility"   : inTime })
 		
 		#############################
 		# 公開範囲
-		if "visibillity" in inToot :
-			outARRrip[wIndex].update({ "visibility" : inToot['status']['visibility'] })
+		if "status" in inToot :
+			outARRrip[wIndex]['visibility'] = inToot['status']['visibility']
 		else :
-			outARRrip[wIndex].update({ "visibility" : "public" })
+			outARRrip[wIndex]['visibility'] = "public"
 		
 		#############################
 		# トゥートid、コメント
@@ -461,6 +478,52 @@ class CLS_LookRIP():
 					outARRrip[wIndex]['media_attachments'].append( wMedia['preview_url'] )
 		
 		return
+
+
+
+#####################################################
+# 過去ふぁぼ取得・保存
+#####################################################
+	def Get_RateFV(self):
+		#############################
+		# 読み出し先初期化
+		wRateList = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['Rate_FavFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wRateList )!=True :
+			return False	#失敗
+		
+		#############################
+		# 反応リプライ時間範囲の算出(分→秒へ)
+		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
+		
+		#############################
+		# 過去ふぁぼの作成
+		# 反応時間内のidを詰め込む
+		self.ARR_RateFV = []
+		for wLine in wRateList :
+			wFavData = wLine.split(",")
+			wGetLag  = CLS_OSIF.sTimeLag( wFavData[1], inThreshold=wReaRIPmin )
+			if wGetLag['Result']!=True :
+				continue
+			if wGetLag['Beyond']==True :
+				continue	#反応時間外
+			
+			self.ARR_RateFV.append( wFavData[0] )
+		
+		return True			#成功
+
+	#####################################################
+	def Set_RateFV(self):
+		#############################
+		# ファイル書き込み (改行つき)
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['Rate_FavFile']
+		if CLS_File.sWriteFile( wFile_path, self.ARR_UpdateFV, inRT=True )!=True :
+			return False	#失敗
+		
+		return True			#成功
 
 
 

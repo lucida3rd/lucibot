@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ぼっとJob(cron制御)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/9
+#   Update  ：2019/3/15
 #####################################################
 # Private Function:
 #   __getCommand( self, inKind, inAccount ):
@@ -199,7 +199,7 @@ class CLS_Botjob() :
 		if inKind==gVal.DEF_CRON_MASTER or inKind==gVal.DEF_CRON_SUB :
 			wRes['Responce'] = self.Command_Temp + inKind + " " + inAccount
 		elif inKind==gVal.DEF_CRON_BACK :
-			wRes['Responce'] = self.Command_Temp + inKind + gVal.DEF_CRON_ACCOUNT_BACKGROUND
+			wRes['Responce'] = self.Command_Temp + inKind + " " + gVal.DEF_CRON_ACCOUNT_BACKGROUND
 		else :
 			wRes['Responce'] = "Type that can not issue command: " + inKind
 			return wRes
@@ -232,6 +232,28 @@ class CLS_Botjob() :
 			return wRes
 		
 		wRes['Result'] = True
+		return wRes
+
+
+
+#####################################################
+# 一覧取得
+#####################################################
+	def GetList(self):
+		#############################
+		# cronが有効か？
+		if self.OBJ_CronCtrl.Check()!=True :
+			wRes['Reason'] = "Cron disable"
+			CLS_OSIF.sPrn( "CLS_Botjob: List: Cron disable" )
+			return wRes
+		
+		#############################
+		# List取得
+		wRes = self.OBJ_CronCtrl.GetList()
+		if wRes['Result']!=True :
+			CLS_OSIF.sPrn( "CLS_Botjob: List: Failed: " + wRes['Reason']  )
+			return wRes
+		
 		return wRes
 
 

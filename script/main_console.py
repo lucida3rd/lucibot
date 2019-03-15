@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/7
+#   Update  ：2019/3/15
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -29,7 +29,7 @@ from toot import CLS_Toot
 from config import CLS_Config
 from regist import CLS_Regist
 from userdata import CLS_UserData
-from botjob import CLS_Botjob
+from bot_ctrl import CLS_Bot_Ctrl
 from gval import gVal
 #####################################################
 class CLS_Main_Console() :
@@ -256,8 +256,8 @@ class CLS_Main_Console() :
 		#############################
 		# master運用操作
 		elif inCommand=="-run" :
-			wCLS_work = CLS_Config()
-			wCLS_work.CnfMasterRun()
+			wCLS_work = CLS_Bot_Ctrl()
+			wCLS_work.Console()
 			wFlg = True
 ##		#############################
 ##		# masterメンテ操作
