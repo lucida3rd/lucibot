@@ -40,12 +40,10 @@ class CLS_LookLTL():
 		
 		"Traffic"	: 0,		#トラヒック数
 		"UserCorr"	: 0,		#ユーザ収集
-
-
-		"Now_Word"  : 0,		#今ワード監視した数
-		"Now_Favo"  : 0,		#今ニコった数
-		"Now_Boot"  : 0,		#今ブーストした数
-		"Now_ARip"  : 0,		#今エアリプした数
+##		"Now_Word"  : 0,		#今ワード監視した数
+##		"Now_Favo"  : 0,		#今ニコった数
+##		"Now_Boot"  : 0,		#今ブーストした数
+##		"Now_ARip"  : 0,		#今エアリプした数
 		
 		"dummy"     : 0	#(未使用)
 	}

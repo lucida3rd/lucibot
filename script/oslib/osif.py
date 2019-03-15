@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/13
+#   Update  ：2019/3/14
 #####################################################
 # Private Function:
 #   (none)
@@ -153,7 +153,8 @@ class CLS_OSIF() :
 			"Result"	: False,
 			"Beyond"	: False,
 			"InputTime"	: "",
-			"NowTime"	: ""
+			"NowTime"	: "",
+			"RateSec"	: 0
 		}
 		
 		#############################
@@ -189,6 +190,7 @@ class CLS_OSIF() :
 		
 		wRes['InputTime'] = wTD
 		wRes['NowTime']   = wNowTime['TimeDate']
+		wRes['RateSec']   = wRatetime
 		wRes['Result']    = True
 		return wRes
 

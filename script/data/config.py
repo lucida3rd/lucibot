@@ -71,6 +71,7 @@ class CLS_Config() :
 		"Multicast"		: True,
 		"RIP_Favo"		: True,
 		"IND_Favo"		: True,
+		"IND_Follow"	: True,
 		"TrafficCnt"	: True,
 		"WordCorrect"	: True,
 		"AutoFollow"	: False,
@@ -557,6 +558,7 @@ class CLS_Config() :
 		# 文字→数値へ変換
 		gVal.STR_Config["getLTLnum"] = int( gVal.STR_Config["getLTLnum"] )
 		gVal.STR_Config["getRIPnum"] = int( gVal.STR_Config["getRIPnum"] )
+		gVal.STR_Config["reaRIPmin"] = int( gVal.STR_Config["reaRIPmin"] )
 		gVal.STR_Config["getFollowMnum"] = int( gVal.STR_Config["getFollowMnum"] )
 		
 		wRes['Responce'] = wFilename

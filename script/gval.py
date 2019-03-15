@@ -95,10 +95,12 @@ class gVal() :
 		"getLTLnum"			: 120,						#LTL取得数
 		
 		"RIP_Favo"		: "off",					#リプニコる
-		"IND_Favo"		: "off",					#ファボ監視
-		"IND_Favo_Unl"		: "off",					#ファボ監視 privateの通知を許可
-		"IND_FavoTag"		: "favoind",				#ファボ監視タグ
+		"IND_Favo"		: "off",					#ファボ通知
+		"IND_Favo_Unl"		: "off",					#ファボ通知 privateの通知を許可
+		"IND_FavoTag"		: "[favoind]",				#ファボ通知タグ
+		"IND_Follow"	: "off",					#フォロー通知
 		"getRIPnum"			: 120,						#リプライ取得数
+		"reaRIPmin"			: 10,						#反応リプライ時間(分)
 		
 		"TrafficCnt"	: "off",					#トラヒック集計
 		
@@ -230,6 +232,7 @@ class gVal() :
 	DEF_TWITTER_URL = "https://api.twitter.com/1.1/statuses/update.json"
 	
 	DEF_PROF_SUBURL = "/web/accounts/"						#プロフ用サブURL
+	DEF_TOOT_SUBURL = "/web/statuses/"						#トゥート用サブURL
 
 	DEF_LOCK_LOOPTIME = 2									#ロック解除待ち
 	DEF_LOCK_WAITCNT  = 30									#  待ち時間: DEF_LOCK_LOOPTIME * DEF_LOCK_WAITCNT
