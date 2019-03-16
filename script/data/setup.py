@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：セットアップ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/7
+#   Update  ：2019/3/16
 #####################################################
 # Private Function:
 #   (none)
@@ -130,12 +130,20 @@ class CLS_Setup():
 		# AdminUserの変更
 		wCLS_Config.CnfAdminUser()
 		
-
-
-
-
-
-
+		#############################
+		# MasterとBackgroundのbotを起動する
+		wRes = wCLS_Botjob.Put( gVal.DEF_CRON_MASTER, gVal.STR_MasterConfig['MasterUser'] )
+		if wRes['Result']!=True :
+			wStr = "Master botの起動に失敗しました。: " + wRes['Reason']
+			CLS_OSIF.sPrn( wStr )
+			return False
+		
+		wRes = wCLS_Botjob.Put( gVal.DEF_CRON_BACK, gVal.DEF_CRON_ACCOUNT_BACKGROUND )
+		if wRes['Result']!=True :
+			wStr = "Background botの起動に失敗しました。: " + wRes['Reason']
+			CLS_OSIF.sPrn( wStr )
+			return False
+		
 		return True
 
 

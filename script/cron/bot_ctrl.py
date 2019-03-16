@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ぼっと制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/15
+#   Update  ：2019/3/16
 #####################################################
 # Private Function:
 #   __getCommand( self, inKind, inAccount ):
@@ -31,7 +31,8 @@ class CLS_Bot_Ctrl() :
 #####################################################
 
 	OBJ_Job = ""
-	UserList = []
+	UserList = {}
+	FLG_AllStop = False
 
 #####################################################
 # 初期化
@@ -43,10 +44,16 @@ class CLS_Bot_Ctrl() :
 		
 		#############################
 		# ユーザ一覧取得
-		self.UserList = CLS_UserData.sGetUserList()
+		wUserList = CLS_UserData.sGetUserList()
+		
+		#############################
+		# クラス変数に辞書型として納める
+		self.UserList = {}
+		for wUser in wUserList :
+			self.UserList.update({ wUser : False })
 		
 		###バックグラウンドユーザの追加
-		self.UserList.append( gVal.DEF_CRON_ACCOUNT_BACKGROUND )
+		self.UserList.update({ gVal.DEF_CRON_ACCOUNT_BACKGROUND : False })
 		return
 
 
@@ -56,21 +63,34 @@ class CLS_Bot_Ctrl() :
 #####################################################
 	def __start(self):
 		#############################
+		# 全停止の場合は、再開処理にする
+		#  =再開コマンド
+		if self.FLG_AllStop==True :
+			self.__reStart()
+			return
+		
+		#############################
 		# ユーザ名の入力
 		wStr = "bot起動するユーザ名をドメインを含める形で入力してください。"
 		CLS_OSIF.sPrn( wStr )
 		wUser = CLS_OSIF.sInp( "User？=> " )
 		
 		#############################
+		# ユーザ名の確認
+		wKeylist = self.UserList.keys()
+		if wUser not in wKeylist :
+			wStr = "登録のないユーザです。[RT]"
+			CLS_OSIF.sInp( wStr )
+			return
+		
+		if self.UserList[wUser]==True :
+			wStr = "既に起動してます。[RT]"
+			CLS_OSIF.sInp( wStr )
+			return
+		
+		#############################
 		# 種別の設定
-		if wUser==gVal.STR_MasterConfig['MasterUser'] :
-			wKind = gVal.DEF_CRON_MASTER
-		
-		elif wUser==gVal.DEF_CRON_ACCOUNT_BACKGROUND :
-			wKind = gVal.DEF_CRON_BACK
-		
-		else :
-			wKind = gVal.DEF_CRON_SUB
+		wKind = self.__getKind( wUser )
 		
 		#############################
 		# ジョブの作成
@@ -80,6 +100,7 @@ class CLS_Bot_Ctrl() :
 		# 結果
 		if wRes['Result']==True :
 			###成功
+			self.UserList[wUser] = True
 			wStr = "cronに登録成功しました。"
 			CLS_OSIF.sPrn( wStr )
 		else :
@@ -103,15 +124,21 @@ class CLS_Bot_Ctrl() :
 		wUser = CLS_OSIF.sInp( "User？=> " )
 		
 		#############################
+		# ユーザ名の確認
+		wKeylist = self.UserList.keys()
+		if wUser not in wKeylist :
+			wStr = "登録のないユーザです。[RT]"
+			CLS_OSIF.sInp( wStr )
+			return
+		
+		if self.UserList[wUser]==False :
+			wStr = "既に停止してます。[RT]"
+			CLS_OSIF.sInp( wStr )
+			return
+		
+		#############################
 		# 種別の設定
-		if wUser==gVal.STR_MasterConfig['MasterUser'] :
-			wKind = gVal.DEF_CRON_MASTER
-		
-		elif wUser==gVal.DEF_CRON_ACCOUNT_BACKGROUND :
-			wKind = gVal.DEF_CRON_BACK
-		
-		else :
-			wKind = gVal.DEF_CRON_SUB
+		wKind = self.__getKind( wUser )
 		
 		#############################
 		# ジョブの削除
@@ -121,6 +148,7 @@ class CLS_Bot_Ctrl() :
 		# 結果
 		if wRes['Result']==True :
 			###成功
+			self.UserList[wUser] = False
 			wStr = "cronを削除しました。2分以内にはbotが止まります。"
 			CLS_OSIF.sPrn( wStr )
 		else :
@@ -137,9 +165,49 @@ class CLS_Bot_Ctrl() :
 # 全ぼっと停止
 #####################################################
 	def __allStop(self):
-
-
-		return wRes
+		#############################
+		# フラグの確認
+		if self.FLG_AllStop==True :
+			###ありえない
+			wStr = "CLS_Bot_Ctrl: __allStop: FLG_AllStop flag contradiction" + '\n'
+			wStr = wStr + "フラグをリセットしました。再度やり直してください。[RT]"
+			CLS_OSIF.sInp( wStr )
+			self.FLG_AllStop = False
+			return
+		
+		#############################
+		# 起動中のbotがあるか
+		# あれば停止していく
+		wFLG_Start = False
+		wKeylist = self.UserList.keys()
+		for wUser in wKeylist :
+			if self.UserList[wUser]==True :
+				#############################
+				# 種別の設定
+				wKind = self.__getKind( wUser )
+				
+				#############################
+				# ジョブの削除
+				wRes = self.OBJ_Job.Del( wKind, wUser )
+				if wRes['Result']!=True :
+					###失敗
+					wStr = "cronの削除が失敗しました。 User:" + wUser + " Reason: " + wRes['Reason']
+					CLS_OSIF.sPrn( wStr )
+					continue
+				
+				wFLG_Start = True
+		
+		#############################
+		# 処理結果
+		if wFLG_Start==False :
+			wStr = "停止したbotはありませんでした。[RT]"
+			CLS_OSIF.sInp( wStr )
+			return
+		
+		wStr = "起動中のbotを停止しました。[RT]"
+		CLS_OSIF.sInp( wStr )
+		self.FLG_AllStop = True
+		return
 
 
 
@@ -147,9 +215,62 @@ class CLS_Bot_Ctrl() :
 # 再開
 #####################################################
 	def __reStart(self):
+		#############################
+		# コマンド受かったので一回フラグを落とす
+		self.FLG_AllStop = False
+		
+		#############################
+		# 起動中だったbotがあるか
+		# あれば起動していく
+		wFLG_Start = False
+		wKeylist = self.UserList.keys()
+		for wUser in wKeylist :
+			if self.UserList[wUser]==True :
+				#############################
+				# 種別の設定
+				wKind = self.__getKind( wUser )
+				
+				#############################
+				# ジョブの作成
+				wRes = self.OBJ_Job.Put( wKind, wUser )
+				if wRes['Result']!=True :
+					###失敗
+					wStr = "cronの作成が失敗しました。 User:" + wUser + " Reason: " + wRes['Reason']
+					CLS_OSIF.sPrn( wStr )
+					continue
+				
+				wFLG_Start = True
+		
+		#############################
+		# 処理結果
+		if wFLG_Start==False :
+			###ジョブ作成失敗以外はありえない
+			wStr = "起動したbotはありませんでした。[RT]"
+			CLS_OSIF.sInp( wStr )
+			return
+		
+		wStr = "起動中だったbotを再開しました。[RT]"
+		CLS_OSIF.sInp( wStr )
+		return
 
 
-		return wRes
+
+#####################################################
+# 種別の取得
+#####################################################
+	def __getKind( self, inFulluser ):
+		#############################
+		# 種別の設定
+		if inFulluser==gVal.STR_MasterConfig['MasterUser'] :
+			wKind = gVal.DEF_CRON_MASTER
+		
+		elif inFulluser==gVal.DEF_CRON_ACCOUNT_BACKGROUND :
+			wKind = gVal.DEF_CRON_BACK
+		
+		else :
+			wKind = gVal.DEF_CRON_SUB
+		
+		return wKind
 
 
 
@@ -158,7 +279,7 @@ class CLS_Bot_Ctrl() :
 #####################################################
 	def __runCommand( self, inCommand ):
 		#############################
-		# 起動
+		# 起動 or 再開
 		if inCommand=="\\r" :
 			self.__start()
 		
@@ -171,11 +292,6 @@ class CLS_Bot_Ctrl() :
 		# 全停止
 		elif inCommand=="\\as" :
 			self.__allStop()
-		
-		#############################
-		# 再開
-		elif inCommand=="\\rr" :
-			self.__reStart()
 		
 		return
 
@@ -214,7 +330,8 @@ class CLS_Bot_Ctrl() :
 		# 内容
 		#   crontabにユーザが登録されていれば *ON
 		#   crontabにユーザが未登録なら        OFF
-		for wUser in self.UserList :
+		wKeylist = self.UserList.keys()
+		for wUser in wKeylist :
 			wFlg_Online = False
 			for wJob in wRes['Responce']['List']:  
 				if wJob.find( wUser )>=0 :
@@ -229,8 +346,10 @@ class CLS_Bot_Ctrl() :
 		
 		#############################
 		# コマンド見本
-###		wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 起動 / [\\s] 停止 / [\\as] 全停止" + '\n'
-		wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 起動 / [\\s] 停止" + '\n'
+		if self.FLG_AllStop==False :
+			wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 起動 / [\\s] 停止 / [\\as] 全停止" + '\n'
+		else:
+			wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 再開" + '\n'
 		
 		#############################
 		# 出力
