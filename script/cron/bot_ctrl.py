@@ -32,6 +32,7 @@ class CLS_Bot_Ctrl() :
 
 	OBJ_Job = ""
 	UserList = {}
+	WaitRestart = []
 	FLG_AllStop = False
 
 #####################################################
@@ -100,7 +101,6 @@ class CLS_Bot_Ctrl() :
 		# 結果
 		if wRes['Result']==True :
 			###成功
-			self.UserList[wUser] = True
 			wStr = "cronに登録成功しました。"
 			CLS_OSIF.sPrn( wStr )
 		else :
@@ -148,7 +148,6 @@ class CLS_Bot_Ctrl() :
 		# 結果
 		if wRes['Result']==True :
 			###成功
-			self.UserList[wUser] = False
 			wStr = "cronを削除しました。2分以内にはbotが止まります。"
 			CLS_OSIF.sPrn( wStr )
 		else :
@@ -178,7 +177,7 @@ class CLS_Bot_Ctrl() :
 		#############################
 		# 起動中のbotがあるか
 		# あれば停止していく
-		wFLG_Start = False
+		self.WaitRestart = []
 		wKeylist = self.UserList.keys()
 		for wUser in wKeylist :
 			if self.UserList[wUser]==True :
@@ -195,11 +194,11 @@ class CLS_Bot_Ctrl() :
 					CLS_OSIF.sPrn( wStr )
 					continue
 				
-				wFLG_Start = True
+				self.WaitRestart.append( wUser )
 		
 		#############################
 		# 処理結果
-		if wFLG_Start==False :
+		if len(self.WaitRestart)==0 :
 			wStr = "停止したbotはありませんでした。[RT]"
 			CLS_OSIF.sInp( wStr )
 			return
@@ -220,26 +219,23 @@ class CLS_Bot_Ctrl() :
 		self.FLG_AllStop = False
 		
 		#############################
-		# 起動中だったbotがあるか
-		# あれば起動していく
+		# 再開待ちリストで再開中のユーザを起動していく
 		wFLG_Start = False
-		wKeylist = self.UserList.keys()
-		for wUser in wKeylist :
-			if self.UserList[wUser]==True :
-				#############################
-				# 種別の設定
-				wKind = self.__getKind( wUser )
-				
-				#############################
-				# ジョブの作成
-				wRes = self.OBJ_Job.Put( wKind, wUser )
-				if wRes['Result']!=True :
-					###失敗
-					wStr = "cronの作成が失敗しました。 User:" + wUser + " Reason: " + wRes['Reason']
-					CLS_OSIF.sPrn( wStr )
-					continue
-				
-				wFLG_Start = True
+		for wUser in self.WaitRestart :
+			#############################
+			# 種別の設定
+			wKind = self.__getKind( wUser )
+			
+			#############################
+			# ジョブの作成
+			wRes = self.OBJ_Job.Put( wKind, wUser )
+			if wRes['Result']!=True :
+				###失敗
+				wStr = "cronの作成が失敗しました。 User:" + wUser + " Reason: " + wRes['Reason']
+				CLS_OSIF.sPrn( wStr )
+				continue
+			
+			wFLG_Start = True
 		
 		#############################
 		# 処理結果
@@ -338,8 +334,10 @@ class CLS_Bot_Ctrl() :
 					wFlg_Online = True
 			
 			if wFlg_Online==True :
+				self.UserList[wUser] = True
 				wStat = "*ON "
 			else:
+				self.UserList[wUser] = False
 				wStat = " OFF"
 			
 			wStr = wStr + "    " + wStat + "    " + wUser + '\n'
