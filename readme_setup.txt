@@ -75,7 +75,6 @@ $ exit
 # pip3 install psutil
 # pip3 install pytz
 # pip3 install python-dateutil
-# pip3 install mecab-python3
 # pip3 install python-crontab
 
 　インストールしたライブラリがあるか確認します。
@@ -131,6 +130,8 @@ uft-8に変更することで他のソフトやサービスに影響を及ぼす
 >>> sys.getdefaultencoding()
 'ascii'
 
+※utf-8が表示された場合、2項以降は不要です。
+
 2.site-packagesの場所を確認します。exit、ctrl+Dで抜けます。
 >>> import site; site.getsitepackages()
 >>> exit
@@ -173,7 +174,7 @@ http://taku910.github.io/mecab/#download
 4.IPA辞書をメイク→インストールする（コマンドはMeCabと一緒）
 
 5.MeCab pythonをインストールする
-# pip install mecab-python
+# pip3 install mecab-python3
 
 6.動作テスト
 # mecab

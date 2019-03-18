@@ -1,38 +1,153 @@
+#!/usr/bin/python
 # coding: UTF-8
 #####################################################
-# 十八試るしぼっと
+# るしぼっと4
 #   Class   ：周期トゥート処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2018/11/27
+#   Update  ：2019/3/14
 #####################################################
-from datetime import datetime
-from datetime import timedelta
-import codecs
-import os
-import random
-import linecache
-import re
-import global_val
+# Private Function:
+#   (none)
+#
+# Instance Function:
+#   __init__( self, parentObj=None ):	※親クラス実体を設定すること
+#   (none)
+#
+# Class Function(static):
+#   (none)
+#
 #####################################################
-class CLS_CircleToot:
+
+from osif import CLS_OSIF
+from filectrl import CLS_File
+from gval import gVal
+#####################################################
+class CLS_CircleToot():
+#####################################################
+	CHR_LogName  = "周期Toot処理"
+	Obj_Parent   = ""		#親クラス実体
+
+	ARR_NewTL    = []		#mastodon TL(mastodon API)
+	ARR_AnapTL   = []		#TL解析パターン
+	ARR_RateTL   = []		#過去TL(id)
+	ARR_UpdateTL = []		#新・過去TL(id)
+
+	STR_Cope = {			#処理カウンタ
+		"Now_Cope"  : 0,		#処理した新トゥート数
+		
+		"Traffic"	: 0,		#トラヒック数
+		"UserCorr"	: 0,		#ユーザ収集
+##		"Now_Word"  : 0,		#今ワード監視した数
+##		"Now_Favo"  : 0,		#今ニコった数
+##		"Now_Boot"  : 0,		#今ブーストした数
+##		"Now_ARip"  : 0,		#今エアリプした数
+		
+		"dummy"     : 0	#(未使用)
+	}
+
+
 
 	ARR_CTTL = []	#CTTLデータ
 	FLG_Init = False
 	
 	Time_CTTL_File = ""
-	
-	CopeCTTL = {
-		"Now_Toot"  : 0,							#
-		"dummy"     : 0								#(未使用)
-	}
 
 
 
 #####################################################
 # Init
 #####################################################
-	def __init__(self):
+	def __init__( self, parentObj=None ):
+		if parentObj==None :
+			###親クラス実体の未設定
+			CLS_OSIF.sPrn( "CLS_CircleToot: __init__: You have not set the parent class entity for parentObj" )
+			return
+		
+		self.Obj_Parent = parentObj
+		self.__run()	#処理開始
 		return
+
+
+
+#####################################################
+# 処理実行
+#####################################################
+	def __run(self):
+		#############################
+		# 開始ログ
+		self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
+		
+		#############################
+		# LTL読み込み(mastodon)
+		wRes = self.Get_LTL()
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: LTL read failed: " + wRes['Reason'] )
+			return
+		
+		#############################
+		# TL解析パターン読み込み
+		### LTL監視にはない
+		
+		#############################
+		# 過去LTLの読み込み
+		wRes = self.Get_RateLTL()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: Get_RateLTL failed" )
+			return
+		
+		#############################
+		# TLチェック
+		self.ARR_UpdateTL = []
+		for wROW in self.ARR_NewTL :
+			#############################
+			# チェックするので新過去TLに保管
+			self.ARR_UpdateTL.append( wROW['id'] )
+			
+			#############################
+			# 過去チェックしたトゥートか
+			#   であればスキップする
+			wFlg_Rate = False
+			for wRow_Rate in self.ARR_RateTL :
+				if str(wRow_Rate) == str(wROW['id']) :
+					wFlg_Rate = True
+					break
+			
+			if wFlg_Rate == True :
+				continue
+			
+			#############################
+			# 新トゥートへの対応
+			self.__cope( wROW )
+			self.STR_Cope["Now_Cope"] += 1
+		
+		#############################
+		# 新・過去LTL保存
+		wRes = self.Set_RateLTL()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: Set_RateLTL failed" )
+			return
+		
+		#############################
+		# 処理結果ログ
+		wSTR_Word = self.Obj_Parent.OBJ_WordCorr.GetWordCorrectStat()	#収集状況の取得
+		
+		wStr = self.CHR_LogName + " 結果: 新Toot=" + str(self.STR_Cope['Now_Cope'])
+##		wStr = wStr + " Traffic=" + str(self.STR_Cope['Traffic'])
+
+		if gVal.FLG_Test_Mode==False :
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
+		else:
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr, True )
+		
+		return
+
+
+
+
+
+
+
+
 
 
 
