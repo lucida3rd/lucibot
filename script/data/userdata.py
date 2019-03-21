@@ -235,7 +235,8 @@ class CLS_UserData() :
 #####################################################
 	@classmethod
 	def sGetRange( cls, inRange ):
-		if inRange in cls.STR_RANGE :
+		wKeylist = cls.STR_RANGE.keys()
+		if inRange not in wKeylist :
 			return cls.DEF_RANGE
 		
 		return cls.STR_RANGE[inRange]
