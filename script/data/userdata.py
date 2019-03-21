@@ -28,6 +28,14 @@ from gval import gVal
 class CLS_UserData() :
 #####################################################
 
+	STR_RANGE = {
+		"p"	:	"public",
+		"u"	:	"unlisted",
+		"l"	:	"private",
+		"d"	:	"direct"
+	}
+	DEF_RANGE = "unlisted"
+
 #####################################################
 # Init
 #####################################################
@@ -219,6 +227,18 @@ class CLS_UserData() :
 		wRes['Domain']   = wDomain
 		wRes['Result']   = True
 		return wRes
+
+
+
+#####################################################
+# 範囲の変換
+#####################################################
+	@classmethod
+	def sGetRange( cls, inRange ):
+		if inRange in cls.STR_RANGE :
+			return cls.DEF_RANGE
+		
+		return cls.STR_RANGE[inRange]
 
 
 

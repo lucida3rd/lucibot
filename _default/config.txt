@@ -5,7 +5,6 @@ getLTLnum=120
 RIP_Favo=off
 IND_Favo=off
 IND_Favo_Unl=off
-IND_FavoTag=[favoind]
 getRIPnum=120
 reaRIPmin=10
 

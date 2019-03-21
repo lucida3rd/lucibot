@@ -4,6 +4,8 @@ MasterUser=
 AdminUser=
 PRUser=
 mTootTag=[Sender]
+iFavoTag=[favoind]
+prTag=[prtoot]
 
 TwitterUser=
 Twitter=off

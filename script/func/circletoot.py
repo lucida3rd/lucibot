@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：周期トゥート処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/3/21
 #####################################################
 # Private Function:
 #   (none)
@@ -19,6 +19,7 @@
 #####################################################
 
 from osif import CLS_OSIF
+from userdata import CLS_UserData
 from filectrl import CLS_File
 from gval import gVal
 #####################################################
@@ -27,32 +28,18 @@ class CLS_CircleToot():
 	CHR_LogName  = "周期Toot処理"
 	Obj_Parent   = ""		#親クラス実体
 
-	ARR_NewTL    = []		#mastodon TL(mastodon API)
-	ARR_AnapTL   = []		#TL解析パターン
-	ARR_RateTL   = []		#過去TL(id)
-	ARR_UpdateTL = []		#新・過去TL(id)
+	ARR_CLData   = {}		#周期データ
 
 	STR_Cope = {			#処理カウンタ
-		"Now_Cope"  : 0,		#処理した新トゥート数
+		"Now_Cope"  : 0,		#処理したスケジュール数
 		
-		"Traffic"	: 0,		#トラヒック数
-		"UserCorr"	: 0,		#ユーザ収集
-##		"Now_Word"  : 0,		#今ワード監視した数
-##		"Now_Favo"  : 0,		#今ニコった数
-##		"Now_Boot"  : 0,		#今ブーストした数
-##		"Now_ARip"  : 0,		#今エアリプした数
+		"Sended"	: 0,		#送信済み数
+		"Invalid"	: 0,		#無効数
 		
 		"dummy"     : 0	#(未使用)
 	}
 
-
-
-	ARR_CTTL = []	#CTTLデータ
-	FLG_Init = False
-	
-	Time_CTTL_File = ""
-
-
+	DEF_TITLE_PRTOOT = "[PR Toot]"
 
 #####################################################
 # Init
@@ -75,65 +62,37 @@ class CLS_CircleToot():
 	def __run(self):
 		#############################
 		# 開始ログ
-		self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
+		if gVal.FLG_Test_Mode==False :
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
+		else:
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始", True )
 		
 		#############################
-		# LTL読み込み(mastodon)
-		wRes = self.Get_LTL()
-		if wRes['Result']!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: LTL read failed: " + wRes['Reason'] )
+		# 周期Data取得
+		wRes = self.Get_CLData()
+		if wRes!=True :
 			return
 		
 		#############################
-		# TL解析パターン読み込み
-		### LTL監視にはない
-		
-		#############################
-		# 過去LTLの読み込み
-		wRes = self.Get_RateLTL()
+		# データチェック＆トゥート
+		wRes = self.CheckData()
 		if wRes!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: Get_RateLTL failed" )
 			return
 		
 		#############################
-		# TLチェック
-		self.ARR_UpdateTL = []
-		for wROW in self.ARR_NewTL :
-			#############################
-			# チェックするので新過去TLに保管
-			self.ARR_UpdateTL.append( wROW['id'] )
-			
-			#############################
-			# 過去チェックしたトゥートか
-			#   であればスキップする
-			wFlg_Rate = False
-			for wRow_Rate in self.ARR_RateTL :
-				if str(wRow_Rate) == str(wROW['id']) :
-					wFlg_Rate = True
-					break
-			
-			if wFlg_Rate == True :
-				continue
-			
-			#############################
-			# 新トゥートへの対応
-			self.__cope( wROW )
-			self.STR_Cope["Now_Cope"] += 1
-		
-		#############################
-		# 新・過去LTL保存
-		wRes = self.Set_RateLTL()
+		# 周期Data保存
+		wRes = self.Set_CLData()
 		if wRes!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: Set_RateLTL failed" )
 			return
 		
 		#############################
 		# 処理結果ログ
 		wSTR_Word = self.Obj_Parent.OBJ_WordCorr.GetWordCorrectStat()	#収集状況の取得
 		
-		wStr = self.CHR_LogName + " 結果: 新Toot=" + str(self.STR_Cope['Now_Cope'])
-##		wStr = wStr + " Traffic=" + str(self.STR_Cope['Traffic'])
-
+		wStr = self.CHR_LogName + " 結果: 処理数=" + str(self.STR_Cope['Now_Cope'])
+		wStr = wStr + " Sended=" + str(self.STR_Cope['Sended'])
+		wStr = wStr + " Invalid=" + str(self.STR_Cope['Invalid'])
+		
 		if gVal.FLG_Test_Mode==False :
 			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
 		else:
@@ -143,295 +102,220 @@ class CLS_CircleToot():
 
 
 
-
-
-
-
-
-
-
-
-#####################################################
-# メイン処理
-#####################################################
-	def cMain(self):
-		global_val.gCLS_Mylog.cLog('c', "周期トゥート処理")
-		
-		#############################
-		#CTTLデータ読み込み
-		self.cGet_CTTL()
-		
-		#############################
-		#CTTLデータ ロード正常か
-		if self.FLG_Init!=True :
-			return False
-		
-		#############################
-		#データチェック
-		index = 0
-		for data in self.ARR_CTTL:
-			self.cCheckData( index )
-			index += 1
-		
-		#############################
-		#CTTLデータ書き込み
-		self.pSet_CTTL_Data_File()
-		
-		if self.CopeCTTL["Now_Toot"] > 0 :
-			msg = "Toot=" + str(self.CopeCTTL["Now_Toot"])
-			global_val.gCLS_Mylog.cLog('b', "周期トゥート処理完了：" + msg )
-		
-		return True
-
-
-
 #####################################################
 # データチェック
-#   再実行は1時間経たないと有効にならない
 #####################################################
-	def cCheckData( self, index ):
+	def CheckData(self):
+		#############################
+		# 現在時刻を取得する
+		wTime = CLS_OSIF.sGetTime()
+		if wTime['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: CheckData: sGetTime failed" )
+			return False
 		
 		#############################
 		# 現時分
-		hour   = int( global_val.gOBJ_TimeDate.strftime("%H") )
-		minute = int( global_val.gOBJ_TimeDate.strftime("%M") )
+		wHour   = str( wTime['Object'].strftime("%H") )
+		wMinute = str( wTime['Object'].strftime("%M") )
 		
 		#############################
-		# 時間チェック：0～23時
-		if self.ARR_CTTL[index][2]!="*" :
-			if self.ARR_CTTL[index][2]!=hour :
-				#############################
-				# 実行済み＝戻す
-				if self.ARR_CTTL[index][0]=="*" :
-					self.ARR_CTTL[index][0] = "-"
-				
-				return	#時間ではない
-			
-		
-		#############################
-		# 分チェック or 定時チェック
-		if self.ARR_CTTL[index][3]!=minute :
-			#############################
-			# 実行済み＝戻す
-			if self.ARR_CTTL[index][0]=="*" :
-				self.ARR_CTTL[index][0] = "-"
-			
-			return
-		else :
-			#############################
-			# 同一分で実行済みは実行しない
-			if self.ARR_CTTL[index][0]=="*" :
-				return
-		
-		# 実行確定
-		
-		#############################
-		# トゥートの取得
-		wToot = self.pGet_Toot(self.ARR_CTTL[index][4])
-		if wToot['result']!=True :
-			return
-		
-		#############################
-		#公開範囲の設定
-		range = global_val.gCLS_MainProc.cGet_Visi(wToot['rang'])
-		
-		#############################
-		#トゥート
-		global_val.gCLS_Mastodon.cToot(status=wToot['toot'], visibility=range )
-		
-		#############################
-		#トゥート済
-		self.ARR_CTTL[index][0] = "*"
-		return
-
-
-
-#####################################################
-# 周期トゥートデータの読み出しor作成
-#####################################################
-	def cGet_CTTL(self):
-		#############################
-		# 周期トゥートパターンファイルの日時取得
-		self.Time_CTTL_File = global_val.gCLS_MainProc.cGet_File_TimeDate( global_val.gCircleToot_file )
-		if self.Time_CTTL_File=="" :
-			return
-		
-		#############################
-		# 周期トゥートデータの読み出し
-		if self.pGet_CTTL_Data_File()!=True :
-			return
-		
-		#############################
-		# ロード正常
-		self.FLG_Init = True
-		return
-
-
-
-#####################################################
-# 周期トゥートデータ読み出し
-#####################################################
-	def pGet_CTTL_Data_File(self):
-		if os.path.exists(global_val.gCircleTootDat_file)==False :
-			global_val.gCLS_Mylog.cLog('a', "CLS_CircleToot：pGet_CTTL_Data_File：ファイルがない：" + global_val.gCircleTootDat_file )
-			return False
-		
-		#############################
-		# 周期トゥートデータ読み出し
-		flg_load = False
-		wCTTL = []
-		for line in codecs.open( global_val.gCircleTootDat_file, 'r', 'utf-8'):	#ファイルを開く
-			line = line.strip()
-			lines = line.split(",")
-			wCTTL.append(lines)
-		
-		if len(wCTTL)<=0 :
-			flg_load = True	#初期状態はロード
-		else :
-		#############################
-		# 周期トゥートファイルが更新されているか
-			if self.Time_CTTL_File!=wCTTL[0][0] :
-				flg_load = True	#更新ありはロード
-		
-		#############################
-		# 周期トゥート解析パターンからロード
-		if flg_load==True :
-			if self.pGet_CTTL_ptt_File()!=True :
-				return False
-			
-			return True
-		
-		#############################
-		# データを構築
-		for line in wCTTL :
-			if len(line)!=5 :
-				continue
-			
-			slines = []
-			slines.append(line[0])
-			slines.append(line[1])
-			if line[2]!="*" :
-				line[2] = int(line[2])
-			slines.append(line[2])
-			slines.append(int(line[3]))
-			slines.append(line[4])
-			self.ARR_CTTL.append(slines)
-		
-		return True
-
-
-
-#####################################################
-# 周期トゥートデータ書き出し
-#####################################################
-	def pSet_CTTL_Data_File(self):
-		if os.path.exists(global_val.gCircleTootDat_file)==False :
-			global_val.gCLS_Mylog.cLog('a', "CLS_CircleToot：pSet_CTTL_Data_File：ファイルがない：" + global_val.gCircleTootDat_file )
-			return False
-		
-		#############################
-		# 周期トゥートデータトファイルのオープン
-		file = codecs.open( global_val.gCircleTootDat_file, 'w', 'utf-8')
-		file.close()
-		file = codecs.open( global_val.gCircleTootDat_file, 'w', 'utf-8')
-		
-		#############################
-		# データを作成
-		setline = []
-		line = self.Time_CTTL_File + '\n'
-		setline.append(line)
-		
-		for lines in self.ARR_CTTL :
-			line = ""
-			line = line + lines[0] + ','
-			line = line + lines[1] + ','
-			line = line + str(lines[2]) + ','
-			line = line + str(lines[3]) + ','
-			line = line + lines[4] + '\n'
-			setline.append(line)
-		
-		#############################
-		# 書き込んで閉じる
-		file.writelines( setline )
-		file.close()
-		
-		return True
-
-
-
-#####################################################
-# 周期トゥート解析パターン読み出しと構築
-#####################################################
-	def pGet_CTTL_ptt_File(self):
-		if os.path.exists(global_val.gCircleToot_file)==False :
-			global_val.gCLS_Mylog.cLog('a', "CLS_CircleToot：cGet_CTTL：ファイルがない：" + global_val.gCircleToot_file )
-			return False
-		
-		self.ARR_CTTL = []
-		for line in codecs.open( global_val.gCircleToot_file, 'r', 'utf-8'):	#ファイルを開く
-			line = line.strip()
-			lines = line.split(global_val.gCHR_Border)
+		# データチェック
+		wKeylist = list(self.ARR_CLData.keys())
+		for wKey in wKeylist :
+			self.STR_Cope['Now_Cope'] += 1
 			
 			#############################
-			# ファイルの形式を確認
-			if len(lines)!=3 :
+			# 有効か
+			if self.ARR_CLData[wKey]["Valid"]!=True :
+				self.STR_Cope['Invalid'] += 1
 				continue
 			
-			if lines[0]!="t" :
-				continue
-			
-			wtms = lines[1].split(":")
-			if len(wtms)!=2 :
-				continue
-			
-			if wtms[0]!="*" :
-				wtms[0] = int(wtms[0])
-				if wtms[0]<0 or wtms[0]>23 :
+			#############################
+			# 時間チェック：0～23時
+			if self.ARR_CLData[wKey]["Sended"]!="*" :
+				if self.ARR_CLData[wKey]["Hour"]!=wHour :
+					# 実行済み＝戻す
+					self.ARR_CLData[wKey]["Sended"] = "-"
 					continue
 			
-			wtms[1] = int(wtms[1])
-			if wtms[1]<0 or wtms[1]>59 :
+			#############################
+			# 分チェック or 定時チェック
+			if self.ARR_CLData[wKey]["Minute"]!=wMinute :
+				# 実行済み＝戻す
+				self.ARR_CLData[wKey]["Sended"] = "-"
 				continue
+			else :
+				#############################
+				# 同一分で実行済みは実行しない
+				if self.ARR_CLData[wKey]["Sended"]=="*" :
+					continue
 			
 			#############################
-			# データを構築
-			slines = []
-			slines.append("-")
-			slines.append(lines[0])
-			slines.append(wtms[0])
-			slines.append(wtms[1])
-			slines.append(lines[2])
-			self.ARR_CTTL.append(slines)
+			# 送信
+			wRes = self.__sendToot( self.ARR_CLData[wKey]["TootFile"] )
+			if wRes['Result']!=True :
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeFavo: Mastodon error: " + wRes['Reason'] )
+				self.STR_Cope['Invalid'] += 1
+				continue
+			
+			self.ARR_CLData[wKey]["Sended"] = "*"
+			self.STR_Cope['Sended'] += 1
 		
-		global_val.gCLS_Mylog.cLog('c', "周期トゥート再ロード" )
 		return True
 
+	#####################################################
+	def __sendToot( self, inFileName ):
+		#############################
+		# 応答形式の取得
+		#   "Result" : False, "Reason" : None, "Responce" : None
+		wRes = CLS_OSIF.sGet_Resp()
+		
+		#############################
+		# ファイル読み出し
+		wToot = []
+		
+		wFile_path = gVal.STR_File['Toot_path'] + inFileName
+		if CLS_File.sReadFile( wFile_path, outLine=wToot )!=True :
+			wRes['Reason'] = "CLS_CircleToot: __sendToot: Toot file read failed: " + wFile_path
+			return wRes		#失敗
+		
+		if len(wToot)<=1 :
+			wRes['Reason'] = "CLS_CircleToot: __sendToot: Toot is sortest: " + wFile_path
+			return wRes		#失敗
+		
+		#############################
+		# 範囲の設定
+		wRange = CLS_UserData.sGetRange( wToot[0] )
+		del wToot[0]
+		
+		#############################
+		# トゥートの組み立て
+		wSetToot = self.DEF_TITLE_PRTOOT + " "
+		for wLine in wToot :
+			wSetToot = wSetToot + wLine + '\n'
+		
+		wSetToot = wSetToot + " " + gVal.STR_MasterConfig['prTag']
+		
+		# 管理者がいれば通知する
+		if gVal.STR_MasterConfig['AdminUser']!="" :
+			wSetToot = wSetToot + '\n' + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+		
+		if len(wSetToot)>500 :
+			wRes['Reason'] = "CLS_CircleToot: __sendToot: Create toot is over length"
+			return wRes		#失敗
+		
+		#############################
+		# トゥートの送信
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wSetToot, visibility=wRange )
+		if wRes['Result']!=True :
+			wRes['Reason'] = "CLS_LookRIP: __copeFavo: Mastodon error: " + wRes['Reason']
+			return wRes
+		
+		wRes['Result'] = True
+		return wRes
+
 
 
 #####################################################
-# トゥート作成
+# 周期Data取得・保存
 #####################################################
-	def pGet_Toot(self,fname):
-		wResult = {}
-		wResult.update({ "result" : False })
-		wResult.update({ "rang"   : "" })
-		wResult.update({ "toot"   : "" })
+	def Get_CLData(self):
+		#############################
+		# 読み出し先初期化
+		self.ARR_CLData = {}
+		wCLTootList = []	#トゥートパターン
+		wCLDataList = []	#データ
 		
-		fname = global_val.gCircleToot_folder + fname
-		if os.path.exists( fname )==False :
-			global_val.gCLS_Mylog.cLog('a', "CLS_CircleToot：pGet_Toot：ファイルがない：" + fname )
-			return wResult
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.STR_File['CLTootFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wCLTootList )!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: Get_CLData: CLTootFile read failed: " + wFile_path )
+			return False	#失敗
 		
-		index = 0
-		for line in codecs.open( fname, 'r', 'utf-8'):	#ファイルを開く
-			if index==0 :
-				wResult['rang'] = line.strip()
-			else :
-				wResult['toot'] += line
-			index += 1
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['CLDataFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wCLDataList )!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: Get_CLData: CLDataFile read failed: " + wFile_path )
+			return False	#失敗
 		
-		wResult['result'] = True
-		return wResult
+		#############################
+		# データ枠の作成
+		for wLine in wCLTootList :
+			wLine = wLine.split( gVal.DEF_DATA_BOUNDARY )
+			if len(wLine)!=3 :
+				continue	#フォーマットになってない
+			if wLine[0].find("#")==0 :
+				continue	#コメントアウト
+			
+			wIndex = wLine[1] + ":" + wLine[2]
+			wKeylist = list( self.ARR_CLData.keys() )
+			if wIndex in wKeylist :
+				continue	#キー被り
+			
+			wLine[1] = wLine[1].split(":")
+			if len(wLine[1])!=2 :
+				continue	#フォーマットになってない
+			
+			self.ARR_CLData.update({ wIndex : "" })
+			self.ARR_CLData[wIndex] = {}
+			self.ARR_CLData[wIndex].update({ "Valid"  : True })
+			self.ARR_CLData[wIndex].update({ "Sended" : "-" })
+			self.ARR_CLData[wIndex].update({ "Hour"   : wLine[1][0] })
+			self.ARR_CLData[wIndex].update({ "Minute" : wLine[1][1] })
+			self.ARR_CLData[wIndex].update({ "TootFile" : wLine[2]  })
+		
+		#############################
+		# データの反映
+##		wFlg_Valid = False
+		wKeylist = list( self.ARR_CLData.keys() )
+		for wKey in wKeylist :
+			for wLine in wCLDataList :
+				wLine = wLine.split(",")
+				if len(wLine)!=4 :
+					continue	#フォーマットになってない
+				
+				wIndex = wLine[1] + ":" + wLine[2] + ":" + wLine[3]
+				if wIndex not in wKeylist :
+					continue	#キーなし
+				
+				self.ARR_CLData[wIndex]["Sended"] = wLine[0]
+				self.ARR_CLData[wIndex]["Hour"]   = wLine[1]
+				self.ARR_CLData[wIndex]["Minute"] = wLine[2]
+				self.ARR_CLData[wIndex]["TootFile"] = wLine[3]
+				self.ARR_CLData[wIndex]["Valid"]  = True
+##				wFlg_Valid = True
+		
+##		if wFlg_Valid!=True :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_CircleToot: Get_CLData: 周期データなし" )
+##			return False	#有効なデータがない
+		
+		return True			#成功
+
+	#####################################################
+	def Set_CLData(self):
+		#############################
+		# 書き込みデータの作成
+		wCLDataList = []
+		
+		wKeylist = list( self.ARR_CLData.keys() )
+		for wKey in wKeylist :
+			if self.ARR_CLData[wKey]["Valid"]==False :
+				continue	#無効データ
+			
+			wSetLine = self.ARR_CLData[wKey]["Sended"] + ","
+			wSetLine = wSetLine + str(self.ARR_CLData[wKey]["Hour"]) + ","
+			wSetLine = wSetLine + str(self.ARR_CLData[wKey]["Minute"]) + ","
+			wSetLine = wSetLine + self.ARR_CLData[wKey]["TootFile"]
+			wCLDataList.append( wSetLine )
+		
+		#############################
+		# ファイル書き込み (改行つき)
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['CLDataFile']
+		if CLS_File.sWriteFile( wFile_path, wCLDataList, inRT=True )!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: Set_CLData: CLDataFile read failed: " + wFile_path )
+			return False	#失敗
+		
+		return True			#成功
 
 
 

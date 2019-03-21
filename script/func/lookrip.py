@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/18
+#   Update  ：2019/3/21
 #####################################################
 # Private Function:
 #   __run(self):
@@ -266,7 +266,7 @@ class CLS_LookRIP():
 		#############################
 		# トゥートの組み立て
 		wToot = self.DEF_TITLE_INFORMATION + " 以下のトゥートが注目されました。:" + '\n'
-		wToot = wToot + wCont + " " + gVal.STR_Config['IND_FavoTag'] + '\n'
+		wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
 		wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
 		
 		#############################
@@ -297,7 +297,7 @@ class CLS_LookRIP():
 		#############################
 		# トゥートの組み立て
 		wToot = self.DEF_TITLE_NEW_FOLLOWER + " " + inROW['display_name'] + " (@" + inROW['Fulluser'] + ") にフォローされました。"
-		wToot = wToot + " " + gVal.STR_Config['IND_FavoTag']
+		wToot = wToot + " " + gVal.STR_MasterConfig['iFavoTag']
 		
 		#############################
 		# 管理者がいれば通知する
@@ -458,7 +458,7 @@ class CLS_LookRIP():
 				
 				### 通知のふぁぼ、ぶーすとか
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
-				if wCont.find( gVal.STR_Config['IND_FavoTag'] ) >= 0 :
+				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
 					### ふぉろー通知のふぁぼ、ぶーすとは通知しない
 					if wCont.find( self.DEF_TITLE_NEW_FOLLOWER ) == 0 :
 						self.STR_Cope['Ind_Inv'] += 1
@@ -501,7 +501,11 @@ class CLS_LookRIP():
 			elif wToot['type']=="mention" :
 				### 通知付きのめんしょんは通知しない(=adminへの通知)
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
-				if wCont.find( gVal.STR_Config['IND_FavoTag'] ) >= 0 :
+				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
+					self.STR_Cope['Ind_Inv'] += 1
+					continue
+				
+				if wCont.find( gVal.STR_MasterConfig['prTag'] ) >= 0 :
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				

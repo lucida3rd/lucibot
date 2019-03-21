@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/15
+#   Update  ：2019/3/21
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -183,6 +183,12 @@ class CLS_Main_Console() :
 		elif inCommand=="-ca" :
 			wCLS_work = CLS_Config()
 			wCLS_work.CnfAdminUser()
+			wFlg = True
+		#############################
+		# PR Userの変更
+		elif inCommand=="-cp" :
+			wCLS_work = CLS_Config()
+			wCLS_work.CnfPRUser()
 			wFlg = True
 		
 	#####################################################

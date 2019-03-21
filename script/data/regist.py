@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ登録
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/11
+#   Update  ：2019/3/21
 #####################################################
 # Private Function:
 #   __registUser( self, inFulluser, inMail, inPass ):
@@ -27,6 +27,7 @@
 from osif import CLS_OSIF
 from filectrl import CLS_File
 from userdata import CLS_UserData
+from botjob import CLS_Botjob
 from mastodon_use import CLS_Mastodon_Use
 from gval import gVal
 #####################################################
@@ -339,6 +340,21 @@ class CLS_Regist() :
 		CLS_OSIF.sPrn( "mastodon登録OK" + '\n' )
 		
 		#############################
+		# cron作成
+		if inFulluser == gVal.STR_MasterConfig['MasterUser'] :
+			wKind = gVal.DEF_CRON_MASTER
+		else:
+			wKind = gVal.DEF_CRON_SUB
+		
+		wCLS_botjib = CLS_Botjob()
+		wPutRes = wCLS_botjib.Put( wKind, inFulluser )
+		if wDelRes['Result']!=True :
+			CLS_OSIF.sPrn( "CLS_Regist: Regist: cron create failed: " + wPutRes['Reason'] )
+			return False
+		
+		CLS_OSIF.sPrn( '\n' + "cronを起動しました" )
+		
+		#############################
 		# 完了
 		CLS_OSIF.sPrn( inFulluser + " の登録が完了しました" + '\n' )
 		return True
@@ -491,7 +507,19 @@ class CLS_Regist() :
 			CLS_OSIF.sPrn( "削除を中止しました" + '\n' )
 			return False
 		
-		CLS_OSIF.sPrn( '\n' + "データ削除中......" )
+		CLS_OSIF.sPrn( '\n' + "データ削除中......(2分かかります)" )
+		#############################
+		# cron削除
+		wCLS_botjib = CLS_Botjob()
+		wDelRes = wCLS_botjib.Del( gVal.DEF_CRON_SUB, inFulluser )
+		if wDelRes['Result']!=True :
+			CLS_OSIF.sPrn( "CLS_Regist: Delete: cron delete failed: " + wDelRes['Reason'] )
+			return False
+		
+		#############################
+		# 実行中のcronが処理が終わるまで待機
+		CLS_OSIF.sSleep( 120 )
+		
 		#############################
 		# データ削除
 		wGetPath = CLS_UserData.sGetUserPath( inFulluser )

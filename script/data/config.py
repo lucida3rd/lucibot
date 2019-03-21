@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/3/21
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -52,7 +52,7 @@ class CLS_Config() :
 		"PTL_ARip"		: True,
 		"PTL_WordOpe"	: True,
 		"RandToot"		: True,
-		"CircleToot"	: False,
+		"CircleToot"	: True,
 		"Traffic"		: True,
 		"LookHard"		: True,
 		"WordStudy"		: True,
@@ -419,6 +419,73 @@ class CLS_Config() :
 		#############################
 		# 変更
 		gVal.STR_MasterConfig['AdminUser'] = wAdminUser
+		self.sSetMasterConfig()
+		CLS_OSIF.sPrn( "設定内容をMaster環境情報にセーブしました: " + gVal.STR_File['MasterConfig'] + '\n' )
+		return True
+
+
+
+#####################################################
+# PR User変更(宣伝ユーザ)
+#####################################################
+	def CnfPRUser(self):
+		#############################
+		# ファイルの存在チェック
+		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
+			###ありえない
+			CLS_OSIF.sPrn( "CLS_Config: CnfPRUser: masterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
+			return False	#ない
+		
+		#############################
+		# 変更メニュー表示
+		if gVal.STR_MasterConfig['PRUser']=="" :
+			wStr = "現在PR Userは設定されていません。設定することで登録ユーザから通知を受け取ることができるようになります。"
+			wSt2 = "PR Userの設定をおこないますか？(y/N)=> "
+		else :
+			wStr = "現在PR Userは次のアカウントが設定されています。: " + gVal.STR_MasterConfig['PRUser']
+			wSt2 = "PR Userの設定をおこないますか？(y:変更 /D:解除 /other: キャンセル)=> "
+		
+		CLS_OSIF.sPrn( wStr )
+		wSelect = CLS_OSIF.sInp( wSt2 )
+		if wSelect=="D" :
+			###削除
+			gVal.STR_MasterConfig['PRUser'] = ""
+			self.sSetMasterConfig()
+			CLS_OSIF.sPrn( "PR Userの設定を解除しました。" + '\n' )
+			CLS_OSIF.sPrn( "設定内容をMaster環境情報にセーブしました: " + gVal.STR_File['MasterConfig'] + '\n' )
+			return True
+		elif wSelect!="y" :
+			###設定しない
+			CLS_OSIF.sPrn( "キャンセルされました" )
+			return True
+		
+		#############################
+		# 名前入力
+		wStr = "PR User(宣伝アカウント)をドメインを含めて入力してください。 例= " + gVal.DEF_EXAMPLE_ACCOUNT + '\n'
+		wStr = wStr + "  ※ユーザ登録している、MasterUser以外のユーザを指定できます"
+		CLS_OSIF.sPrn( wStr )
+		wPRUser = CLS_OSIF.sInp("PR User？ => ")
+		if wPRUser=="" or \
+		   gVal.STR_MasterConfig['PRUser'] ==wPRUser :
+			###設定しない
+			CLS_OSIF.sPrn( "キャンセルされました" )
+			return True
+		
+		if wPRUser==gVal.STR_MasterConfig['MasterUser'] :
+			###設定しない
+			CLS_OSIF.sPrn( "MasterUserは指定できません。キャンセルします。" )
+			return True
+		
+		# ユーザ一覧の取得
+		wList = CLS_UserData.sGetUserList()
+		if wPRUser not in wList :
+			###設定しない
+			CLS_OSIF.sPrn( "登録されていないユーザは設定できません。キャンセルします。" )
+			return True
+		
+		#############################
+		# 変更
+		gVal.STR_MasterConfig['PRUser'] = wPRUser
 		self.sSetMasterConfig()
 		CLS_OSIF.sPrn( "設定内容をMaster環境情報にセーブしました: " + gVal.STR_File['MasterConfig'] + '\n' )
 		return True

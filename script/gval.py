@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/3/21
 #####################################################
 
 #####################################################
@@ -41,6 +41,8 @@ class gVal() :
 		"AdminUser"		: "",						#監視ユーザ(通知先)
 		"PRUser"		: "",						#PRユーザ(広報・周期トゥート用)
 		"mTootTag"			: "[Sender]",				#手動トゥートタグ
+		"iFavoTag"			: "[favoind]",				#ファボ通知タグ
+		"prTag"				: "[prtoot]",				#PRトゥートタグ
 		
 		"TwitterUser"	: "",						#twiterユーザ
 		"Twitter"		: "off",					#twiter連携
@@ -97,7 +99,6 @@ class gVal() :
 		"RIP_Favo"		: "off",					#リプニコる
 		"IND_Favo"		: "off",					#ファボ通知
 		"IND_Favo_Unl"		: "off",					#ファボ通知 privateの通知を許可
-		"IND_FavoTag"		: "[favoind]",				#ファボ通知タグ
 		"IND_Follow"	: "off",					#フォロー通知
 		"getRIPnum"			: 120,						#リプライ取得数
 		"reaRIPmin"			: 10,						#反応リプライ時間(分)
@@ -135,6 +136,9 @@ class gVal() :
 		"MasterNowTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_now.txt",
 		"MasterRatTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_rat.txt",
 		
+		"Toot_path"				: DEF_MASTERCONFIG + "toot/",
+		"CLTootFile"			: DEF_MASTERCONFIG + "toot/ctoot.txt",
+		
 		"DomainREMFile"			: DEF_MASTERCONFIG + "user/xxdomain.txt",
 		"WordREMFile"			: DEF_MASTERCONFIG + "user/xxword.txt",
 		"UserinfoCSVFile"		: DEF_MASTERCONFIG + "user/userinfo.csv",
@@ -149,6 +153,7 @@ class gVal() :
 		"UserinfoFile"			: "data/userinfo.txt",
 		"WorddicFile"			: "data/worddic.txt",
 		"ClazListFile"			: "data/clazlist.txt",
+		"CLDataFile"			: "data/ctootd.txt",
 		"Rate_LTLFile"			: "data/rltl.txt",
 		"Rate_PTLFile"			: "data/rptl.txt",
 		"Rate_RipFile"			: "data/rreply.txt",

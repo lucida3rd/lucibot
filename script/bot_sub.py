@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/3/21
 #####################################################
 # Private Function:
 #   (none)
@@ -27,6 +27,7 @@ from crontest import CLS_CronTest
 from botctrl import CLS_BotCtrl
 from lookltl import CLS_LookLTL
 from lookrip import CLS_LookRIP
+from circletoot import CLS_CircleToot
 from mylog import CLS_Mylog
 from traffic import CLS_Traffic
 from usercorr import CLS_UserCorr
@@ -172,9 +173,13 @@ class CLS_BOT_Sub() :
 		#############################
 		# RIP監視処理
 		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
-
-
-
+		
+		#############################
+		# 周期トゥート処理
+		if gVal.STR_MasterConfig['CircleToot']=="on" and \
+		   gVal.STR_MasterConfig['PRUser']==cls.CHR_Account :
+			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
+		
 	#############################
 	# 後処理
 	#############################
