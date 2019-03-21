@@ -348,7 +348,7 @@ class CLS_Regist() :
 		
 		wCLS_botjib = CLS_Botjob()
 		wPutRes = wCLS_botjib.Put( wKind, inFulluser )
-		if wDelRes['Result']!=True :
+		if wPutRes['Result']!=True :
 			CLS_OSIF.sPrn( "CLS_Regist: Regist: cron create failed: " + wPutRes['Reason'] )
 			return False
 		
