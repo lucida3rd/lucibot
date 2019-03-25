@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/21
+#   Update  ：2019/3/25
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -44,6 +44,11 @@ class CLS_Config() :
 		"MasterUser"	: False,
 		"AdminUser"		: False,
 		"PRUser"		: False,
+		
+		"mTootTag"		: False,
+		"iFavoTag"		: False,
+		"prTag"			: False,
+		
 		"TwitterUser"	: False,
 		"Twitter"		: True,
 		"PTL_Favo"		: True,
@@ -267,6 +272,38 @@ class CLS_Config() :
 			if wSelect=="c" :
 				###変更する
 				gVal.STR_MasterConfig[iKey] = wChg
+		
+		#############################
+		# タグの変更
+		wStr = "mTootTag= " + str( gVal.STR_MasterConfig["mTootTag"]) + " : "
+		wStr = wStr + "c: 変更する / othwe: 変更しない"
+		CLS_OSIF.sPrn( wStr )
+		wSelect = CLS_OSIF.sInp( "選択? => " )
+		if wSelect=="c" :
+			###変更する
+			wTag = CLS_OSIF.sInp( "タグ? => " )
+			if CLS_OSIF.sChkREMString( wTag )==True :
+				gVal.STR_MasterConfig["mTootTag"] = wTag
+		
+		wStr = "iFavoTag= " + str( gVal.STR_MasterConfig["iFavoTag"]) + " : "
+		wStr = wStr + "c: 変更する / othwe: 変更しない"
+		CLS_OSIF.sPrn( wStr )
+		wSelect = CLS_OSIF.sInp( "選択? => " )
+		if wSelect=="c" :
+			###変更する
+			wTag = CLS_OSIF.sInp( "タグ? => " )
+			if CLS_OSIF.sChkREMString( wTag )==True :
+				gVal.STR_MasterConfig["iFavoTag"] = wTag
+		
+		wStr = "prTag= " + str( gVal.STR_MasterConfig["prTag"]) + " : "
+		wStr = wStr + "c: 変更する / othwe: 変更しない"
+		CLS_OSIF.sPrn( wStr )
+		wSelect = CLS_OSIF.sInp( "選択? => " )
+		if wSelect=="c" :
+			###変更する
+			wTag = CLS_OSIF.sInp( "タグ? => " )
+			if CLS_OSIF.sChkREMString( wTag )==True :
+				gVal.STR_MasterConfig["prTag"] = wTag
 		
 		return
 

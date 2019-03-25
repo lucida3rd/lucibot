@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/3/25
 #####################################################
 # Private Function:
 #   (none)
@@ -328,6 +328,24 @@ class CLS_OSIF() :
 		wPatt = re.compile(r"<[^>]*?>")
 		wD_Cont = wPatt.sub( "", inCont )
 		return wD_Cont
+
+
+
+#####################################################
+# row['content']からHTMLタグを除去
+#####################################################
+	@classmethod
+	def sChkREMString( cls, inStr, inSpace=True ):
+		wPatt = r'[\\|/|:|?|.|"|<|>|\|]'
+		wRes = cls().sRe_Search( wPatt, inStr )
+		if wRes==False :
+			return False
+		
+		if inSpace==True :
+			if inStr.find(" ")<0 :
+				return False
+		
+		return True
 
 
 

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ登録
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/21
+#   Update  ：2019/3/25
 #####################################################
 # Private Function:
 #   __registUser( self, inFulluser, inMail, inPass ):
@@ -472,7 +472,7 @@ class CLS_Regist() :
 		#############################
 		# 1件しかない場合か、MasterUserは削除できない
 		#   ※1件しかない場合はそれがMasterUserなので
-		wList = CLS_Regist.sGetUserList()
+		wList = CLS_UserData.sGetUserList()
 		if len(wList)==1 :
 			CLS_OSIF.sPrn( "残り1件しかないので、そのユーザは削除できません。" )
 			return False
@@ -491,7 +491,7 @@ class CLS_Regist() :
 		
 		#############################
 		# ユーザ名の妥当性チェック
-		wSTR_user = CLS_Regist.sUserCheck( inFulluser )
+		wSTR_user = CLS_UserData.sUserCheck( inFulluser )
 		if wSTR_user['Result']!=True :
 			CLS_OSIF.sPrn( wSTR_user['Reason'] )
 			return False
@@ -512,13 +512,10 @@ class CLS_Regist() :
 		# cron削除
 		wCLS_botjib = CLS_Botjob()
 		wDelRes = wCLS_botjib.Del( gVal.DEF_CRON_SUB, inFulluser )
-		if wDelRes['Result']!=True :
-			CLS_OSIF.sPrn( "CLS_Regist: Delete: cron delete failed: " + wDelRes['Reason'] )
-			return False
-		
-		#############################
-		# 実行中のcronが処理が終わるまで待機
-		CLS_OSIF.sSleep( 120 )
+		if wDelRes['Result']==True :
+			#############################
+			# 実行中のcronが処理が終わるまで待機
+			CLS_OSIF.sSleep( 120 )
 		
 		#############################
 		# データ削除
