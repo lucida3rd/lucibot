@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：周期トゥート処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/21
+#   Update  ：2019/4/4
 #####################################################
 # Private Function:
 #   (none)
@@ -131,6 +131,12 @@ class CLS_CircleToot():
 				continue
 			
 			#############################
+			# 種別チェック
+			if self.ARR_CLData[wKey]["Kind"]!="t" and self.ARR_CLData[wKey]["Kind"]!="w" :
+				self.STR_Cope['Invalid'] += 1
+				continue
+			
+			#############################
 			# 時間チェック：0～23時
 			if self.ARR_CLData[wKey]["Sended"]!="*" :
 				if self.ARR_CLData[wKey]["Hour"]!=wHour :
@@ -152,7 +158,7 @@ class CLS_CircleToot():
 			
 			#############################
 			# 送信
-			wRes = self.__sendToot( self.ARR_CLData[wKey]["TootFile"] )
+			wRes = self.__sendToot( self.ARR_CLData[wKey]["Kind"], self.ARR_CLData[wKey]["TootFile"] )
 			if wRes['Result']!=True :
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeFavo: Mastodon error: " + wRes['Reason'] )
 				self.STR_Cope['Invalid'] += 1
@@ -164,7 +170,7 @@ class CLS_CircleToot():
 		return True
 
 	#####################################################
-	def __sendToot( self, inFileName ):
+	def __sendToot( self, inKind, inFileName ):
 		#############################
 		# 応答形式の取得
 		#   "Result" : False, "Reason" : None, "Responce" : None
@@ -189,6 +195,12 @@ class CLS_CircleToot():
 		del wToot[0]
 		
 		#############################
+		# 種別=CWトゥート
+		if inKind=="w" :
+			wTitle = wToot[0]
+			del wToot[0]
+		
+		#############################
 		# トゥートの組み立て
 		wSetToot = self.DEF_TITLE_PRTOOT + " "
 		for wLine in wToot :
@@ -197,7 +209,7 @@ class CLS_CircleToot():
 		wSetToot = wSetToot + " " + gVal.STR_MasterConfig['prTag']
 		
 		# 管理者がいれば通知する
-		if gVal.STR_MasterConfig['AdminUser']!="" :
+		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
 			wSetToot = wSetToot + '\n' + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
 		
 		if len(wSetToot)>500 :
@@ -206,7 +218,11 @@ class CLS_CircleToot():
 		
 		#############################
 		# トゥートの送信
-		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wSetToot, visibility=wRange )
+		if inKind=="w" :
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wSetToot, visibility=wRange, spoiler_text=wTitle )
+		else :
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wSetToot, visibility=wRange )
+		
 		if wRes['Result']!=True :
 			wRes['Reason'] = "CLS_LookRIP: __copeFavo: Mastodon error: " + wRes['Reason']
 			return wRes
@@ -259,6 +275,7 @@ class CLS_CircleToot():
 			self.ARR_CLData.update({ wIndex : "" })
 			self.ARR_CLData[wIndex] = {}
 			self.ARR_CLData[wIndex].update({ "Valid"  : True })
+			self.ARR_CLData[wIndex].update({ "Kind"   : wLine[0] })
 			self.ARR_CLData[wIndex].update({ "Sended" : "-" })
 			self.ARR_CLData[wIndex].update({ "Hour"   : wLine[1][0] })
 			self.ARR_CLData[wIndex].update({ "Minute" : wLine[1][1] })
@@ -271,17 +288,18 @@ class CLS_CircleToot():
 		for wKey in wKeylist :
 			for wLine in wCLDataList :
 				wLine = wLine.split(",")
-				if len(wLine)!=4 :
+				if len(wLine)!=5 :
 					continue	#フォーマットになってない
 				
 				wIndex = wLine[1] + ":" + wLine[2] + ":" + wLine[3]
 				if wIndex not in wKeylist :
 					continue	#キーなし
 				
-				self.ARR_CLData[wIndex]["Sended"] = wLine[0]
-				self.ARR_CLData[wIndex]["Hour"]   = wLine[1]
-				self.ARR_CLData[wIndex]["Minute"] = wLine[2]
-				self.ARR_CLData[wIndex]["TootFile"] = wLine[3]
+				self.ARR_CLData[wIndex]["Kind"]   = wLine[0]
+				self.ARR_CLData[wIndex]["Sended"] = wLine[1]
+				self.ARR_CLData[wIndex]["Hour"]   = wLine[2]
+				self.ARR_CLData[wIndex]["Minute"] = wLine[3]
+				self.ARR_CLData[wIndex]["TootFile"] = wLine[4]
 				self.ARR_CLData[wIndex]["Valid"]  = True
 ##				wFlg_Valid = True
 		
@@ -302,6 +320,7 @@ class CLS_CircleToot():
 			if self.ARR_CLData[wKey]["Valid"]==False :
 				continue	#無効データ
 			
+			wSetLine = self.ARR_CLData[wKey]["Kind"] + ","
 			wSetLine = self.ARR_CLData[wKey]["Sended"] + ","
 			wSetLine = wSetLine + str(self.ARR_CLData[wKey]["Hour"]) + ","
 			wSetLine = wSetLine + str(self.ARR_CLData[wKey]["Minute"]) + ","

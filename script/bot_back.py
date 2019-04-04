@@ -112,88 +112,87 @@ class CLS_BOT_Sub() :
 			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
 			return
 		
-		#############################
-		# ユーザ情報読み込み
-		if cls.OBJ_UserCorr.GetUserInfo_Min()!=True :
-			wStr = "CLS_BOT_Sub: GetUserInfo_Min failure"
-			cls.OBJ_Mylog.Log( 'a', wStr )
-			
-			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
-			return
+#		#############################
+#		# ユーザ情報読み込み
+#		if cls.OBJ_UserCorr.GetUserInfo_Min()!=True :
+#			wStr = "CLS_BOT_Sub: GetUserInfo_Min failure"
+#			cls.OBJ_Mylog.Log( 'a', wStr )
+#			
+#			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
+#			return
 		
-		#############################
-		# 単語辞書読み込み
-		if cls.OBJ_WordCorr.GetWorddic()!=True :
-			wStr = "CLS_BOT_Sub: GetWorddic failure"
-			cls.OBJ_Mylog.Log( 'a', wStr )
-			
-			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
-			return
+#		#############################
+#		# 単語辞書読み込み
+#		if cls.OBJ_WordCorr.GetWorddic()!=True :
+#			wStr = "CLS_BOT_Sub: GetWorddic failure"
+#			cls.OBJ_Mylog.Log( 'a', wStr )
+#			
+#			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
+#			return
 		
-		#############################
-		# 除外ドメイン読み込み
-		if cls.OBJ_UserCorr.GetDomainREM()!=True :
-			wStr = "CLS_BOT_Sub: GetDomainREM failure"
-			cls.OBJ_Mylog.Log( 'a', wStr )
+#		#############################
+#		# 除外ドメイン読み込み
+#		if cls.OBJ_UserCorr.GetDomainREM()!=True :
+#			wStr = "CLS_BOT_Sub: GetDomainREM failure"
+#			cls.OBJ_Mylog.Log( 'a', wStr )
 		
-		#############################
-		# 禁止ワード読み込み
-		if cls.OBJ_WordCorr.GetWordREM()!=True :
-			wStr = "CLS_BOT_Sub: GetWordREM failure"
-			cls.OBJ_Mylog.Log( 'a', wStr )
+#		#############################
+#		# 禁止ワード読み込み
+#		if cls.OBJ_WordCorr.GetWordREM()!=True :
+#			wStr = "CLS_BOT_Sub: GetWordREM failure"
+#			cls.OBJ_Mylog.Log( 'a', wStr )
 		
-		#############################
-		# mastodonクラス生成
-		cls.OBJ_Mastodon = CLS_Regist()
-		wRes = cls.OBJ_Mastodon.CreateMastodon( cls.CHR_Account )
-		if wRes['Result']!=True :
-			wStr = "CLS_BOT_Sub: Mastodon connect failure: " + wRes['Reason']
-			cls.OBJ_Mylog.Log( 'a', wStr )
-			
-			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
-			return
-		
-		wRes = cls.OBJ_Mastodon.GetMastodon( cls.CHR_Account )
-		if wRes['Result']!=True :
-			wStr = "CLS_BOT_Sub: Mastodon get failer: " + wRes['Reason']
-			cls.OBJ_Mylog.Log( 'a', wStr )
-			
-			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
-			return
-		
-		cls.OBJ_MyDon = wRes['Responce']	#1個だけ取り出す
+#		#############################
+#		# mastodonクラス生成
+#		cls.OBJ_Mastodon = CLS_Regist()
+#		wRes = cls.OBJ_Mastodon.CreateMastodon( cls.CHR_Account )
+#		if wRes['Result']!=True :
+#			wStr = "CLS_BOT_Sub: Mastodon connect failure: " + wRes['Reason']
+#			cls.OBJ_Mylog.Log( 'a', wStr )
+#			
+#			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
+#			return
+#		
+#		wRes = cls.OBJ_Mastodon.GetMastodon( cls.CHR_Account )
+#		if wRes['Result']!=True :
+#			wStr = "CLS_BOT_Sub: Mastodon get failer: " + wRes['Reason']
+#			cls.OBJ_Mylog.Log( 'a', wStr )
+#			
+#			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
+#			return
+#		
+#		cls.OBJ_MyDon = wRes['Responce']	#1個だけ取り出す
 		
 	#############################
 	# mastodon処理
 	#############################
-		#############################
-		# LTL監視処理
-		wOBJ_LookLTL = CLS_LookLTL( parentObj=cls )
+##		#############################
+##		# LTL監視処理
+##		wOBJ_LookLTL = CLS_LookLTL( parentObj=cls )
 		
-		#############################
-		# RIP監視処理
-		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
-		
-		#############################
-		# 周期トゥート処理
-		if gVal.STR_MasterConfig['CircleToot']=="on" and \
-		   gVal.STR_MasterConfig['PRUser']==cls.CHR_Account :
-			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
+
+
+
+
+
+
+
+
 		
 	#############################
 	# 後処理
 	#############################
+#		#############################
+#		# ユーザ情報書き込み
+#		if cls.OBJ_UserCorr.SetUserInfo_Min()!=True :
+#			wStr = "CLS_BOT_Sub: SetUserInfo_Min failure"
+#			cls.OBJ_Mylog.Log( 'a', wStr )
+#		
 		#############################
-		# ユーザ情報書き込み
-		if cls.OBJ_UserCorr.SetUserInfo_Min()!=True :
-			wStr = "CLS_BOT_Sub: SetUserInfo_Min failure"
-			cls.OBJ_Mylog.Log( 'a', wStr )
-		
-		#############################
-		# 単語辞書書き込み
-		if cls.OBJ_WordCorr.SetWorddic()!=True :
-			wStr = "CLS_BOT_Sub: SetWorddic failure"
-			cls.OBJ_Mylog.Log( 'a', wStr )
+#		# 単語辞書書き込み
+#		if cls.OBJ_WordCorr.SetWorddic()!=True :
+#			wStr = "CLS_BOT_Sub: SetWorddic failure"
+#			cls.OBJ_Mylog.Log( 'a', wStr )
 		
 		#############################
 		# 排他解除
