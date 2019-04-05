@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：周期トゥート処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/4
+#   Update  ：2019/4/5
 #####################################################
 # Private Function:
 #   (none)
@@ -197,12 +197,14 @@ class CLS_CircleToot():
 		#############################
 		# 種別=CWトゥート
 		if inKind=="w" :
-			wTitle = wToot[0]
+			wTitle = self.DEF_TITLE_PRTOOT + " " + wToot[0]
 			del wToot[0]
+			wSetToot = ""
+		else :
+			wSetToot = self.DEF_TITLE_PRTOOT + " "
 		
 		#############################
 		# トゥートの組み立て
-		wSetToot = self.DEF_TITLE_PRTOOT + " "
 		for wLine in wToot :
 			wSetToot = wSetToot + wLine + '\n'
 		

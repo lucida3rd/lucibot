@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/21
+#   Update  ：2019/4/5
 #####################################################
 # Private Function:
 #   __run(self):
@@ -271,7 +271,7 @@ class CLS_LookRIP():
 		
 		#############################
 		# 管理者がいれば通知する
-		if gVal.STR_MasterConfig['AdminUser']!="" :
+		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
 			wToot = wToot + '\n' + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
 		
 		#############################
@@ -296,12 +296,12 @@ class CLS_LookRIP():
 		
 		#############################
 		# トゥートの組み立て
-		wToot = self.DEF_TITLE_NEW_FOLLOWER + " " + inROW['display_name'] + " (@" + inROW['Fulluser'] + ") にフォローされました。"
+		wToot = self.DEF_TITLE_NEW_FOLLOWER + " " + inROW['display_name'] + " (@" + inROW['Fulluser'] + ") さんにフォローされました。"
 		wToot = wToot + " " + gVal.STR_MasterConfig['iFavoTag']
 		
 		#############################
 		# 管理者がいれば通知する
-		if gVal.STR_MasterConfig['AdminUser']!="" :
+		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
 			wToot = wToot + '\n' + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
 		
 		#############################
