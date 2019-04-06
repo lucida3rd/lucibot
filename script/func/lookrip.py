@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/5
+#   Update  ：2019/4/7
 #####################################################
 # Private Function:
 #   __run(self):
@@ -456,6 +456,12 @@ class CLS_LookRIP():
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				
+				### ユーザ登録されていたら通知しない
+				wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
+				if wUserChk['Result']!=True or wUserChk['Registed']==True :
+					self.STR_Cope['Ind_Inv'] += 1
+					continue
+				
 				### 通知のふぁぼ、ぶーすとか
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
 				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
@@ -566,6 +572,11 @@ class CLS_LookRIP():
 		outARRrip.update({ wIndex : "" })
 		outARRrip[wIndex] = {}
 		
+		wCont = inToot['status']['content']
+		wCont = wCont.replace( "</span></a></p><p>[Admin] <span class=\"h-card\">", '\n'+"[Admin] " )
+		wCont = wCont.replace( "<br />", '\n' )
+		wCont = CLS_OSIF.sDel_HTML( wCont )
+		
 		#############################
 		# 相手、時間、通知id
 		outARRrip[wIndex].update({ "id"           : str( inToot['id'] ) })
@@ -574,7 +585,8 @@ class CLS_LookRIP():
 		outARRrip[wIndex].update({ "Timedate"     : inTime })
 		outARRrip[wIndex].update({ "visibility"   : inToot['status']['visibility'] })
 		outARRrip[wIndex].update({ "status_id" : str( inStatusID ) })
-		outARRrip[wIndex].update({ "content"   : CLS_OSIF.sDel_HTML( inToot['status']['content'] ) })
+		outARRrip[wIndex].update({ "content"   : wCont })
+		outARRrip[wIndex].update({ "media_attachments" : [] })
 		return
 
 	#####################################################
