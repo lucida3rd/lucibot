@@ -447,6 +447,13 @@ class CLS_LookRIP():
 			# ふぁぼ or ぶーすと
 			if ( wToot['type']=="favourite" or wToot['type']=="reblog" ) \
 			  and gVal.STR_Config['IND_Favo']=="on" :
+				### タグなしcontents
+				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
+				
+				### @ 入り(リプライ)のふぁぼ、ブーストは通知しない
+				if wCont.find("@") >= 0 :
+					self.STR_Cope['Ind_Inv'] += 1
+					continue
 				### directの場合、通知しない
 				if wToot['status']['visibility']=="direct" :
 					self.STR_Cope['Ind_Inv'] += 1
@@ -458,12 +465,6 @@ class CLS_LookRIP():
 				### ユーザ登録されていたら通知しない
 				wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
 				if wUserChk['Result']!=True or wUserChk['Registed']==True :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-				
-				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
-				### @ 入り(リプライ)のふぁぼ、ブーストは通知しない
-				if wCont.find("@") >= 0 :
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				
