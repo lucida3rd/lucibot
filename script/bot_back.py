@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Background)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/21
+#   Update  ：2019/4/8
 #####################################################
 # Private Function:
 #   (none)
@@ -34,7 +34,7 @@ from usercorr import CLS_UserCorr
 from wordcorr import CLS_WordCorr
 from gval import gVal
 #####################################################
-class CLS_BOT_Sub() :
+class CLS_BOT_Back() :
 #####################################################
 	CHR_Account   = ""		#実行アカウント
 	CHR_User_path = ""		#ユーザフォルダパス
@@ -55,15 +55,10 @@ class CLS_BOT_Sub() :
 		#############################
 		# cronテストとconfigのロード
 		#   テスト項目
-		#     1.jobチェック
-		#       実行ファイルチェック
-		#       ユーザ登録チェック(Master、Subの場合)
-		#     2.データフォルダチェック
-		#     3.Master環境情報ロード(チェック)
-		#     4.Userフォルダチェック
-		#     5.User環境情報ロード(チェック)
-		#     6.実行権限チェック
-		#     7.testログ
+		#     1.データフォルダチェック
+		#     2.Master環境情報ロード(チェック)
+		#     3.testログ
+		#     ※Account、Kindのテストは関数コール時に実施している
 		wCLS_Test = CLS_CronTest()
 		wRes = wCLS_Test.Run()
 		if wRes['Result']!=True :
@@ -79,8 +74,6 @@ class CLS_BOT_Sub() :
 		cls.CHR_User_path = wRes['Responce']['User_path']
 		
 		cls.OBJ_Mylog    = CLS_Mylog( cls.CHR_User_path + gVal.STR_File['UserLog_path'] )
-##		cls.OBJ_Traffic  = CLS_Traffic( cls.CHR_User_path )
-##		cls.OBJ_UserCorr = CLS_UserCorr( cls.CHR_User_path, cls.CHR_Account )
 		cls.OBJ_Traffic  = CLS_Traffic( parentObj=cls )
 		cls.OBJ_UserCorr = CLS_UserCorr( parentObj=cls )
 		cls.OBJ_WordCorr = CLS_WordCorr( parentObj=cls )
@@ -99,14 +92,14 @@ class CLS_BOT_Sub() :
 		#############################
 		# 開始ログ
 		if gVal.FLG_Test_Mode==False :
-			cls.OBJ_Mylog.Log( 'b', "bot開始" )
+			cls.OBJ_Mylog.Log( 'b', "開始" )
 		else :
-			cls.OBJ_Mylog.Log( 'a', "bot開始(Test)", inView=True )
+			cls.OBJ_Mylog.Log( 'a', "開始(Test)", inView=True )
 		
 		#############################
 		# 1時間監視
 		if CLS_BotCtrl.sChk1HourTime( cls.CHR_User_path )!=True :
-			wStr = "CLS_BOT_Sub: sChk1HourTime failure"
+			wStr = "CLS_BOT_Back: sChk1HourTime failure"
 			cls.OBJ_Mylog.Log( 'a', wStr )
 			
 			CLS_BotCtrl.sUnlock( cls.CHR_User_path )

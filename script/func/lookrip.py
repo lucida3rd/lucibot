@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/7
+#   Update  ：2019/4/10
 #####################################################
 # Private Function:
 #   __run(self):
@@ -455,15 +455,19 @@ class CLS_LookRIP():
 				if wToot['status']['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" :
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
-				
 				### ユーザ登録されていたら通知しない
 				wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
 				if wUserChk['Result']!=True or wUserChk['Registed']==True :
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				
-				### 通知のふぁぼ、ぶーすとか
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
+				### @ 入り(リプライ)のふぁぼ、ブーストは通知しない
+				if wCont.find("@") >= 0 :
+					self.STR_Cope['Ind_Inv'] += 1
+					continue
+				
+				### 通知のふぁぼ、ぶーすとか
 				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
 					### ふぉろー通知のふぁぼ、ぶーすとは通知しない
 					if wCont.find( self.DEF_TITLE_NEW_FOLLOWER ) == 0 :

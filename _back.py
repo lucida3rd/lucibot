@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：bot実行 (Background用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/10
+#   Update  ：2019/4/8
 #####################################################
 # Private Function:
 #   (none)
@@ -26,12 +26,9 @@ sys.path.append('script/disp')
 sys.path.append('script/func')
 sys.path.append('script/oslib')
 
-from crontest import CLS_CronTest
-##from main_console import CLS_Main_Console
+from bot_back import CLS_BOT_Back
 from gval import gVal
 #####################################################
-##CLS_Main_Console.sRun( sys.argv )	#コンソール起動
-##									#いちお引数も渡しておく
+CLS_BOT_Back.sRun()	#起動
 
-wCLS_test = CLS_CronTest()				# cronテスト
 
