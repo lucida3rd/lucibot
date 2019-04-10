@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/21
+#   Update  ：2019/4/11
 #####################################################
 
 #####################################################
@@ -123,7 +123,7 @@ class gVal() :
 	DEF_MASTERCONFIG      = DEF_USERDATA_PATH + DEF_MASTERCONFIG_NAME + "/"
 
 	STR_File = {
-		"Readme"				: "readme.txt",
+		"Readme"				: "readme.md",
 		"defUserdata_path"		: "_default/",
 		"defMasterdata_path"	: "_master/",
 		"defMasterConfig"		: "_master/mconfig.txt",
