@@ -504,6 +504,12 @@ class CLS_LookRIP():
 			#############################
 			# ふぉろー
 			elif wToot['type']=="follow" and gVal.STR_Config['IND_Follow']=="on" :
+				### ユーザ登録されていたら通知しない
+				wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
+				if wUserChk['Result']!=True or wUserChk['Registed']==True :
+					self.STR_Cope['Ind_Inv'] += 1
+					continue
+				
 				self.__setNewRIP( self.ARR_NewFollow, wFulluser['Fulluser'], wGetTime, wToot )
 				self.STR_Cope['Ind_On'] += 1
 			
