@@ -99,6 +99,7 @@ class gVal() :
 		"RIP_Favo"		: "off",					#リプニコる
 		"IND_Favo"		: "off",					#ファボ通知
 		"IND_Favo_Unl"		: "off",					#ファボ通知 privateの通知を許可
+		"IND_Favo_CW"		: "off",					#通知をCW化するか
 		"IND_Follow"	: "off",					#フォロー通知
 		"getRIPnum"			: 120,						#リプライ取得数
 		"reaRIPmin"			: 10,						#反応リプライ時間(分)

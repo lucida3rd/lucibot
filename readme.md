@@ -1,7 +1,7 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4  
 ::BotDate= 2019/4/11  
-::Version= 4.0.3.4  
+::Version= 4.0.3.5  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
 

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/10
+#   Update  ：2019/4/11
 #####################################################
 # Private Function:
 #   __run(self):
@@ -134,9 +134,9 @@ class CLS_LookRIP():
 		# TLチェック
 		self.ARR_UpdateTL = []
 		
-		if gVal.STR_Config['IND_Favo']=="on" :
 		#############################
 		# ふぁぼ、ぶーすとチェック
+		if gVal.STR_Config['IND_Favo']=="on" :
 			wKeylist = self.ARR_NewFavo.keys()
 			for wKey in wKeylist :
 				#############################
@@ -171,9 +171,9 @@ class CLS_LookRIP():
 				self.__copeReind( self.ARR_Reind[wKey] )
 				self.STR_Cope["Now_Cope"] += 1
 		
-		if gVal.STR_Config['IND_Follow']=="on" :
 		#############################
 		# ふぉろーチェック
+		if gVal.STR_Config['IND_Follow']=="on" :
 			wKeylist = self.ARR_NewFollow.keys()
 			for wKey in wKeylist :
 				#############################
@@ -192,21 +192,22 @@ class CLS_LookRIP():
 		
 		#############################
 		# リプライチェック
-		wKeylist = self.ARR_NewRip.keys()
-		for wKey in wKeylist :
-			#############################
-			# チェックするので新過去TLに保管
-			self.ARR_UpdateTL.append( self.ARR_NewRip[wKey]['id'] )
-			
-			#############################
-			# 過去チェックしたトゥートか
-			if self.ARR_NewRip[wKey]['id'] in self.ARR_RateTL :
-				continue
-			
-			#############################
-			# 新トゥートへの対応
-			self.__copeRIP( self.ARR_NewRip[wKey] )
-			self.STR_Cope["Now_Cope"] += 1
+		if gVal.STR_Config['RIP_Favo']=="on" :
+			wKeylist = self.ARR_NewRip.keys()
+			for wKey in wKeylist :
+				#############################
+				# チェックするので新過去TLに保管
+				self.ARR_UpdateTL.append( self.ARR_NewRip[wKey]['id'] )
+				
+				#############################
+				# 過去チェックしたトゥートか
+				if self.ARR_NewRip[wKey]['id'] in self.ARR_RateTL :
+					continue
+				
+				#############################
+				# 新トゥートへの対応
+				self.__copeRIP( self.ARR_NewRip[wKey] )
+				self.STR_Cope["Now_Cope"] += 1
 		
 		#############################
 		# 新・過去ふぁぼ保存
@@ -250,11 +251,17 @@ class CLS_LookRIP():
 		wToot_Url = "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
 		
 		#############################
+		# spoiler_textが設定されていたら、そちらで通知を出す
+		if inROW['spoiler_text'] != "" :
+			wCont = inROW['spoiler_text']
+		
+		#############################
 		# トゥートが140字超えの場合、切り払う
-		if len(inROW['content'])>140 :
-			wCont = inROW['content'][0:139] + "(以下略)"
-		else:
-			wCont = inROW['content']
+		else :
+			if len(inROW['content'])>140 :
+				wCont = inROW['content'][0:139] + "(以下略)"
+			else:
+				wCont = inROW['content']
 		
 		#############################
 		# 画像(サムネ)があればURLを付ける
@@ -265,18 +272,49 @@ class CLS_LookRIP():
 		
 		#############################
 		# トゥートの組み立て
-		wToot = self.DEF_TITLE_INFORMATION + " 以下のトゥートが注目されました。:" + '\n'
-		wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
-		wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
 		
 		#############################
-		# 管理者がいれば通知する
-		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-			wToot = wToot + '\n' + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+		# CWトゥートで送信
+		if gVal.STR_Config['IND_Favo_CW']=="on" :
+			#############################
+			# タイトルの組み立て
+			wSpoText = self.DEF_TITLE_INFORMATION + "注目されたトゥート"
+			
+			#############################
+			# トゥートの組み立て
+			wToot = "以下のトゥートが注目されました。:" + '\n'
+			wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
+			wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
+			
+			#############################
+			# 管理者がいれば通知する
+			if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
+				wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+			
+			#############################
+			# トゥートの送信
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, spoiler_text=wSpoText, visibility=inROW['visibility'] )
 		
 		#############################
-		# トゥートの送信
-		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
+		# ノーマルのトゥートで送信
+		else :
+			#############################
+			# トゥートの組み立て
+			wToot = self.DEF_TITLE_INFORMATION + " 以下のトゥートが注目されました。:" + '\n'
+			wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
+			wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
+			
+			#############################
+			# 管理者がいれば通知する
+			if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
+				wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+			
+			#############################
+			# トゥートの送信
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
+		
+		#############################
+		# 結果判定
 		if wRes['Result']!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeFavo: Mastodon error: " + wRes['Reason'] )
 			return
@@ -302,7 +340,7 @@ class CLS_LookRIP():
 		#############################
 		# 管理者がいれば通知する
 		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-			wToot = wToot + '\n' + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+			wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
 		
 		#############################
 		# トゥートの送信
@@ -322,11 +360,28 @@ class CLS_LookRIP():
 	def __copeReind( self, inROW ) :
 		#############################
 		# トゥートの組み立て
-		wToot = inROW['content']
 		
 		#############################
-		# トゥートの送信
-		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
+		# CWトゥートで送信
+		if gVal.STR_Config['IND_Favo_CW']=="on" :
+			wSpoText = inROW['spoiler_text']
+			wToot    = inROW['content']
+			
+			#############################
+			# トゥートの送信
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, spoiler_text=wSpoText, visibility=inROW['visibility'] )
+		
+		#############################
+		# ノーマルのトゥートで送信
+		else :
+			wToot = inROW['content']
+			
+			#############################
+			# トゥートの送信
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
+		
+		#############################
+		# 結果判定
 		if wRes['Result']!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeReind: Mastodon error: " + wRes['Reason'] )
 			return
@@ -449,6 +504,10 @@ class CLS_LookRIP():
 			  and gVal.STR_Config['IND_Favo']=="on" :
 				### タグなしcontents
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
+				wInde = wCont.find( "[Admin]" )
+				if wInde>=0 :
+					wCont = wCont[0:wInde]
+##					CLS_OSIF.sPrn( "xxx1" + wCont )
 				
 				### @ 入り(リプライ)のふぁぼ、ブーストは通知しない
 				if wCont.find("@") >= 0 :
@@ -515,7 +574,7 @@ class CLS_LookRIP():
 			
 			#############################
 			# めんしょん
-			elif wToot['type']=="mention" :
+			elif wToot['type']=="mention" and gVal.STR_Config['RIP_Favo']=="on" :
 				### 通知付きのめんしょんは通知しない(=adminへの通知)
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
 				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
@@ -563,11 +622,13 @@ class CLS_LookRIP():
 		#   ふぁぼ、ぶーすと、りぷらいの時
 		outARRrip[wIndex].update({ "status_id" : None })
 		outARRrip[wIndex].update({ "content"   : None })
+		outARRrip[wIndex].update({ "spoiler_text"      : None })
 		outARRrip[wIndex].update({ "media_attachments" : [] })
 		
 		if "status" in inToot :
 			outARRrip[wIndex]['status_id'] = str(inToot['status']['id'])
 			outARRrip[wIndex]['content']   = CLS_OSIF.sDel_HTML( inToot['status']['content'] )
+			outARRrip[wIndex]['spoiler_text'] = CLS_OSIF.sDel_HTML( inToot['status']['spoiler_text'] )
 			if "media_attachments" in inToot['status'] :
 				for wMedia in inToot['status']['media_attachments'] :
 					outARRrip[wIndex]['media_attachments'].append( wMedia['preview_url'] )
@@ -597,6 +658,7 @@ class CLS_LookRIP():
 		outARRrip[wIndex].update({ "visibility"   : inToot['status']['visibility'] })
 		outARRrip[wIndex].update({ "status_id" : str( inStatusID ) })
 		outARRrip[wIndex].update({ "content"   : wCont })
+		outARRrip[wIndex].update({ "spoiler_text"      : CLS_OSIF.sDel_HTML( inToot['status']['spoiler_text'] ) })
 		outARRrip[wIndex].update({ "media_attachments" : [] })
 		return
 
