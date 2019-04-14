@@ -642,6 +642,13 @@ class CLS_Config() :
 			return wRes
 		
 		#############################
+		# 初期化 onのところは全てoff (新要素対策)
+		wKeylist = list(gVal.STR_Config.keys())
+		for wKey in wKeylist :
+			if gVal.STR_Config[wKey] == "on" :
+				gVal.STR_Config[wKey] = "off"
+		
+		#############################
 		# 読み込み
 		for wLine in open( wFilename, 'r'):
 			#############################
