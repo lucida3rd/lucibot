@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/13
+#   Update  ：2019/4/15
 #####################################################
 # Private Function:
 #   (none)
@@ -240,6 +240,21 @@ class CLS_UserData() :
 			return cls.DEF_RANGE
 		
 		return cls.STR_RANGE[inRange]
+
+
+
+#####################################################
+# 範囲の変換
+#####################################################
+	@classmethod
+	def sChkHitPatt( cls, inHitPatt, inPatt ):
+		wFlg = False
+		for patt in inHitPatt:
+			if patt == inPatt:
+				wFlg = True
+				break
+		
+		return wFlg
 
 
 

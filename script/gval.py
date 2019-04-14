@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/11
+#   Update  ：2019/4/15
 #####################################################
 
 #####################################################
@@ -97,12 +97,15 @@ class gVal() :
 		"getLTLnum"			: 120,						#LTL取得数
 		
 		"RIP_Favo"		: "off",					#リプニコる
+		"IND_Favo_Unl"		: "off",					#privateのブーストを許可
 		"IND_Favo"		: "off",					#ファボ通知
-		"IND_Favo_Unl"		: "off",					#ファボ通知 privateの通知を許可
 		"IND_Favo_CW"		: "off",					#通知をCW化するか
 		"IND_Follow"	: "off",					#フォロー通知
 		"getRIPnum"			: 120,						#リプライ取得数
 		"reaRIPmin"			: 10,						#反応リプライ時間(分)
+		
+		"HTL_Boost"		: "off",					#ホームブースト
+		"getHTLnum"			: 120,						#HTL取得数
 		
 		"TrafficCnt"	: "off",					#トラヒック集計
 		
@@ -139,6 +142,7 @@ class gVal() :
 		
 		"Toot_path"				: DEF_MASTERCONFIG + "toot/",
 		"CLTootFile"			: DEF_MASTERCONFIG + "toot/ctoot.txt",
+		"HTLBoostFile"			: DEF_MASTERCONFIG + "toot/hboost.txt",
 		
 		"DomainREMFile"			: DEF_MASTERCONFIG + "user/xxdomain.txt",
 		"WordREMFile"			: DEF_MASTERCONFIG + "user/xxword.txt",
@@ -155,6 +159,7 @@ class gVal() :
 		"WorddicFile"			: "data/worddic.txt",
 		"ClazListFile"			: "data/clazlist.txt",
 		"CLDataFile"			: "data/ctootd.txt",
+		"Rate_HTLFile"			: "data/rhtl.txt",
 		"Rate_LTLFile"			: "data/rltl.txt",
 		"Rate_PTLFile"			: "data/rptl.txt",
 		"Rate_RipFile"			: "data/rreply.txt",

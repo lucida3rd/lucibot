@@ -3,10 +3,15 @@ Multicast=off
 getLTLnum=120
 
 RIP_Favo=off
-IND_Favo=off
 IND_Favo_Unl=off
+IND_Favo=off
+IND_Favo_CW=off
+IND_Follow=off
 getRIPnum=120
 reaRIPmin=10
+
+HTL_Boost=off
+getHTLnum=120
 
 Traffic=off
 

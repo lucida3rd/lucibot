@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ情報収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/13
+#   Update  ：2019/4/15
 #####################################################
 # Private Function:
 #   __getUserInfo_Full(self) :
@@ -137,7 +137,7 @@ class CLS_UserCorr():
 		wUserInfo.update({ "Locked"   : "-" })	#鍵
 			## K 鍵垢
 			## - 鍵OFF
-		wUserInfo.update({ "Score"      : 0 })
+###		wUserInfo.update({ "Score"      : 0 })
 		wUserInfo.update({ "Lastupdate" : "" })
 		wUserInfo.update({ "Lastcheck"  : "" })
 		
@@ -162,7 +162,7 @@ class CLS_UserCorr():
 		wUserInfo = wUserInfo + self.STR_UserInfo[inKey]['Follower'] + gVal.DEF_DATA_BOUNDARY
 		wUserInfo = wUserInfo + self.STR_UserInfo[inKey]['Locked']   + gVal.DEF_DATA_BOUNDARY
 		
-		wUserInfo = wUserInfo + str(self.STR_UserInfo[inKey]['Score']) + gVal.DEF_DATA_BOUNDARY
+###		wUserInfo = wUserInfo + str(self.STR_UserInfo[inKey]['Score']) + gVal.DEF_DATA_BOUNDARY
 		wUserInfo = wUserInfo + self.STR_UserInfo[inKey]['Lastupdate'] + gVal.DEF_DATA_BOUNDARY
 		wUserInfo = wUserInfo + self.STR_UserInfo[inKey]['Lastcheck']
 		

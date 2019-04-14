@@ -575,13 +575,20 @@ class CLS_LookRIP():
 			#############################
 			# めんしょん
 			elif wToot['type']=="mention" and gVal.STR_Config['RIP_Favo']=="on" :
-				### 通知付きのめんしょんは通知しない(=adminへの通知)
+				### 通知付きのめんしょんは反応しない(=adminへの通知)
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
 				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				
+				### PRトゥートには反応しない(=adminへの通知)
 				if wCont.find( gVal.STR_MasterConfig['prTag'] ) >= 0 :
+					self.STR_Cope['Ind_Inv'] += 1
+					continue
+				
+				### ユーザ登録されていたら反応しない(恥ずかしい)
+				wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
+				if wUserChk['Result']!=True or wUserChk['Registed']==True :
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				

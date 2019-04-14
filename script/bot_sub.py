@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/21
+#   Update  ：2019/4/15
 #####################################################
 # Private Function:
 #   (none)
@@ -25,6 +25,7 @@ from userdata import CLS_UserData
 
 from crontest import CLS_CronTest
 from botctrl import CLS_BotCtrl
+from lookhtl import CLS_LookHTL
 from lookltl import CLS_LookLTL
 from lookrip import CLS_LookRIP
 from circletoot import CLS_CircleToot
@@ -167,12 +168,19 @@ class CLS_BOT_Sub() :
 	# mastodon処理
 	#############################
 		#############################
+		# HTL監視処理
+		if gVal.STR_Config['HTL_Boost']=="on" and \
+		   gVal.STR_MasterConfig['PRUser']!=cls.CHR_Account :
+			wOBJ_LookHTL = CLS_LookHTL( parentObj=cls )
+		
+		#############################
 		# LTL監視処理
 		wOBJ_LookLTL = CLS_LookLTL( parentObj=cls )
 		
 		#############################
 		# RIP監視処理
-		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
+		if gVal.STR_MasterConfig['PRUser']!=cls.CHR_Account :
+			wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
 		
 		#############################
 		# 周期トゥート処理

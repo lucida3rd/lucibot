@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/11
+#   Update  ：2019/4/15
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -78,6 +78,7 @@ class CLS_Config() :
 		"IND_Favo"		: True,
 		"IND_Favo_CW"	: True,
 		"IND_Follow"	: True,
+		"HTL_Boost"		: True,
 		"TrafficCnt"	: True,
 		"WordCorrect"	: True,
 		"AutoFollow"	: False,
@@ -664,6 +665,7 @@ class CLS_Config() :
 		gVal.STR_Config["getLTLnum"] = int( gVal.STR_Config["getLTLnum"] )
 		gVal.STR_Config["getRIPnum"] = int( gVal.STR_Config["getRIPnum"] )
 		gVal.STR_Config["reaRIPmin"] = int( gVal.STR_Config["reaRIPmin"] )
+		gVal.STR_Config["getHTLnum"] = int( gVal.STR_Config["getHTLnum"] )
 		gVal.STR_Config["getFollowMnum"] = int( gVal.STR_Config["getFollowMnum"] )
 		
 		wRes['Responce'] = wFilename
@@ -934,7 +936,8 @@ class CLS_Config() :
 		# MasterUserが設定されていたら
 		# 同報配信元には配信しないので抜く
 		if gVal.STR_MasterConfig['MasterUser']!="" :
-			wList.remove( gVal.STR_MasterConfig['MasterUser'] )
+			if gVal.STR_MasterConfig['MasterUser'] in wList :
+				wList.remove( gVal.STR_MasterConfig['MasterUser'] )
 		
 		#############################
 		# 登録ユーザのconfigから Multicast値 を読み込む
