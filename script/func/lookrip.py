@@ -507,7 +507,6 @@ class CLS_LookRIP():
 				wInde = wCont.find( "[Admin]" )
 				if wInde>=0 :
 					wCont = wCont[0:wInde]
-##					CLS_OSIF.sPrn( "xxx1" + wCont )
 				
 				### @ 入り(リプライ)のふぁぼ、ブーストは通知しない
 				if wCont.find("@") >= 0 :
@@ -541,22 +540,29 @@ class CLS_LookRIP():
 						self.STR_Cope['Ind_Inv'] += 1
 						continue
 					
+##					CLS_OSIF.sPrn( "xxx1: " + wID )
 					### この周では既に通知を出してるid
 					if wID in wFavID :
+##						CLS_OSIF.sPrn( "xxx2: " + wID )
 						self.STR_Cope['Ind_Inv'] += 1
 						continue
 					
 					wFavID.append( wID )	#被り防止
+##					CLS_OSIF.sPrn( str(wFavID) )
 					self.__setReindRIP( self.ARR_Reind, wFulluser['Fulluser'], wGetTime, wToot, wID )
 					self.STR_Cope['Ind_On'] += 1
 					continue
 				
+				wID = str(wToot['status']['id'])
+##				CLS_OSIF.sPrn( "xxx3: " + wID )
 				### この周では既に通知を出してるid
-				if wToot['status']['id'] in wFavID :
+				if wID in wFavID :
+##					CLS_OSIF.sPrn( "xxx4: " + wID )
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				
-				wFavID.append( wToot['status']['id'] )	#被り防止
+				wFavID.append( wID )	#被り防止
+##				CLS_OSIF.sPrn( str(wFavID) )
 				self.__setNewRIP( self.ARR_NewFavo, wFulluser['Fulluser'], wGetTime, wToot )
 				self.STR_Cope['Ind_On'] += 1
 			
