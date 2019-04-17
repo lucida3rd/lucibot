@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/15
+#   Update  ：2019/4/17
 #####################################################
 # Private Function:
 #   (none)
@@ -175,7 +175,7 @@ class CLS_BOT_Sub() :
 		
 		#############################
 		# LTL監視処理
-		wOBJ_LookLTL = CLS_LookLTL( parentObj=cls )
+##		wOBJ_LookLTL = CLS_LookLTL( parentObj=cls )
 		
 		#############################
 		# RIP監視処理
