@@ -71,7 +71,7 @@ class CLS_LookRIP():
 	
 	STR_Ind = {				#通知制限
 		"Count"			: 0,	#通知回数
-		"TimeDate"		: ""	#規制時の時間
+		"TimeDate"		: ""	#カウント開始時間
 	}
 	
 	VAL_ReaRIPmin = 0
@@ -823,6 +823,12 @@ class CLS_LookRIP():
 		self.STR_Ind['Count'] = int(wARR_Lim[0])
 		self.STR_Ind['TimeDate'] = wARR_Lim[1]
 		
+		# 0で合わせる
+		if self.STR_Ind['Count']==0 or self.STR_Ind['TimeDate']=="" :
+			self.STR_Ind['Count'] = 0
+			self.STR_Ind['TimeDate'] = ""
+			return True		#ノーカウントなら終わり
+		
 		#############################
 		# 制限時間が過ぎたか
 		wGetLag = CLS_OSIF.sTimeLag( self.STR_Ind['TimeDate'], inThreshold=self.VAL_indLimmin )
@@ -831,7 +837,7 @@ class CLS_LookRIP():
 		else :
 			if wGetLag['Beyond']==True :
 			#############################
-			# 通知制限が過ぎたので制限解除
+			# 通知制限が過ぎたのでクリア
 				self.STR_Ind['Count'] = 0
 				self.STR_Ind['TimeDate'] = ""
 				self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_LookRIP: Get_Indlim: 通知制限 [解除]" )
@@ -868,6 +874,8 @@ class CLS_LookRIP():
 		#############################
 		# 回数チェック
 		if self.STR_Ind['Count']<gVal.STR_Config['indLimcnt'] :
+			if self.STR_Ind['Count']==0 :	#最初にカウント開始した時間をメモる
+				self.STR_Ind['TimeDate'] = str(inCreateAt)
 			return True		#制限なし
 		
 		#############################
@@ -880,7 +888,7 @@ class CLS_LookRIP():
 		#############################
 		# 制限開始
 		self.STR_Ind['Count'] += 1	#カウントはする
-		self.STR_Ind['TimeDate'] = str(inCreateAt)
+###		self.STR_Ind['TimeDate'] = str(inCreateAt)
 		self.FLG_indLim = True
 		self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_LookRIP: Check_Indlim: 通知制限 [開始]" )
 		
