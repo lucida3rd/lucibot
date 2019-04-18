@@ -1,7 +1,7 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4  
-::BotDate= 2019/4/17  
-::Version= 4.0.4.4  
+::BotDate= 2019/4/18  
+::Version= 4.0.5.0  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
 
@@ -231,6 +231,7 @@ botの機能を以下に説明します。
 トゥートをファボ、ブーストされた時に、トゥートの内容（140字のハイライト）、URLをトゥートします。
 またフォローされた時にもその旨をpublicに通知します（オプション）。Twitterライクな機能です。  
 公開トゥートと未収載トゥートが対象です。（未収載はオプションでOFF可）  
+制限時間内に通知回数が閾値を超えると自動的に規制抑止されます。（規制時間が終わると自動解除されます）  
 　利用権限：Master × / PR 〇 / User 〇  
 　機能有効：IND_Favo=on  
 　　　※IND_FavoTag  トゥートに付加するタグを指定します。  

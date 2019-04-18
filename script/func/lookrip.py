@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/11
+#   Update  ：2019/4/18
 #####################################################
 # Private Function:
 #   __run(self):
@@ -69,6 +69,15 @@ class CLS_LookRIP():
 		"dummy"     : 0	#(未使用)
 	}
 	
+	STR_Ind = {				#通知制限
+		"Count"			: 0,	#通知回数
+		"TimeDate"		: ""	#規制時の時間
+	}
+	
+	VAL_ReaRIPmin = 0
+	VAL_indLimmin = 0
+	FLG_indLim = False
+	
 	DEF_TITLE_INFORMATION  = "[Info]"
 	DEF_TITLE_NEW_FOLLOWER = "[New Follower]"
 	
@@ -81,6 +90,14 @@ class CLS_LookRIP():
 			###親クラス実体の未設定
 			CLS_OSIF.sPrn( "CLS_LookRIP: __init__: You have not set the parent class entity for parentObj" )
 			return
+		
+		#############################
+		# 反応リプライ時間範囲の算出(分→秒へ)
+		self.VAL_ReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
+		
+		#############################
+		# 通知制限時間の算出(分→秒へ)
+		self.VAL_indLimmin = gVal.STR_Config['indLimmin'] * 60	#秒に変換
 		
 		self.Obj_Parent = parentObj
 		self.__run()	#処理開始
@@ -97,6 +114,13 @@ class CLS_LookRIP():
 		self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
 		
 		#############################
+		# 通知制限の読み込み
+		wRes = self.Get_Indlim()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get_Indlim failed" )
+			return
+		
+		#############################
 		# RIP読み込み(mastodon)
 		wRes = self.Get_RIP()
 		if wRes['Result']!=True :
@@ -111,14 +135,14 @@ class CLS_LookRIP():
 		# 過去ふぁぼの読み込み
 		wRes = self.Get_RateFV()
 		if wRes!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: Get_RateFV failed" )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get_RateFV failed" )
 			return
 		
 		#############################
 		# 過去RIPの読み込み
 		wRes = self.Get_RateRIP()
 		if wRes!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __run: Get_RateRIP failed" )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get_RateRIP failed" )
 			return
 		
 		#############################
@@ -150,6 +174,11 @@ class CLS_LookRIP():
 					continue
 				
 				#############################
+				# 通知制限か
+				if self.Check_Indlim( self.ARR_NewFavo[wKey]['created_at'] )==False :
+					continue
+				
+				#############################
 				# 新トゥートへの対応
 				self.__copeFavo( self.ARR_NewFavo[wKey] )
 				self.STR_Cope["Now_Cope"] += 1
@@ -164,6 +193,11 @@ class CLS_LookRIP():
 				#############################
 				# 過去チェックしたトゥートか
 				if self.ARR_Reind[wKey]['status_id'] in self.ARR_RateFV :
+					continue
+				
+				#############################
+				# 通知制限か
+				if self.Check_Indlim( self.ARR_Reind[wKey]['created_at'] )==False :
 					continue
 				
 				#############################
@@ -210,22 +244,29 @@ class CLS_LookRIP():
 				self.STR_Cope["Now_Cope"] += 1
 		
 		#############################
+		# 通知制限の保存
+		wRes = self.Set_Indlim()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_Indlim failed" )
+###			return
+		
+		#############################
 		# 新・過去ふぁぼ保存
 		wRes = self.Set_RateFV()
 		if wRes!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateFV failed" )
-			return
+###			return
 		
 		#############################
 		# 新・過去RIP保存
 		wRes = self.Set_RateRIP()
 		if wRes!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateRIP failed" )
-			return
+###			return
 		
 		#############################
 		# 処理結果ログ
-		wStr = self.CHR_LogName + " 結果: 新Riply=" + str(self.STR_Cope['Now_Cope']) + " Ans=" + str(self.STR_Cope['Now_Rip']) + '\n'
+		wStr = self.CHR_LogName + " 結果: 新Riply=" + str(self.STR_Cope['Now_Cope']) + " Ans=" + str(self.STR_Cope['Now_Rip']) + " Limit=" + str(self.STR_Ind['Count']) + '\n'
 		wStr = wStr + "Ind=[Cope:" + str(self.STR_Cope['Ind_Cope']) + " On:" + str(self.STR_Cope['Ind_On']) + " Off:" + str(self.STR_Cope['Ind_Off'])
 		wStr = wStr + " Invalid:" + str(self.STR_Cope['Ind_Inv']) + " Failed:" + str(self.STR_Cope['Ind_Fail']) + "]"
 		wStr = wStr + " Favo=" + str(self.STR_Cope['Now_Favo']) + " Follow=" + str(self.STR_Cope['Now_Follow']) + " Reind=" + str(self.STR_Cope['Now_Reind'])
@@ -319,6 +360,7 @@ class CLS_LookRIP():
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeFavo: Mastodon error: " + wRes['Reason'] )
 			return
 		
+		self.STR_Ind['Count'] += 1	#通知制限カウント
 		self.STR_Cope['Now_Favo'] += 1
 		return
 
@@ -386,6 +428,7 @@ class CLS_LookRIP():
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeReind: Mastodon error: " + wRes['Reason'] )
 			return
 		
+		self.STR_Ind['Count'] += 1	#通知制限カウント
 		self.STR_Cope['Now_Reind'] += 1
 		return
 
@@ -469,10 +512,6 @@ class CLS_LookRIP():
 			return wRes
 		
 		#############################
-		# 反応リプライ時間範囲の算出(分→秒へ)
-		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
-		
-		#############################
 		# type別に取り込み先を振り分け
 		wFavID = []
 		for wToot in wGet_TootList :
@@ -480,7 +519,7 @@ class CLS_LookRIP():
 			
 			#############################
 			# トゥートの時間 (変換＆差)
-			wGetLag = CLS_OSIF.sTimeLag( str(wToot['created_at']), inThreshold=wReaRIPmin )
+			wGetLag = CLS_OSIF.sTimeLag( str(wToot['created_at']), inThreshold=self.VAL_ReaRIPmin )
 			if wGetLag['Result']!=True :
 				self.STR_Cope['Ind_Fail'] += 1
 				continue
@@ -489,7 +528,6 @@ class CLS_LookRIP():
 				continue	#反応時間外
 			
 			wGetTime = str(wGetLag['InputTime'])
-###			CLS_OSIF.sPrn( str(wGetLag['RateSec']) )
 			
 			#############################
 			# 相手ユーザ名
@@ -543,26 +581,21 @@ class CLS_LookRIP():
 ##					CLS_OSIF.sPrn( "xxx1: " + wID )
 					### この周では既に通知を出してるid
 					if wID in wFavID :
-##						CLS_OSIF.sPrn( "xxx2: " + wID )
 						self.STR_Cope['Ind_Inv'] += 1
 						continue
 					
 					wFavID.append( wID )	#被り防止
-##					CLS_OSIF.sPrn( str(wFavID) )
 					self.__setReindRIP( self.ARR_Reind, wFulluser['Fulluser'], wGetTime, wToot, wID )
 					self.STR_Cope['Ind_On'] += 1
 					continue
 				
 				wID = str(wToot['status']['id'])
-##				CLS_OSIF.sPrn( "xxx3: " + wID )
 				### この周では既に通知を出してるid
 				if wID in wFavID :
-##					CLS_OSIF.sPrn( "xxx4: " + wID )
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				
 				wFavID.append( wID )	#被り防止
-##				CLS_OSIF.sPrn( str(wFavID) )
 				self.__setNewRIP( self.ARR_NewFavo, wFulluser['Fulluser'], wGetTime, wToot )
 				self.STR_Cope['Ind_On'] += 1
 			
@@ -624,6 +657,7 @@ class CLS_LookRIP():
 		outARRrip[wIndex].update({ "display_name" : inToot['account']['display_name'] })
 		outARRrip[wIndex].update({ "Timedate"     : inTime })
 		outARRrip[wIndex].update({ "visibility"   : "public" })
+		outARRrip[wIndex].update({ "created_at"   : inToot['created_at'] })
 		
 		#############################
 		# 公開範囲
@@ -669,6 +703,7 @@ class CLS_LookRIP():
 		outARRrip[wIndex].update({ "display_name" : inToot['account']['display_name'] })
 		outARRrip[wIndex].update({ "Timedate"     : inTime })
 		outARRrip[wIndex].update({ "visibility"   : inToot['status']['visibility'] })
+		outARRrip[wIndex].update({ "created_at"   : inToot['created_at'] })
 		outARRrip[wIndex].update({ "status_id" : str( inStatusID ) })
 		outARRrip[wIndex].update({ "content"   : wCont })
 		outARRrip[wIndex].update({ "spoiler_text"      : CLS_OSIF.sDel_HTML( inToot['status']['spoiler_text'] ) })
@@ -710,16 +745,12 @@ class CLS_LookRIP():
 			return False	#失敗
 		
 		#############################
-		# 反応リプライ時間範囲の算出(分→秒へ)
-		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
-		
-		#############################
 		# 過去ふぁぼの作成
 		# 反応時間内のidを詰め込む
 		self.ARR_RateFV = []
 		for wLine in wRateList :
 			wFavData = wLine.split(",")
-			wGetLag  = CLS_OSIF.sTimeLag( wFavData[1], inThreshold=wReaRIPmin )
+			wGetLag  = CLS_OSIF.sTimeLag( wFavData[1], inThreshold=self.VAL_ReaRIPmin )
 			if wGetLag['Result']!=True :
 				continue
 			if wGetLag['Beyond']==True :
@@ -766,6 +797,100 @@ class CLS_LookRIP():
 			return False	#失敗
 		
 		return True			#成功
+
+
+
+#####################################################
+# 通知制限取得・保存
+#####################################################
+	def Get_Indlim(self):
+		#############################
+		# 読み出し先初期化
+		wARR_Lim = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['IndLim_File']
+		if CLS_File.sReadFile( wFile_path, outLine=wARR_Lim )!=True :
+			return False	#失敗
+		
+		wARR_Lim = wARR_Lim[0].split(",")
+		if len( wARR_Lim )!= 2 :
+			return False	#失敗
+		
+		#############################
+		# データに取り込む
+		self.STR_Ind['Count'] = int(wARR_Lim[0])
+		self.STR_Ind['TimeDate'] = wARR_Lim[1]
+		
+		#############################
+		# 制限時間が過ぎたか
+		wGetLag = CLS_OSIF.sTimeLag( self.STR_Ind['TimeDate'], inThreshold=self.VAL_indLimmin )
+		if wGetLag['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: Get_Indlim: Time lag calculation failure" )
+		else :
+			if wGetLag['Beyond']==True :
+			#############################
+			# 通知制限が過ぎたので制限解除
+				self.STR_Ind['Count'] = 0
+				self.STR_Ind['TimeDate'] = ""
+				self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_LookRIP: Get_Indlim: 通知制限 [解除]" )
+		
+		return True			#成功
+
+	#####################################################
+	def Set_Indlim(self):
+		#############################
+		# 保存形式を整える
+		wARR_Lim = []
+		wLim = str(self.STR_Ind['Count']) + "," + self.STR_Ind['TimeDate']
+		wARR_Lim.append( wLim )
+		
+		#############################
+		# ファイル書き込み (改行つき)
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['IndLim_File']
+		if CLS_File.sWriteFile( wFile_path, wARR_Lim )!=True :
+			return False	#失敗
+		
+		return True			#成功
+
+
+#####################################################
+# 通知制限 判定
+#####################################################
+	def Check_Indlim( self, inCreateAt ):
+		#############################
+		# この周回は制限中
+		if self.FLG_indLim==True :
+			self.STR_Ind['Count'] += 1	#カウントはする
+			return False	#制限
+		
+		#############################
+		# 回数チェック
+		if self.STR_Ind['Count']<gVal.STR_Config['indLimcnt'] :
+			return True		#制限なし
+		
+		#############################
+		# 規制中
+		if self.STR_Ind['TimeDate']!="" :
+			self.STR_Ind['Count'] += 1	#カウントはする
+			self.FLG_indLim = True
+			return False	#制限
+		
+		#############################
+		# 制限開始
+		self.STR_Ind['Count'] += 1	#カウントはする
+		self.STR_Ind['TimeDate'] = str(inCreateAt)
+		self.FLG_indLim = True
+		self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_LookRIP: Check_Indlim: 通知制限 [開始]" )
+		
+		#############################
+		# 管理者がいれば通知する
+		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
+			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.STR_Config['indLimmin']) + "分"
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility="direct" )
+		
+		return False	#制限
 
 
 

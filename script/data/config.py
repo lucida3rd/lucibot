@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/15
+#   Update  ：2019/4/17
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -674,6 +674,8 @@ class CLS_Config() :
 		gVal.STR_Config["reaRIPmin"] = int( gVal.STR_Config["reaRIPmin"] )
 		gVal.STR_Config["getHTLnum"] = int( gVal.STR_Config["getHTLnum"] )
 		gVal.STR_Config["getFollowMnum"] = int( gVal.STR_Config["getFollowMnum"] )
+		gVal.STR_Config["indLimmin"] = int( gVal.STR_Config["indLimmin"] )
+		gVal.STR_Config["indLimcnt"] = int( gVal.STR_Config["indLimcnt"] )
 		
 		wRes['Responce'] = wFilename
 		wRes['Result'] = True

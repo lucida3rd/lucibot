@@ -103,13 +103,15 @@ class gVal() :
 		"IND_Follow"	: "off",					#フォロー通知
 		"getRIPnum"			: 120,						#リプライ取得数
 		"reaRIPmin"			: 10,						#反応リプライ時間(分)
+		"indLimmin"			: 5,						#通知制限時間(分)
+		"indLimcnt"			: 3,						#通知回数制限
 		
 		"HTL_Boost"		: "off",					#ホームブースト
 		"getHTLnum"			: 120,						#HTL取得数
 		
-		"TrafficCnt"	: "off",					#トラヒック集計
-		
-		"WordCorrect"	: "off",					#個別ワード収集
+##		"TrafficCnt"	: "off",					#トラヒック集計
+##		
+##		"WordCorrect"	: "off",					#個別ワード収集
 		
 		"AutoFollow"	: "off",					#フォロー監視モード
 		"getFollowMnum"		: 10,						#フォロー処理数
@@ -164,6 +166,7 @@ class gVal() :
 		"Rate_PTLFile"			: "data/rptl.txt",
 		"Rate_RipFile"			: "data/rreply.txt",
 		"Rate_FavFile"			: "data/rfav.txt",
+		"IndLim_File"			: "data/indlim.txt",
 		
 		"(dummy)"				: 0
 	}

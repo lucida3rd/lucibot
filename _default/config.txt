@@ -9,13 +9,11 @@ IND_Favo_CW=off
 IND_Follow=off
 getRIPnum=120
 reaRIPmin=10
+indLimmin=5
+indLimcnt=3
 
 HTL_Boost=off
 getHTLnum=120
-
-Traffic=off
-
-WordCorrect=off
 
 AutoFollow=off
 getFollowMnum=5
