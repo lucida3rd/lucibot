@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/18
+#   Update  ：2019/4/30
 #####################################################
 # Private Function:
 #   __run(self):
@@ -878,15 +878,15 @@ class CLS_LookRIP():
 				self.STR_Ind['TimeDate'] = str(inCreateAt)
 			return True		#制限なし
 		
-		#############################
 		# 規制中
-		if self.STR_Ind['TimeDate']!="" :
+		elif self.STR_Ind['Count']>gVal.STR_Config['indLimcnt'] :
 			self.STR_Ind['Count'] += 1	#カウントはする
 			self.FLG_indLim = True
 			return False	#制限
 		
 		#############################
 		# 制限開始
+		####  self.STR_Ind['Count'] == gVal.STR_Config['indLimcnt']
 		self.STR_Ind['Count'] += 1	#カウントはする
 ###		self.STR_Ind['TimeDate'] = str(inCreateAt)
 		self.FLG_indLim = True
