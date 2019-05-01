@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/16
+#   Update  ：2019/5/1
 #####################################################
 # Private Function:
 #   __run(self):
@@ -149,6 +149,10 @@ class CLS_LookHTL():
 		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
 		#リプライは除外（先頭に@付きトゥート）
 		if wCont.find('@') == 0 :
+			return
+		
+		#通知は除外
+		if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
 			return
 		
 		#############################
