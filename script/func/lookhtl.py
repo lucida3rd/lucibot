@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/5/1
+#   Update  ：2019/5/2
 #####################################################
 # Private Function:
 #   __run(self):
@@ -140,7 +140,7 @@ class CLS_LookHTL():
 # 新トゥートへの対応
 #####################################################
 	def __cope( self, inROW ) :
-##		wHitPatt = []
+###		wHitPatt = []
 		
 		#公開トゥート以外は除外
 		if inROW['visibility']!="public" :
@@ -180,14 +180,15 @@ class CLS_LookHTL():
 		#############################
 		#解析種類の判定
 		for wKey in wKeylist :
+			wKind = self.ARR_AnapTL[wKey]['Kind']
+			
 			#############################
 			#解析：ブースト
-			wKind = self.ARR_AnapTL[wKey]['Kind']
 			if wKind == 'h' :
-##				#############################
-##				#既に同じ処理をしたか
-##				if CLS_UserData.sChkHitPatt( wHitPatt, wKind )==True :
-##					continue	#既に同じ処理した
+###				#############################
+###				#既に同じ処理をしたか
+###				if CLS_UserData.sChkHitPatt( wHitPatt, wKind )==True :
+###					continue	#既に同じ処理した
 				
 				#############################
 				#自分が指定ユーザか
@@ -204,14 +205,39 @@ class CLS_LookHTL():
 				
 				#############################
 				#パターンマッチ
-				wMatch = CLS_OSIF.sRe_Search( self.ARR_AnapTL[wKey]['Tag'], wCont )
+				wPatt = "#" + self.ARR_AnapTL[wKey]['Tag']
+				wMatch = CLS_OSIF.sRe_Search( wPatt, wCont )
 				if wMatch :
 					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
 					if wRes['Result']!=True :
 						return	#失敗
 					
 					self.STR_Cope["Now_Boot"] += 1
-##					wHitPatt.append( wKind )
+###					wHitPatt.append( wKind )
+					break	# 1つの実行で止めておく
+		
+			#############################
+			#解析：指定フルブースト
+			if wKind == 'p' :
+###				#############################
+###				#既に同じ処理をしたか
+###				if CLS_UserData.sChkHitPatt( wHitPatt, wKind )==True :
+###					continue	#既に同じ処理した
+				
+				#############################
+				#自分が指定ユーザではない
+				if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
+					continue	#指定ではない
+				
+				#############################
+				#対象のブーストユーザか
+				if self.ARR_AnapTL[wKey]['Tag']==wFulluser :
+					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
+					if wRes['Result']!=True :
+						return	#失敗
+					
+					self.STR_Cope["Now_Boot"] += 1
+###					wHitPatt.append( wKind )
 					break	# 1つの実行で止めておく
 		
 		return
@@ -317,7 +343,7 @@ class CLS_LookHTL():
 			self.ARR_AnapTL.update({ wIndex : "" })
 			self.ARR_AnapTL[wIndex] = {}
 			self.ARR_AnapTL[wIndex].update({ "Kind"     : wLine[0] })
-			self.ARR_AnapTL[wIndex].update({ "Tag"      : "#" + wLine[1] })
+			self.ARR_AnapTL[wIndex].update({ "Tag"      : wLine[1] })
 			self.ARR_AnapTL[wIndex].update({ "Fulluser" : wLine[2] })
 			wIndex += 1
 		
