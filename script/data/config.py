@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/17
+#   Update  ：2019/5/6
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -79,8 +79,8 @@ class CLS_Config() :
 		"IND_Favo_CW"	: True,
 		"IND_Follow"	: True,
 		"HTL_Boost"		: True,
-		"TrafficCnt"	: True,
-		"WordCorrect"	: True,
+##		"TrafficCnt"	: True,
+##		"WordCorrect"	: True,
 		"AutoFollow"	: False,
 ##		"Mainte"		: False,
 		"JPonly"		: True
