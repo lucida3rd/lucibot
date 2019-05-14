@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/5/2
+#   Update  ：2019/5/14
 #####################################################
 # Private Function:
 #   __run(self):
@@ -41,6 +41,8 @@ class CLS_LookHTL():
 		"Now_Boot"  : 0,		#今ブーストした数
 		
 		"OffTime"   : 0,		#時間外で未処理
+		"Outrange"  : 0,		#範囲外
+		"Invalid"   : 0,		#その他の除外
 		"dummy"     : 0	#(未使用)
 	}
 
@@ -93,6 +95,10 @@ class CLS_LookHTL():
 		# TLチェック
 		self.ARR_UpdateTL = []
 		for wROW in self.ARR_NewTL :
+###			wR = "----------------------" + '\n'
+###			wR = wR + str(wROW) + '\n'
+###			CLS_OSIF.sPrn( str(wR) )
+			
 			#############################
 			# チェックするので新過去TLに保管
 			self.ARR_UpdateTL.append( wROW['id'] )
@@ -126,6 +132,8 @@ class CLS_LookHTL():
 		wStr = self.CHR_LogName + " 結果: 新Toot=" + str(self.STR_Cope['Now_Cope'])
 		wStr = wStr + " Boost=" + str(self.STR_Cope['Now_Boot'])
 		wStr = wStr + " OffTime=" + str(self.STR_Cope['OffTime'])
+		wStr = wStr + " Outrange=" + str(self.STR_Cope['Outrange'])
+		wStr = wStr + " Invalid=" + str(self.STR_Cope['Invalid'])
 
 		if gVal.FLG_Test_Mode==False :
 			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
@@ -144,25 +152,35 @@ class CLS_LookHTL():
 		
 		#公開トゥート以外は除外
 		if inROW['visibility']!="public" :
+			self.STR_Cope['Outrange'] += 1
 			return
 		
 		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
 		#リプライは除外（先頭に@付きトゥート）
 		if wCont.find('@') == 0 :
+			self.STR_Cope['Outrange'] += 1
 			return
 		
 		#通知は除外
 		if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
+			self.STR_Cope['Outrange'] += 1
+			return
+		
+		#ブーストトゥートは除外
+		if inROW['reblog']!=None :
+			self.STR_Cope['Outrange'] += 1
 			return
 		
 		#############################
 		# 相手ユーザ名
 		wFulluser = CLS_UserData.sGetFulluser( inROW['account']['username'], inROW['account']['url'] )
 		if wFulluser['Result']!=True :
+			self.STR_Cope['Invalid'] += 1
 			return
 		wFulluser = wFulluser['Fulluser']
 		#自分ならスキップ
 		if wFulluser == self.Obj_Parent.CHR_Account :
+			self.STR_Cope['Invalid'] += 1
 			return
 		
 		#############################
@@ -170,6 +188,7 @@ class CLS_LookHTL():
 		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
 		wGetLag = CLS_OSIF.sTimeLag( str(inROW['created_at']), inThreshold=wReaRIPmin )
 		if wGetLag['Result']!=True :
+			self.STR_Cope['Invalid'] += 1
 			return
 		if wGetLag['Beyond']==True :
 			self.STR_Cope['OffTime'] += 1
@@ -210,6 +229,7 @@ class CLS_LookHTL():
 				if wMatch :
 					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
 					if wRes['Result']!=True :
+						self.STR_Cope['Invalid'] += 1
 						return	#失敗
 					
 					self.STR_Cope["Now_Boot"] += 1
@@ -234,6 +254,7 @@ class CLS_LookHTL():
 				if self.ARR_AnapTL[wKey]['Tag']==wFulluser :
 					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
 					if wRes['Result']!=True :
+						self.STR_Cope['Invalid'] += 1
 						return	#失敗
 					
 					self.STR_Cope["Now_Boot"] += 1
