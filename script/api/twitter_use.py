@@ -4,7 +4,7 @@
 # public
 #   Class   ：ついったーユーズ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/21
+#   Update  ：2019/8/22
 #####################################################
 # Private Function:
 #   __conn(self):
@@ -50,6 +50,8 @@ class CLS_Twitter_Use():
 
 	DEF_TWITTER_HOSTNAME = "twitter.com"	#Twitterホスト名
 	DEF_MOJI_ENCODE      = 'utf-8'			#ファイル文字エンコード
+	DEF_TWITTER_PING_COUNT   = "2"			#Ping回数 (文字型)
+	DEF_TWITTER_PING_TIMEOUT = "1000"		#Pingタイムアウト秒 (文字型)
 
 #####################################################
 # 初期化状態取得
@@ -568,8 +570,11 @@ class CLS_Twitter_Use():
 #####################################################
 # twitterサーバのPing確認
 #####################################################
-	def __TwitterPing( self, inCount=4 ):
-		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " " + str( self.DEF_TWITTER_HOSTNAME ) )
+##	def __TwitterPing( self, inCount=4 ):
+	def __TwitterPing(self):
+##		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " " + str( self.DEF_TWITTER_HOSTNAME ) )
+		wPingComm = "ping -c " + self.DEF_TWITTER_PING_COUNT + " -w " + self.DEF_TWITTER_PING_TIMEOUT + " " + self.DEF_TWITTER_HOSTNAME
+		wStatus, wResult = sp.getstatusoutput( wPingComm )
 		if wStatus==0 :
 			return True	# Link UP
 		
