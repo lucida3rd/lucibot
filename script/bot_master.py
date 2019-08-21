@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理(Master)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/7
+#   Update  ：2019/8/19
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -25,7 +25,7 @@
 from osif import CLS_OSIF
 
 
-from toot import CLS_Toot
+##from toot import CLS_Toot
 from config import CLS_Config
 from regist import CLS_Regist
 from userdata import CLS_UserData

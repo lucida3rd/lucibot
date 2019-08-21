@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/5/2
+#   Update  ：2019/8/21
 #####################################################
 # Private Function:
 #   __run(self):
@@ -93,11 +93,13 @@ class CLS_LookRIP():
 		
 		#############################
 		# 反応リプライ時間範囲の算出(分→秒へ)
-		self.VAL_ReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
+##		self.VAL_ReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
+		self.VAL_ReaRIPmin = gVal.reaRIPmin['reaRIPmin'] * 60	#秒に変換
 		
 		#############################
 		# 通知制限時間の算出(分→秒へ)
-		self.VAL_indLimmin = gVal.STR_Config['indLimmin'] * 60	#秒に変換
+##		self.VAL_indLimmin = gVal.STR_Config['indLimmin'] * 60	#秒に変換
+		self.VAL_indLimmin = gVal.STR_TLnum['indLimmin'] * 60	#秒に変換
 		
 		self.Obj_Parent = parentObj
 		self.__run()	#処理開始
@@ -160,7 +162,8 @@ class CLS_LookRIP():
 		
 		#############################
 		# ふぁぼ、ぶーすとチェック
-		if gVal.STR_Config['IND_Favo']=="on" :
+##		if gVal.STR_Config['IND_Favo']=="on" :
+		if gVal.STR_MasterConfig['IND_Favo']=="on" :
 			wKeylist = self.ARR_NewFavo.keys()
 			for wKey in wKeylist :
 				#############################
@@ -207,7 +210,8 @@ class CLS_LookRIP():
 		
 		#############################
 		# ふぉろーチェック
-		if gVal.STR_Config['IND_Follow']=="on" :
+##		if gVal.STR_Config['IND_Follow']=="on" :
+		if gVal.STR_MasterConfig['IND_Follow']=="on" :
 			wKeylist = self.ARR_NewFollow.keys()
 			for wKey in wKeylist :
 				#############################
@@ -226,7 +230,8 @@ class CLS_LookRIP():
 		
 		#############################
 		# リプライチェック
-		if gVal.STR_Config['RIP_Favo']=="on" :
+##		if gVal.STR_Config['RIP_Favo']=="on" :
+		if gVal.STR_MasterConfig['RIP_Favo']=="on" :
 			wKeylist = self.ARR_NewRip.keys()
 			for wKey in wKeylist :
 				#############################
@@ -316,43 +321,44 @@ class CLS_LookRIP():
 		
 		#############################
 		# CWトゥートで送信
-		if gVal.STR_Config['IND_Favo_CW']=="on" :
-			#############################
-			# タイトルの組み立て
-			wSpoText = self.DEF_TITLE_INFORMATION + "注目されたトゥート"
-			
-			#############################
-			# トゥートの組み立て
-			wToot = "以下のトゥートが注目されました。:" + '\n'
-			wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
-			wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
-			
-			#############################
-			# 管理者がいれば通知する
-			if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-				wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
-			
-			#############################
-			# トゥートの送信
-			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, spoiler_text=wSpoText, visibility=inROW['visibility'] )
+##		if gVal.STR_Config['IND_Favo_CW']=="on" :
+		#############################
+		# タイトルの組み立て
+		wSpoText = self.DEF_TITLE_INFORMATION + "注目されたトゥート"
 		
 		#############################
-		# ノーマルのトゥートで送信
-		else :
-			#############################
-			# トゥートの組み立て
-			wToot = self.DEF_TITLE_INFORMATION + " 以下のトゥートが注目されました。:" + '\n'
-			wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
-			wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
-			
-			#############################
-			# 管理者がいれば通知する
-			if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-				wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
-			
-			#############################
-			# トゥートの送信
-			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
+		# トゥートの組み立て
+		wToot = "以下のトゥートが注目されました。:" + '\n'
+##		wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
+		wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iActionTag'] + '\n'
+		wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
+		
+		#############################
+		# 管理者がいれば通知する
+		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
+			wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+		
+		#############################
+		# トゥートの送信
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, spoiler_text=wSpoText, visibility=inROW['visibility'] )
+		
+##		#############################
+##		# ノーマルのトゥートで送信
+##		else :
+##			#############################
+##			# トゥートの組み立て
+##			wToot = self.DEF_TITLE_INFORMATION + " 以下のトゥートが注目されました。:" + '\n'
+##			wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
+##			wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
+##			
+##			#############################
+##			# 管理者がいれば通知する
+##			if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
+##				wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+##			
+##			#############################
+##			# トゥートの送信
+##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
 		
 		#############################
 		# 結果判定
@@ -377,7 +383,8 @@ class CLS_LookRIP():
 		#############################
 		# トゥートの組み立て
 		wToot = self.DEF_TITLE_NEW_FOLLOWER + " " + inROW['display_name'] + " (" + inROW['Fulluser'] + ") さんにフォローされました。"
-		wToot = wToot + " " + gVal.STR_MasterConfig['iFavoTag']
+##		wToot = wToot + " " + gVal.STR_MasterConfig['iFavoTag']
+		wToot = wToot + " " + gVal.STR_MasterConfig['iActionTag']
 		
 		#############################
 		# 管理者がいれば通知する
@@ -405,22 +412,22 @@ class CLS_LookRIP():
 		
 		#############################
 		# CWトゥートで送信
-		if gVal.STR_Config['IND_Favo_CW']=="on" :
-			wSpoText = inROW['spoiler_text']
-			wToot    = inROW['content']
-			
-			#############################
-			# トゥートの送信
-			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, spoiler_text=wSpoText, visibility=inROW['visibility'] )
+##		if gVal.STR_Config['IND_Favo_CW']=="on" :
+		wSpoText = inROW['spoiler_text']
+		wToot    = inROW['content']
 		
 		#############################
-		# ノーマルのトゥートで送信
-		else :
-			wToot = inROW['content']
-			
-			#############################
-			# トゥートの送信
-			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
+		# トゥートの送信
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, spoiler_text=wSpoText, visibility=inROW['visibility'] )
+		
+##		#############################
+##		# ノーマルのトゥートで送信
+##		else :
+##			wToot = inROW['content']
+##			
+##			#############################
+##			# トゥートの送信
+##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
 		
 		#############################
 		# 結果判定
@@ -441,8 +448,8 @@ class CLS_LookRIP():
 		#############################
 		# directかprivateリプライの場合はニコる
 		if inROW['visibility']=="direct" or \
-		   ( inROW['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" ) :
-
+##		   ( inROW['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" ) :
+		   inROW['visibility']=="private" :
 			wRes = self.Obj_Parent.OBJ_MyDon.Favo( inROW['status_id'] )
 			if wRes['Result']!=True :
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeRIP: Favo error: " + wRes['Reason'] )
@@ -473,7 +480,8 @@ class CLS_LookRIP():
 		
 		wGet_TootList = []
 		wNext_Id = None
-		wMax_Toots = gVal.STR_Config["getRIPnum"]
+##		wMax_Toots = gVal.STR_Config["getRIPnum"]
+		wMax_Toots = gVal.STR_TLnum["getRIPnum"]
 		while (len(wGet_TootList) < wMax_Toots ):
 			#############################
 			# TL取得
@@ -539,7 +547,8 @@ class CLS_LookRIP():
 			#############################
 			# ふぁぼ or ぶーすと
 			if ( wToot['type']=="favourite" or wToot['type']=="reblog" ) \
-			  and gVal.STR_Config['IND_Favo']=="on" :
+##			  and gVal.STR_Config['IND_Favo']=="on" :
+			  and gVal.STR_MasterConfig['IND_Favo']=="on" :
 				### タグなしcontents
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
 				wInde = wCont.find( "[Admin]" )
@@ -550,12 +559,16 @@ class CLS_LookRIP():
 				if wCont.find("@") >= 0 :
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
-				### directの場合、通知しない
-				if wToot['status']['visibility']=="direct" :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-				### privateの場合、configで有効でなければ通知しない
-				if wToot['status']['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" :
+##				### directの場合、通知しない
+##				if wToot['status']['visibility']=="direct" :
+##					self.STR_Cope['Ind_Inv'] += 1
+##					continue
+##				### privateの場合、configで有効でなければ通知しない
+##				if wToot['status']['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" :
+##					self.STR_Cope['Ind_Inv'] += 1
+##					continue
+				### public以外の場合、通知しない
+				if wToot['status']['visibility']!="public" :
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				### ユーザ登録されていたら通知しない
@@ -565,7 +578,8 @@ class CLS_LookRIP():
 					continue
 				
 				### 通知のふぁぼ、ぶーすとか
-				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
+##				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
+				if wCont.find( gVal.STR_MasterConfig['iActionTag'] ) >= 0 :
 					### ふぉろー通知のふぁぼ、ぶーすとは通知しない
 					if wCont.find( self.DEF_TITLE_NEW_FOLLOWER ) == 0 :
 						self.STR_Cope['Ind_Inv'] += 1
@@ -601,7 +615,8 @@ class CLS_LookRIP():
 			
 			#############################
 			# ふぉろー
-			elif wToot['type']=="follow" and gVal.STR_Config['IND_Follow']=="on" :
+##			elif wToot['type']=="follow" and gVal.STR_Config['IND_Follow']=="on" :
+			elif wToot['type']=="follow" and gVal.STR_MasterConfig['IND_Follow']=="on" :
 				### ユーザ登録されていたら通知しない
 				wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
 				if wUserChk['Result']!=True or wUserChk['Registed']==True :
@@ -613,10 +628,12 @@ class CLS_LookRIP():
 			
 			#############################
 			# めんしょん
-			elif wToot['type']=="mention" and gVal.STR_Config['RIP_Favo']=="on" :
+##			elif wToot['type']=="mention" and gVal.STR_Config['RIP_Favo']=="on" :
+			elif wToot['type']=="mention" and gVal.STR_MasterConfig['RIP_Favo']=="on" :
 				### 通知付きのめんしょんは反応しない(=adminへの通知)
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
-				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
+##				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
+				if wCont.find( gVal.STR_MasterConfig['iActionTag'] ) >= 0 :
 					self.STR_Cope['Ind_Inv'] += 1
 					continue
 				
@@ -873,13 +890,15 @@ class CLS_LookRIP():
 		
 		#############################
 		# 回数チェック
-		if self.STR_Ind['Count']<gVal.STR_Config['indLimcnt'] :
+##		if self.STR_Ind['Count']<gVal.STR_Config['indLimcnt'] :
+		if self.STR_Ind['Count']<gVal.STR_TLnum['indLimcnt'] :
 			if self.STR_Ind['Count']==0 :	#最初にカウント開始した時間をメモる
 				self.STR_Ind['TimeDate'] = str(inCreateAt)
 			return True		#制限なし
 		
 		# 規制中
-		elif self.STR_Ind['Count']>gVal.STR_Config['indLimcnt'] :
+##		elif self.STR_Ind['Count']>gVal.STR_Config['indLimcnt'] :
+		elif self.STR_Ind['Count']>gVal.STR_TLnum['indLimcnt'] :
 			self.STR_Ind['Count'] += 1	#カウントはする
 			self.FLG_indLim = True
 			return False	#制限
@@ -895,7 +914,8 @@ class CLS_LookRIP():
 		#############################
 		# 管理者がいれば通知する
 		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.STR_Config['indLimmin']) + "分"
+##			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.STR_Config['indLimmin']) + "分"
+			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.STR_TLnum['indLimmin']) + "分"
 			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility="direct" )
 		
 		return False	#制限

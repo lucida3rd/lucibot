@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：cronテスト
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/8
+#   Update  ：2019/8/18
 #####################################################
 # Private Function:
 #   __testLog( self, inKind, inAccount  ):
@@ -45,9 +45,8 @@ class CLS_CronTest():
 #     2.データフォルダチェック
 #     3.Master環境情報ロード(チェック)
 #     4.Userフォルダチェック
-#     5.User環境情報ロード(チェック)
-#     6.実行権限チェック
-#     7.testログ
+#     5.実行権限チェック
+#     6.testログ
 #
 #   Backgroundテスト項目
 #     1.データフォルダチェック
@@ -76,11 +75,11 @@ class CLS_CronTest():
 		wKind    = wArg[0]
 		wAccount = wArg[1]
 		
-		#############################
-		# Backgroundのチェックは別でやる
-		if wKind==gVal.DEF_CRON_BACK and wAccount==gVal.DEF_CRON_ACCOUNT_BACKGROUND :
-			wRes = self.__backgroundTest( outRes=wRes )
-			return wRes
+##		#############################
+##		# Backgroundのチェックは別でやる
+##		if wKind==gVal.DEF_CRON_BACK and wAccount==gVal.DEF_CRON_ACCOUNT_BACKGROUND :
+##			wRes = self.__backgroundTest( outRes=wRes )
+##			return wRes
 		
 		#############################
 		# 1.jobチェック
@@ -144,21 +143,21 @@ class CLS_CronTest():
 		
 		wUserPath = wRes['Responce']
 		
-		#############################
-		# 5.User環境情報の読み込み
-		wRes = CLS_Config.sGetUserConfig( wAccount )
-		if wRes['Result']!=True :
-			wRes = wCLS_Botjob.Del( wKind, wAccount )	#cronを削除する
-			if wRes['Result']!=True :
-				wStr = "CLS_CronTest: Cron delete failed: " + wRes['Reason']
-				CLS_OSIF.sPrn( wStr  )	#メールに頼る
-			
-			wStr = "User環境情報に異常があったため、" + wAccount
-			wStr = wStr + "のcronを停止しました。"
-			CLS_OSIF.sPrn( wStr  )		#メールに頼る
-			
-			wRes['Result'] = False	#テストはNG
-			return wRes
+##		#############################
+##		# 5.User環境情報の読み込み
+##		wRes = CLS_Config.sGetUserConfig( wAccount )
+##		if wRes['Result']!=True :
+##			wRes = wCLS_Botjob.Del( wKind, wAccount )	#cronを削除する
+##			if wRes['Result']!=True :
+##				wStr = "CLS_CronTest: Cron delete failed: " + wRes['Reason']
+##				CLS_OSIF.sPrn( wStr  )	#メールに頼る
+##			
+##			wStr = "User環境情報に異常があったため、" + wAccount
+##			wStr = wStr + "のcronを停止しました。"
+##			CLS_OSIF.sPrn( wStr  )		#メールに頼る
+##			
+##			wRes['Result'] = False	#テストはNG
+##			return wRes
 		
 		#############################
 		# 6.実行権限チェック
@@ -169,13 +168,14 @@ class CLS_CronTest():
 			if wAccount!=gVal.STR_MasterConfig['MasterUser'] :
 				wFlg_Authority = False
 		
-		elif wKind==gVal.DEF_CRON_BACK :	# Background以外か
-			if wAccount!=gVal.DEF_CRON_ACCOUNT_BACKGROUND :
-				wFlg_Authority = False
+##		elif wKind==gVal.DEF_CRON_BACK :	# Background以外か
+##			if wAccount!=gVal.DEF_CRON_ACCOUNT_BACKGROUND :
+##				wFlg_Authority = False
 		
 		elif wKind==gVal.DEF_CRON_SUB :	# Sub以外か
-			if wAccount==gVal.STR_MasterConfig['MasterUser'] or \
-			   wAccount==gVal.DEF_CRON_ACCOUNT_BACKGROUND :
+##			if wAccount==gVal.STR_MasterConfig['MasterUser'] or \
+##			   wAccount==gVal.DEF_CRON_ACCOUNT_BACKGROUND :
+			if wAccount==gVal.STR_MasterConfig['MasterUser'] :
 				wFlg_Authority = False
 		
 		else :
@@ -211,48 +211,48 @@ class CLS_CronTest():
 #####################################################
 # Background用テスト
 #####################################################
-	def __backgroundTest( self, outRes ):
-		#############################
-		# ※コール時に厳選してるので
-		#   Account、Kindの権限チェックは合格しているものとする
-		
-		wFlg_ok = True
-		#############################
-		# 1.データフォルダのチェック
-		if CLS_File.sExist( gVal.DEF_USERDATA_PATH )!=True :
-			wFlg_ok = False
-		
-		#############################
-		# 2.Master環境情報の読み込み
-		if CLS_Config.sGetMasterConfig()!=True :
-			wFlg_ok = False
-		
-		#############################
-		# Master環境情報に異常はないか
-		if wFlg_ok==False :
-			wRes = wCLS_Botjob.Stop()	#全cronを削除する
-			if wRes['Result']!=True :
-				wStr = "CLS_CronTest: __backgroundTest: Cron stop failed: " + wRes['Reason']
-				CLS_OSIF.sPrn( wStr  )	#メールに頼る
-			
-			wStr = "Master環境情報に異常があったため、" + gVal.STR_SystemInfo['Client_Name']
-			wStr = wStr + "で登録した全cronを停止しました。"
-			CLS_OSIF.sPrn( wStr  )		#メールに頼る
-			
-			return outRes	#NG
-		
-		#############################
-		# 3.testログ
-		self.__testLog( gVal.DEF_CRON_BACK, gVal.DEF_CRON_ACCOUNT_BACKGROUND )
-		
-		outRes['Responce'] = {}
-		outRes['Responce'].update({
-			"Kind"		: gVal.DEF_CRON_BACK,
-			"Account"	: gVal.DEF_CRON_ACCOUNT_BACKGROUND,
-			"User_path"	: gVal.STR_File['MasterConfig_path'] })
-		
-		outRes['Result'] = True
-		return
+##	def __backgroundTest( self, outRes ):
+##		#############################
+##		# ※コール時に厳選してるので
+##		#   Account、Kindの権限チェックは合格しているものとする
+##		
+##		wFlg_ok = True
+##		#############################
+##		# 1.データフォルダのチェック
+##		if CLS_File.sExist( gVal.DEF_USERDATA_PATH )!=True :
+##			wFlg_ok = False
+##		
+##		#############################
+##		# 2.Master環境情報の読み込み
+##		if CLS_Config.sGetMasterConfig()!=True :
+##			wFlg_ok = False
+##		
+##		#############################
+##		# Master環境情報に異常はないか
+##		if wFlg_ok==False :
+##			wRes = wCLS_Botjob.Stop()	#全cronを削除する
+##			if wRes['Result']!=True :
+##				wStr = "CLS_CronTest: __backgroundTest: Cron stop failed: " + wRes['Reason']
+##				CLS_OSIF.sPrn( wStr  )	#メールに頼る
+##			
+##			wStr = "Master環境情報に異常があったため、" + gVal.STR_SystemInfo['Client_Name']
+##			wStr = wStr + "で登録した全cronを停止しました。"
+##			CLS_OSIF.sPrn( wStr  )		#メールに頼る
+##			
+##			return outRes	#NG
+##		
+##		#############################
+##		# 3.testログ
+##		self.__testLog( gVal.DEF_CRON_BACK, gVal.DEF_CRON_ACCOUNT_BACKGROUND )
+##		
+##		outRes['Responce'] = {}
+##		outRes['Responce'].update({
+##			"Kind"		: gVal.DEF_CRON_BACK,
+##			"Account"	: gVal.DEF_CRON_ACCOUNT_BACKGROUND,
+##			"User_path"	: gVal.STR_File['MasterConfig_path'] })
+##		
+##		outRes['Result'] = True
+##		return
 
 
 #####################################################

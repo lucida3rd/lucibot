@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/5/14
+#   Update  ：2019/8/21
 #####################################################
 # Private Function:
 #   __run(self):
@@ -162,7 +162,8 @@ class CLS_LookHTL():
 			return
 		
 		#通知は除外
-		if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
+##		if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
+		if wCont.find( gVal.STR_MasterConfig['iActionTag'] ) >= 0 :
 			self.STR_Cope['Outrange'] += 1
 			return
 		
@@ -185,7 +186,8 @@ class CLS_LookHTL():
 		
 		#############################
 		# トゥートの時間 (変換＆差)
-		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
+##		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
+		wReaRIPmin = gVal.STR_TLnum['reaRIPmin'] * 60	#秒に変換
 		wGetLag = CLS_OSIF.sTimeLag( str(inROW['created_at']), inThreshold=wReaRIPmin )
 		if wGetLag['Result']!=True :
 			self.STR_Cope['Invalid'] += 1
@@ -271,7 +273,8 @@ class CLS_LookHTL():
 	def Get_HTL(self):
 		self.ARR_NewTL = []
 		wNext_Id = None
-		wMax_Toots = gVal.STR_Config["getHTLnum"]
+##		wMax_Toots = gVal.STR_Config["getHTLnum"]
+		wMax_Toots = gVal.STR_TLnum["getHTLnum"]
 		while (len(self.ARR_NewTL) < wMax_Toots ):
 			#############################
 			# TL取得

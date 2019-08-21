@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ情報収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/15
+#   Update  ：2019/8/17
 #####################################################
 # Private Function:
 #   __getUserInfo_Full(self) :
@@ -234,7 +234,8 @@ class CLS_UserCorr():
 		
 		#############################
 		# 外人か (日本人限定=ON時)
-		if inROW['language']!="ja" and gVal.STR_Config["JPonly"]=="on" :
+##		if inROW['language']!="ja" and gVal.STR_Config["JPonly"]=="on" :
+		if inROW['language']!="ja" and gVal.STR_MasterConfig["JPonly"]=="on" :
 			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_UserCorr: AddUser: 日本人以外を検出(登録除外): " + wFulluser['Fulluser'] )
 			return False		#スルーする
 		
@@ -286,7 +287,8 @@ class CLS_UserCorr():
 		
 		#############################
 		# 外人か (日本人限定=ON時)
-		if inROW['language']!="ja" and gVal.STR_Config["JPonly"]=="on" :
+##		if inROW['language']!="ja" and gVal.STR_Config["JPonly"]=="on" :
+		if inROW['language']!="ja" and gVal.STR_MasterConfig["JPonly"]=="on" :
 			self.STR_UserInfo[inKey]['Status'] = "X"
 			self.Obj_Parent.OBJ_Mylog.Log( 'b', "CLS_UserCorr: UpdateUser: 日本人以外を検出(登録抹消): " + inAccount['Fulluser'] )
 		

@@ -1,0 +1,11 @@
+
+TwitterUser=
+twCK=
+twCS=
+twAT=
+twAS=
+
+Mode=home
+List=
+NoReply=on
+Retweet=off

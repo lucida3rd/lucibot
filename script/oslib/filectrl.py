@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # coding: UTF-8
 #####################################################
-# るしぼっと4
+# public
 #   Class   ：ファイル制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/13
+#   Update  ：2019/5/21
 #####################################################
 # Private Function:
 #   (none)
@@ -19,10 +19,13 @@
 #   sMkdir( cls, inPath ):
 #   sCopytree( cls, inSrcPath, inDstPath ):
 #   sRmtree( cls, inPath ):
+#   sCopy( cls, inSrcPath, inDstPath ):
+#   sRename( cls, inSrcPath, inDstPath ):
 #   sClrFile( cls, inPath ):
 #   sWriteFile( cls, inPath, inSetLine ):
 #   sAddFile( cls, inPath, inSetLine ):
 #   sReadFile( cls, inPath, outLine ):
+#   sChmod( cls, inPath, inMod ):
 #
 #####################################################
 from datetime import datetime
@@ -147,6 +150,52 @@ class CLS_File() :
 
 
 #####################################################
+# ファイルコピー
+#####################################################
+	@classmethod
+	def sCopy( cls, inSrcPath, inDstPath ):
+		#############################
+		# 存在チェック
+		if cls().sExist( inSrcPath )!=True :
+			return False
+		
+		###inDstPathはそもそも存在しない前提
+		
+		#############################
+		# コピー
+		try:
+			shutil.copyfile( inSrcPath, inDstPath )
+		except ValueError as err :
+			return False
+		
+		return True
+
+
+
+#####################################################
+# ファイルリネーム
+#####################################################
+	@classmethod
+	def sRename( cls, inSrcPath, inDstPath ):
+		#############################
+		# 存在チェック
+		if cls().sExist( inSrcPath )!=True :
+			return False
+		
+		###inDstPathはそもそも存在しない前提
+		
+		#############################
+		# リネーム
+		try:
+			os.rename( inSrcPath, inDstPath )
+		except ValueError as err :
+			return False
+		
+		return True
+
+
+
+#####################################################
 # ファイル中身だけクリア
 #####################################################
 	@classmethod
@@ -262,6 +311,25 @@ class CLS_File() :
 			for wLine in open( inPath, 'r'):	#ファイルを開く
 				wLine = wLine.strip()
 				pList.append( wLine )
+		except ValueError as err :
+			return False
+		
+		return True
+
+
+
+#####################################################
+# ファイル権限変更
+#####################################################
+	@classmethod
+	def sChmod( cls, inPath, inMod ):
+		#############################
+		# 存在チェック
+		if cls().sExist( inPath )!=True :
+			return False
+		
+		try:
+			os.chmod( inPath, inMod )
 		except ValueError as err :
 			return False
 		

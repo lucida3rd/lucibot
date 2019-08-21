@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/21
+#   Update  ：2019/8/21
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -30,6 +30,8 @@ from config import CLS_Config
 from regist import CLS_Regist
 from userdata import CLS_UserData
 from bot_ctrl import CLS_Bot_Ctrl
+
+from twitter_use import CLS_Twitter_Use
 from gval import gVal
 #####################################################
 class CLS_Main_Console() :
@@ -100,6 +102,13 @@ class CLS_Main_Console() :
 			
 			wCLS_Config = ""
 		
+##		#############################
+##		# Twitterユーザ名の取得
+##		wCLS_work = CLS_Twitter_Use( gVal.STR_File['Twitter_File'], True )
+##		gVal.STR_MasterConfig['TwitterUser'] = wCLS_work.GetUsername()
+##		if gVal.STR_MasterConfig['TwitterUser']=="" :
+##			gVal.STR_MasterConfig['Twitter'] = "off"
+##		
 		#############################
 		# コンソールを表示
 		while True :
@@ -158,12 +167,12 @@ class CLS_Main_Console() :
 			wCLS_work = CLS_Config()
 			wCLS_work.MasterConfig_Disp()
 			wFlg = True
-		#############################
-		# User環境情報の表示
-		elif inCommand=="-vu" :
-			wCLS_work = CLS_Config()
-			wCLS_work.UserConfig_Disp()
-			wFlg = True
+##		#############################
+##		# User環境情報の表示
+##		elif inCommand=="-vu" :
+##			wCLS_work = CLS_Config()
+##			wCLS_work.UserConfig_Disp()
+##			wFlg = True
 		
 	#####################################################
 		#############################
@@ -184,23 +193,23 @@ class CLS_Main_Console() :
 			wCLS_work = CLS_Config()
 			wCLS_work.CnfAdminUser()
 			wFlg = True
-		#############################
-		# PR Userの変更
-		elif inCommand=="-cp" :
-			wCLS_work = CLS_Config()
-			wCLS_work.CnfPRUser()
-			wFlg = True
+##		#############################
+##		# PR Userの変更
+##		elif inCommand=="-cp" :
+##			wCLS_work = CLS_Config()
+##			wCLS_work.CnfPRUser()
+##			wFlg = True
 		
 	#####################################################
 		#############################
 		# ユーザ登録 一覧表示
 		elif inCommand=="-u" :
-			wCLS_work = CLS_Config()
-			wRes = wCLS_work.GetMulticastUserList()
-			if wRes['Result']!=True :
-				CLS_OSIF.sPrn( wRes['Reason'] )
-				return
-			
+##			wCLS_work = CLS_Config()
+##			wRes = wCLS_work.GetMulticastUserList()
+##			if wRes['Result']!=True :
+##				CLS_OSIF.sPrn( wRes['Reason'] )
+##				return
+##			
 			wCLS_work = CLS_UserData()
 			wCLS_work.ViewUserList( wRes['Responce'] )
 			wFlg = True
@@ -247,6 +256,13 @@ class CLS_Main_Console() :
 			wCLS_work.MulticastToot()
 			wFlg = True
 		
+		#############################
+		# Twitterモード
+		elif inCommand=="-tw" :
+			wCLS_work = CLS_Toot()
+			wCLS_work.ManualTweet()
+			wFlg = True
+		
 	#####################################################
 		#############################
 		# 通信テスト
@@ -271,6 +287,25 @@ class CLS_Main_Console() :
 ##			wCLS_work = CLS_Config()
 ##			wCLS_work.CnfMasterMainte()
 ##			wFlg = True
+		#############################
+		# Twitter連携
+		elif inCommand=="-ct" :
+			wCLS_Twitter = CLS_Twitter_Use()
+			wCLS_Twitter.CreateTwitter( gVal.STR_File['Twitter_File'], gVal.STR_File['defTwitter_File'] )
+##			gVal.STR_MasterConfig['TwitterUser'] = wCLS_Twitter.GetUsername()
+##			if gVal.STR_MasterConfig['TwitterUser']=="" :
+##				gVal.STR_MasterConfig['Twitter'] = "off"
+			
+			wCLS_work = CLS_Config()
+			wCLS_work.CnfTwitter()	#有効無効設定
+			
+			##タイムラインの設定
+			CLS_OSIF.sPrn( '\n' + "Twitterと接続しています......" )
+			wCLS_Twitter = CLS_Twitter_Use( gVal.STR_File['Twitter_File'] )
+			if gVal.STR_MasterConfig['Twitter']=="on" :
+				wCLS_Twitter.CnfTimeline( gVal.STR_File['Twitter_File'] )
+			
+			wFlg = True
 		
 		return wFlg
 

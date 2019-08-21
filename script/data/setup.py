@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：セットアップ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/16
+#   Update  ：2019/8/21
 #####################################################
 # Private Function:
 #   (none)
@@ -24,10 +24,16 @@ from config import CLS_Config
 from regist import CLS_Regist
 from userdata import CLS_UserData
 from botjob import CLS_Botjob
+from postgresql_use import CLS_PostgreSQL_Use
+from twitter_use import CLS_Twitter_Use
+
 from gval import gVal
 #####################################################
 class CLS_Setup():
 #####################################################
+
+	#使用クラス実体化
+	OBJ_DB    = ""
 
 #####################################################
 # 初期化
@@ -85,7 +91,9 @@ class CLS_Setup():
 		if wSelect=="y" :
 			wRes = wCLS_Config.CnfMasterConfig()
 			if wRes!=True :
-				return False	#失敗
+				##失敗
+				CLS_File.sRmtree( gVal.STR_File['MasterConfig_path'] )
+				return False
 		
 		#############################
 		# 初期起動直後なので、メンテをOFFにする
@@ -116,6 +124,8 @@ class CLS_Setup():
 						return False	#セットアップいちお完了だけどユーザ未登録
 			
 			if wFLG_regist!=True :
+				##中止なので消す
+				CLS_File.sRmtree( gVal.STR_File['MasterConfig_path'] )
 				return False
 		
 		#############################
@@ -124,27 +134,238 @@ class CLS_Setup():
 		# masterユーザを登録する
 		wRes = wCLS_Config.CnfMasterUser()
 		if wRes!=True :
+			##失敗
+			CLS_File.sRmtree( gVal.STR_File['MasterConfig_path'] )
 			return False
 		
 		#############################
 		# AdminUserの変更
 		wCLS_Config.CnfAdminUser()
 		
+##		#############################
+##		# MasterとBackgroundのbotを起動する
+##		wRes = wCLS_Botjob.Put( gVal.DEF_CRON_MASTER, gVal.STR_MasterConfig['MasterUser'] )
+##		if wRes['Result']!=True :
+##			wStr = "Master botの起動に失敗しました。: " + wRes['Reason']
+##			CLS_OSIF.sPrn( wStr )
+##			return False
+##		
+##		wRes = wCLS_Botjob.Put( gVal.DEF_CRON_BACK, gVal.DEF_CRON_ACCOUNT_BACKGROUND )
+##		if wRes['Result']!=True :
+##			wStr = "Background botの起動に失敗しました。: " + wRes['Reason']
+##			CLS_OSIF.sPrn( wStr )
+##			return False
+		
+		#############################
+		# Databaseの作成
+		
+		#############################
+		# DB接続情報ファイルのチェック
+		if CLS_File.sExist( gVal.STR_File['DBinfo_File'] )!=True :
+##			###DB接続情報ファイルの作成(空ファイル)
+##			if CLS_File.sCopy(
+##				gVal.STR_File['defDBinfo_File'], gVal.STR_File['DBinfo_File'] )!=True :
+##				##失敗
+##				CLS_File.sRmtree( gVal.STR_File['MasterConfig_path'] )
+##				CLS_File.sRmtree( gVal.DEF_USERDATA_PATH + gVal.STR_MasterConfig['MasterUser'] )
+##				
+##				wStr = "CLS_Setup: DataBase file copy failed: src=" + gVal.STR_File['defDBinfo_File']
+##				wStr = wStr + " dst=" + gVal.STR_File['DBinfo_File']
+##				CLS_OSIF.sPrn( wStr  )
+##				return False
+##			
+			wOBJ_DB = CLS_PostgreSQL_Use()
+##			if wOBJ_DB.CreateDBdata( gVal.STR_File['DBinfo_File'] )!=True :
+			if wOBJ_DB.CreateDBdata( gVal.STR_File['DBinfo_File'], gVal.STR_File['defDBinfo_File'] )!=True :
+				##失敗
+				CLS_File.sRmtree( gVal.STR_File['MasterConfig_path'] )
+				CLS_File.sRmtree( gVal.DEF_USERDATA_PATH + gVal.STR_MasterConfig['MasterUser'] )
+				
+				wStr = "CLS_Setup: DataBase file create failed: src=" + gVal.STR_File['defDBinfo_File']
+				wStr = wStr + " dst=" + gVal.STR_File['DBinfo_File']
+				CLS_OSIF.sPrn( wStr  )
+				return False
+			
+			wOBJ_DB = CLS_PostgreSQL_Use( gVal.STR_File['DBinfo_File'] )
+		
+		else :
+			###DB接続情報変更
+			wStr = "DataBaseの接続情報の更新をおこないます。DataBaseの接続情報の更新をおこないますか？"
+			print( wStr )
+			wSelect = input( "更新する？(y/N)=> " ).strip()
+			if wSelect=="y" :
+				wOBJ_DB = CLS_PostgreSQL_Use()
+##				if wOBJ_DB.CreateDBdata( gVal.STR_File['DBinfo_File'] )!=True :
+				if wOBJ_DB.CreateDBdata( gVal.STR_File['DBinfo_File'], gVal.STR_File['defDBinfo_File'] )!=True :
+					##失敗
+					CLS_File.sRmtree( gVal.STR_File['MasterConfig_path'] )
+					CLS_File.sRmtree( gVal.DEF_USERDATA_PATH + gVal.STR_MasterConfig['MasterUser'] )
+					
+					wStr = "CLS_Setup: DataBase file create failed: src=" + gVal.STR_File['defDBinfo_File']
+					wStr = wStr + " dst=" + gVal.STR_File['DBinfo_File']
+					CLS_OSIF.sPrn( wStr  )
+					return False
+				
+				wOBJ_DB = CLS_PostgreSQL_Use( gVal.STR_File['DBinfo_File'] )
+		
+		#############################
+		# DBの状態チェック
+		wRes = wOBJ_DB.GetIniStatus()
+		if wRes['Result']!=True :
+			###失敗
+			CLS_File.sRmtree( gVal.STR_File['MasterConfig_path'] )
+			CLS_File.sRmtree( gVal.DEF_USERDATA_PATH + gVal.STR_MasterConfig['MasterUser'] )
+			
+			wStr = "CLS_Setup: DB Connect test is failed: " + wRes['Reason']
+			CLS_OSIF.sPrn( wStr  )
+			return False
+		
+		wStr = "テーブルの作成中......" + '\n'
+		print( wStr )
+		#############################
+		# テーブルの作成
+		self.__create_TBL_USER_DATA( wOBJ_DB )
+		self.__create_TBL_TRAFFIC_DATA( wOBJ_DB )
+		self.__create_TBL_WORD_CORRECT( wOBJ_DB )
+		self.__create_TBL_CLAZ_LIST( wOBJ_DB )
+		
+		#############################
+		# DBのクローズ
+		wOBJ_DB.Close()
+		wStr = "作成完了!!  DataBaseから切断しました。" + '\n'
+		print( wStr )
+		
+		#############################
+		# Twitter接続情報の作成
+		wOBJ_Twitter = CLS_Twitter_Use()
+		wOBJ_Twitter.CreateTwitter( gVal.STR_File['Twitter_File'], gVal.STR_File['defTwitter_File']  )
+		wCLS_Config.CnfTwitter()	#有効無効設定
+		
 		#############################
 		# MasterとBackgroundのbotを起動する
 		wRes = wCLS_Botjob.Put( gVal.DEF_CRON_MASTER, gVal.STR_MasterConfig['MasterUser'] )
 		if wRes['Result']!=True :
+			##失敗
+			CLS_File.sRmtree( gVal.STR_File['MasterConfig_path'] )
+			CLS_File.sRmtree( gVal.DEF_USERDATA_PATH + gVal.STR_MasterConfig['MasterUser'] )
+			
 			wStr = "Master botの起動に失敗しました。: " + wRes['Reason']
 			CLS_OSIF.sPrn( wStr )
 			return False
 		
-		wRes = wCLS_Botjob.Put( gVal.DEF_CRON_BACK, gVal.DEF_CRON_ACCOUNT_BACKGROUND )
-		if wRes['Result']!=True :
-			wStr = "Background botの起動に失敗しました。: " + wRes['Reason']
-			CLS_OSIF.sPrn( wStr )
-			return False
-		
 		return True
+
+
+
+#####################################################
+# テーブル作成: TBL_USER_DATA
+#####################################################
+	def __create_TBL_USER_DATA( self, inOBJ_DB, inTBLname="TBL_USER_DATA" ):
+		#############################
+		# テーブルのドロップ
+		wQuery = "drop table if exists " + inTBLname + ";"
+		inOBJ_DB.RunQuery( wQuery )
+		
+		#############################
+		# テーブル枠の作成
+		wQuery = "create table " + inTBLname + "(" + \
+					"id          TEXT  NOT NULL," + \
+					"username    TEXT  NOT NULL," + \
+					"domain      TEXT  NOT NULL," + \
+					"status      CHAR(1) DEFAULT '-'," + \
+					"followed    BOOL  DEFAULT false," + \
+					"follow      BOOL  DEFAULT false," + \
+					"follower    BOOL  DEFAULT false," + \
+					"locked      BOOL  DEFAULT false," + \
+					"lupdate     TIMESTAMP," + \
+					"lchacked    TIMESTAMP," + \
+					" PRIMARY KEY ( id ) ) ;"
+		
+		# "status      CHAR(1) DEFAULT '-'," + \
+			## @ フォローチェック予約(まだ未フォロー)
+			## - フォローチェック済
+			## D ドメインブロックユーザ
+			## R リムーブ予約
+			## X チェックもしくはフォロー失敗
+			## * リストから消す
+			## M 自分
+		
+		inOBJ_DB.RunQuery( wQuery )
+		return
+
+
+
+#####################################################
+# テーブル作成: TBL_TRAFFIC_DATA
+#####################################################
+	def __create_TBL_TRAFFIC_DATA( self, inOBJ_DB, inTBLname="TBL_TRAFFIC_DATA" ):
+		#############################
+		# テーブルのドロップ
+		wQuery = "drop table if exists " + inTBLname + ";"
+		inOBJ_DB.RunQuery( wQuery )
+		
+		#############################
+		# テーブル枠の作成
+		wQuery = "create table " + inTBLname + "(" + \
+					"domain      TEXT  NOT NULL," + \
+					"admin_id    TEXT  NOT NULL," + \
+					"count       INTEGER  DEFAULT 0," + \
+					"rat_count   INTEGER  DEFAULT 0," + \
+					" PRIMARY KEY ( domain ) ) ;"
+		
+		inOBJ_DB.RunQuery( wQuery )
+		return
+
+
+
+#####################################################
+# テーブル作成: TBL_WORD_CORRECT
+#####################################################
+	def __create_TBL_WORD_CORRECT( self, inOBJ_DB, inTBLname="TBL_WORD_CORRECT" ):
+		#############################
+		# テーブルのドロップ
+		wQuery = "drop table if exists " + inTBLname + ";"
+		inOBJ_DB.RunQuery( wQuery )
+		
+		#############################
+		# テーブル枠の作成
+		wQuery = "create table " + inTBLname + "(" + \
+					"word        TEXT  NOT NULL," + \
+					"claz        TEXT  NOT NULL," + \
+					"yomi        TEXT," + \
+					"cla1        TEXT," + \
+					"cla2        TEXT," + \
+					"cla3        TEXT," + \
+					"ktyp        TEXT," + \
+					"kkat        TEXT," + \
+					"lupdate     TIMESTAMP," + \
+					"keeped      BOOL  DEFAULT false," + \
+					" PRIMARY KEY ( word ) ) ;"
+		
+		inOBJ_DB.RunQuery( wQuery )
+		return
+
+
+
+#####################################################
+# テーブル作成: TBL_CLAZ_LIST
+#####################################################
+	def __create_TBL_CLAZ_LIST( self, inOBJ_DB, inTBLname="TBL_CLAZ_LIST" ):
+		#############################
+		# テーブルのドロップ
+		wQuery = "drop table if exists " + inTBLname + ";"
+		inOBJ_DB.RunQuery( wQuery )
+		
+		#############################
+		# テーブル枠の作成
+		wQuery = "create table " + inTBLname + "(" + \
+					"claz        TEXT  NOT NULL," + \
+					"lupdate     TIMESTAMP," + \
+					"keeped      BOOL  DEFAULT false," + \
+					" PRIMARY KEY ( claz ) ) ;"
+		
+		inOBJ_DB.RunQuery( wQuery )
+		return
 
 
 

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ぼっとJob(cron制御)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/15
+#   Update  ：2019/8/18
 #####################################################
 # Private Function:
 #   __getCommand( self, inKind, inAccount ):
@@ -198,8 +198,8 @@ class CLS_Botjob() :
 		# コマンドの組み立て
 		if inKind==gVal.DEF_CRON_MASTER or inKind==gVal.DEF_CRON_SUB :
 			wRes['Responce'] = self.Command_Temp + inKind + " " + inAccount
-		elif inKind==gVal.DEF_CRON_BACK :
-			wRes['Responce'] = self.Command_Temp + inKind + " " + gVal.DEF_CRON_ACCOUNT_BACKGROUND
+##		elif inKind==gVal.DEF_CRON_BACK :
+##			wRes['Responce'] = self.Command_Temp + inKind + " " + gVal.DEF_CRON_ACCOUNT_BACKGROUND
 		else :
 			wRes['Responce'] = "Type that can not issue command: " + inKind
 			return wRes

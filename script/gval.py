@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/15
+#   Update  ：2019/8/21
 #####################################################
 
 #####################################################
@@ -14,6 +14,7 @@ class gVal() :
 # ※ユーザ自由変更※
 	DEF_EXAMPLE_ACCOUNT = "lucida3rd@mstdn.mynoghra.jp"		#画面に記載例として表示するアカウント
 	DEF_USERDATA_PATH   = '../botdata/'						#ユーザデータフォルダ
+###	DEF_USERDATA_PATH   = '../botdata_test/'				#ユーザデータフォルダ
 	DEF_TIMEZONE = 9										# 9=日本時間 最終更新日補正用
 	DEF_MOJI_ENCODE = 'utf-8'								#文字エンコード
 
@@ -39,51 +40,47 @@ class gVal() :
 	STR_MasterConfig = {
 		"MasterUser"	: "",						#masterユーザ
 		"AdminUser"		: "",						#監視ユーザ(通知先)
-		"PRUser"		: "",						#PRユーザ(広報・周期トゥート用)
+##		"PRUser"		: "",						#PRユーザ(広報・周期トゥート用)
 		"mTootTag"			: "[Sender]",				#手動トゥートタグ
-		"iFavoTag"			: "[favoind]",				#ファボ通知タグ
+##		"iFavoTag"			: "[favoind]",				#ファボ通知タグ
+		"iActionTag"		: "[action]",				#アクション通知タグ
 		"prTag"				: "[prtoot]",				#PRトゥートタグ
 		
-		"TwitterUser"	: "",						#twiterユーザ
+##		"TwitterUser"	: "",						#twiterユーザ
 		"Twitter"		: "off",					#twiter連携
-		"twCK"				: "",
-		"twCS"				: "",
-		"twAT"				: "",
-		"twAS"				: "",
+##		"twCK"				: "",
+##		"twCS"				: "",
+##		"twAT"				: "",
+##		"twAS"				: "",
 		
 		"PTL_Favo"		: "off",					#PTLニコる
 		"PTL_Boot"		: "off",					#PTLブースト
 		"PTL_HRip"		: "off",					#PTL紐エアリプ
 		"PTL_ARip"		: "off",					#PTLエアリプ
 		"PTL_WordOpe"	: "off",					#ワード監視
-		"getPTLnum"			: 120,						#PTL取得数
 		
 		"RandToot"		: "off",					#ランダムトゥートモード
-		"getRandVal"		: 70,						#トゥート頻度 0-100
-		"getRandRange"		: 1000,						#トゥート頻度 乱数幅
 		
+		"RIP_Favo"		: "off",					#リプニコる
+		"IND_Favo"		: "off",					#ファボ通知
+		"IND_Follow"	: "off",					#フォロー通知
+
+		"HTL_Boost"		: "off",					#ホームブースト
+		"AutoFollow"	: "off",					#フォロー監視モード
 		"CircleToot"	: "off",					#周期トゥート
-		
-		"Multicast"		: "off",					#同報配信リプライ 有効
-		
+##		"Multicast"		: "off",					#同報配信リプライ 有効
 		"Traffic"		: "off",					#トラヒック集計
-		
 		"LookHard"		: "off",					#ハード監視
-		
 		"WordStudy"		: "off",					#ワード学習
-		"studyNum"			: 10,					#学習範囲（トゥート数）
-		"studyMax"			: 5000,					#最大学習単語数
-		"studyDay"			: 14,					#単語を覚えておく日数
-		"clazListNum"		: 100,					#品詞リスト登録数
 		
-		"getMcDelay"			: 5,						#同報配信ディレイ
+		"JPonly"		: "off",					#日本人のみ監視
 		
 		"LogLevel"		: "a",						#ログレベル
 													# a=a,b,c：全て出力
 													# b=a,b：警告レベルまで
 													# c=a：重要なもののみ
 		
-##		"Lock"			: "on",							#排他機能
+##		"Lock"			: "on",						#排他機能
 ##		"mMainte"		: "off",					#全体メンテモード
 		
 		"DataVer"		: DEF_CONFIG_VER				#データversion
@@ -91,35 +88,74 @@ class gVal() :
 
 #############################
 # 環境情報
-	STR_Config = {
-		"Multicast"		: "off",					#同報配信対象
+##	STR_Config = {
+##		"Multicast"		: "off",					#同報配信対象
+##		
+##		"getLTLnum"			: 120,						#LTL取得数
+##		
+##		"RIP_Favo"		: "off",					#リプニコる
+##		"IND_Favo_Unl"		: "off",					#privateのブーストを許可
+##		"IND_Favo"		: "off",					#ファボ通知
+##		"IND_Favo_CW"		: "off",					#通知をCW化するか
+##		"IND_Follow"	: "off",					#フォロー通知
+##		"getRIPnum"			: 120,						#リプライ取得数
+##		"reaRIPmin"			: 10,						#反応リプライ時間(分)
+##		"indLimmin"			: 5,						#通知制限時間(分)
+##		"indLimcnt"			: 3,						#通知回数制限
+##		
+##		"HTL_Boost"		: "off",					#ホームブースト
+##		"getHTLnum"			: 120,						#HTL取得数
+##		
+##		"TrafficCnt"	: "off",					#トラヒック集計
+##		
+##		"WordCorrect"	: "off",					#個別ワード収集
+##		
+##		"AutoFollow"	: "off",					#フォロー監視モード
+##		"getFollowMnum"		: 10,						#フォロー処理数
+##		
+##		"Mainte"		: "off",					#メンテモード
+##		
+##		"JPonly"		: "off"						#日本人のみ監視
+##	}
+
+#############################
+# Timeline調整数
+	STR_TLnum = {
+		"getPTLnum"			: 120,						#PublicTL取得数
+		"getHTLnum"			: 120,						#HomeTL取得数
+		"getLTLnum"			: 120,						#LocalTL取得数
 		
-		"getLTLnum"			: 120,						#LTL取得数
+		"getRandVal"		: 70,						#トゥート頻度 0-100
+		"getRandRange"		: 1000,						#トゥート頻度 乱数幅
 		
-		"RIP_Favo"		: "off",					#リプニコる
-		"IND_Favo_Unl"		: "off",					#privateのブーストを許可
-		"IND_Favo"		: "off",					#ファボ通知
-		"IND_Favo_CW"		: "off",					#通知をCW化するか
-		"IND_Follow"	: "off",					#フォロー通知
+		"studyNum"			: 10,						#学習範囲（トゥート数）
+		"studyMax"			: 10000,					#最大学習単語数
+		"studyDay"			: 14,						#単語を覚えておく日数
+		"clazListNum"		: 500,						#品詞リスト登録数
+
 		"getRIPnum"			: 120,						#リプライ取得数
 		"reaRIPmin"			: 10,						#反応リプライ時間(分)
 		"indLimmin"			: 5,						#通知制限時間(分)
 		"indLimcnt"			: 3,						#通知回数制限
 		
-		"HTL_Boost"		: "off",					#ホームブースト
-		"getHTLnum"			: 120,						#HTL取得数
+		"getMcDelay"		: 5,						#同報配信ディレイ
 		
-##		"TrafficCnt"	: "off",					#トラヒック集計
-##		
-##		"WordCorrect"	: "off",					#個別ワード収集
+		"RefRemoveDays"		: 14,						#未リフォローによる、自動リムーブまでの日数
+		"AutoRemoveDays"	: 30,						#未活動時、自動リムーブまでの日数
 		
-		"AutoFollow"	: "off",					#フォロー監視モード
-		"getFollowMnum"		: 10,						#フォロー処理数
-		
-##		"Mainte"		: "off",					#メンテモード
-		
-		"JPonly"		: "off"						#日本人のみ監視
+		"getTwitTLnum"		: 120,						#TwitterのTL取得数
+		"(dummy)"			: ""
 	}
+
+#############################
+# DB情報
+##	STR_DBInfo = {
+##		"Valid"			: False,
+##		"Hostname"		: "",
+##		"Database"		: "",
+##		"Username"		: "",
+##		"Password"		: ""
+##	}
 
 #############################
 # ファイルパス
@@ -135,28 +171,36 @@ class gVal() :
 		"defMasterConfig"		: "_master/mconfig.txt",
 		"LockFile"				: "data/_lock.txt",
 		"Chk1HourFile"			: "data/_chk1hour.txt",
+		"TweetFile"				: "data/tweet.txt",
 		
 		"MasterConfig_path"		: DEF_MASTERCONFIG,
 		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig.txt",
 		"MasterLog_path"		: DEF_MASTERCONFIG + "log/",
-		"MasterNowTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_now.txt",
-		"MasterRatTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_rat.txt",
+##		"MasterNowTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_now.txt",
+##		"MasterRatTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_rat.txt",
 		
 		"Toot_path"				: DEF_MASTERCONFIG + "toot/",
 		"CLTootFile"			: DEF_MASTERCONFIG + "toot/ctoot.txt",
 		"HTLBoostFile"			: DEF_MASTERCONFIG + "toot/hboost.txt",
+		"TweetPatternFile"		: DEF_MASTERCONFIG + "toot/twitter.txt",
+		"DBInfoFile"			: DEF_MASTERCONFIG + "toot/.dbinfo.txt",
 		
 		"DomainREMFile"			: DEF_MASTERCONFIG + "user/xxdomain.txt",
 		"WordREMFile"			: DEF_MASTERCONFIG + "user/xxword.txt",
 		"UserinfoCSVFile"		: DEF_MASTERCONFIG + "user/userinfo.csv",
 		"WorddicCSVFile"		: DEF_MASTERCONFIG + "user/worddic.csv",
 		
-		"UserConfig"			: "config.txt",
+		"defDBinfo_File"		: DEF_MASTERCONFIG + "data/_dbinfo.txt",
+		"defTwitter_File"		: DEF_MASTERCONFIG + "data/_twitter.txt",
+		"DBinfo_File"			: DEF_MASTERCONFIG + ".dbinfo",
+		"Twitter_File"			: DEF_MASTERCONFIG + ".twitter",
+		
+##		"UserConfig"			: "config.txt",
 		"Reg_RegFile"			: "data/reg_reg_file.txt",
 		"Reg_UserFile"			: "data/reg_user_file.txt",
 		"UserLog_path"			: "log/",
 		
-		"TrafficFile"			: "data/traffic_count.txt",
+##		"TrafficFile"			: "data/traffic_count.txt",
 		"UserinfoFile"			: "data/userinfo.txt",
 		"WorddicFile"			: "data/worddic.txt",
 		"ClazListFile"			: "data/clazlist.txt",
@@ -180,11 +224,11 @@ class gVal() :
 
 #############################
 # デフォルトのトゥート公開設定
-	STR_defaultRange = {
-		"ManualToot"	: "public",
-		"Multicast"		: "unlisted",
-		"Bot"			: "unlisted"
-	}
+##	STR_defaultRange = {
+##		"ManualToot"	: "public",
+##		"Multicast"		: "unlisted",
+##		"Bot"			: "unlisted"
+##	}
 ###	'public'   ..公開
 ###	'unlisted' ..未収載
 ###	'private'  ..非公開
@@ -204,9 +248,9 @@ class gVal() :
 	
 	DEF_CRON_MASTER = "_master.py"
 	DEF_CRON_SUB    = "_sub.py"
-	DEF_CRON_BACK   = "_back.py"
+##	DEF_CRON_BACK   = "_back.py"
 	
-	DEF_CRON_ACCOUNT_BACKGROUND = "BACKGROUND"
+##	DEF_CRON_ACCOUNT_BACKGROUND = "BACKGROUND"
 
 #############################
 # 時間情報
@@ -240,10 +284,10 @@ class gVal() :
 
 #############################
 # 定数
-															#Twitterホスト名
-	DEF_TWITTER_HOSTNAME = "twitter.com"
-															#ツイート投稿用のURL
-	DEF_TWITTER_URL = "https://api.twitter.com/1.1/statuses/update.json"
+###															#Twitterホスト名
+###	DEF_TWITTER_HOSTNAME = "twitter.com"
+###															#ツイート投稿用のURL
+###	DEF_TWITTER_URL = "https://api.twitter.com/1.1/statuses/update.json"
 	
 	DEF_PROF_SUBURL = "/web/accounts/"						#プロフ用サブURL
 	DEF_TOOT_SUBURL = "/web/statuses/"						#トゥート用サブURL

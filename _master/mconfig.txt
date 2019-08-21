@@ -2,43 +2,33 @@ DataVer=1
 
 MasterUser=
 AdminUser=
-PRUser=
 mTootTag=[Sender]
-iFavoTag=[favoind]
+iActionTag=[action]
 prTag=[prtoot]
 
-TwitterUser=
 Twitter=off
-twCK=
-twCS=
-twAT=
-twAS=
 
 PTL_Favo=off
 PTL_Boot=off
 PTL_HRip=off
 PTL_ARip=off
 PTL_WordOpe=off
-getPTLnum=120
 
 RandToot=off
-getRandVal=50
-getRandRange=1000
 
+RIP_Favo=off
+IND_Favo=off
+IND_Follow=off
+
+HTL_Boost=off
+AutoFollow=off
 CircleToot=off
-
-Multicast=off
 
 Traffic=off
 
 LookHard=off
 
 WordStudy=off
-studyNum=10
-studyMax=5000
-studyDay=14
-clazListNum=100
 
-getMcDelay=5
-
+JPonly=on
 LogLevel=c

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/17
+#   Update  ：2019/8/19
 #####################################################
 # Private Function:
 #   (none)
@@ -18,7 +18,7 @@
 #####################################################
 
 from osif import CLS_OSIF
-from toot import CLS_Toot
+##from toot import CLS_Toot
 from config import CLS_Config
 from regist import CLS_Regist
 from userdata import CLS_UserData
@@ -169,8 +169,10 @@ class CLS_BOT_Sub() :
 	#############################
 		#############################
 		# HTL監視処理
-		if gVal.STR_Config['HTL_Boost']=="on" and \
-		   gVal.STR_MasterConfig['PRUser']!=cls.CHR_Account :
+##		if gVal.STR_Config['HTL_Boost']=="on" and \
+##		   gVal.STR_MasterConfig['PRUser']!=cls.CHR_Account :
+##		if gVal.STR_Config['HTL_Boost']=="on" :
+		if gVal.STR_MasterConfig['HTL_Boost']=="on" :
 			wOBJ_LookHTL = CLS_LookHTL( parentObj=cls )
 		
 ##		#############################
@@ -179,13 +181,15 @@ class CLS_BOT_Sub() :
 		
 		#############################
 		# RIP監視処理
-		if gVal.STR_MasterConfig['PRUser']!=cls.CHR_Account :
-			wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
+##		if gVal.STR_MasterConfig['PRUser']!=cls.CHR_Account :
+##			wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
+		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
 		
 		#############################
 		# 周期トゥート処理
-		if gVal.STR_MasterConfig['CircleToot']=="on" and \
-		   gVal.STR_MasterConfig['PRUser']==cls.CHR_Account :
+##		if gVal.STR_MasterConfig['CircleToot']=="on" and \
+##		   gVal.STR_MasterConfig['PRUser']==cls.CHR_Account :
+		if gVal.STR_MasterConfig['CircleToot']=="on" :
 			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
 		
 	#############################

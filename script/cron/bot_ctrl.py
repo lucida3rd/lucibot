@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ぼっと制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/16
+#   Update  ：2019/8/18
 #####################################################
 # Private Function:
 #   __getCommand( self, inKind, inAccount ):
@@ -53,8 +53,8 @@ class CLS_Bot_Ctrl() :
 		for wUser in wUserList :
 			self.UserList.update({ wUser : False })
 		
-		###バックグラウンドユーザの追加
-		self.UserList.update({ gVal.DEF_CRON_ACCOUNT_BACKGROUND : False })
+##		###バックグラウンドユーザの追加
+##		self.UserList.update({ gVal.DEF_CRON_ACCOUNT_BACKGROUND : False })
 		return
 
 
@@ -260,8 +260,8 @@ class CLS_Bot_Ctrl() :
 		if inFulluser==gVal.STR_MasterConfig['MasterUser'] :
 			wKind = gVal.DEF_CRON_MASTER
 		
-		elif inFulluser==gVal.DEF_CRON_ACCOUNT_BACKGROUND :
-			wKind = gVal.DEF_CRON_BACK
+##		elif inFulluser==gVal.DEF_CRON_ACCOUNT_BACKGROUND :
+##			wKind = gVal.DEF_CRON_BACK
 		
 		else :
 			wKind = gVal.DEF_CRON_SUB

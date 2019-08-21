@@ -96,6 +96,7 @@ $ exit
 # pip3 install pytz
 # pip3 install python-dateutil
 # pip3 install python-crontab
+# pip3 install psycopg2
 
 　インストールしたライブラリがあるか確認します。
 # su - [ユーザ名]
@@ -110,6 +111,17 @@ $ exit
 7.MeCabをインストールする。  
 　以下 [MeCabのインストール](#iMecabInstall) をご参照ください。  
 
+8.Databaseを作成する。  
+# su - [postgreSQLのマスターユーザ]  
+$ psql  
+=> create database [ユーザ名];  
+=> create role [ユーザ名] with password '[DBパスワード]';  
+=> alter role [ユーザ名] with login;  
+=> \q  
+$ psql -l  
+  Databaseができていることを確認します。  
+$ exit  
+
 
 
 <a id="iGetTwitter"></a>
@@ -117,22 +129,42 @@ $ exit
 1.以下、twitterのサイトにtwitterアカウントでログインします。  
   (https://apps.twitter.com/app/new)  
   
-2.以下を入力し、登録します。
-* Name（アプリ名）
-* Description（アプリの説明）
-* Website（自分のブログのURLなど）
-* Callback URLは空欄でOKです。
+2～5 までの項目ではDeveropper Accountの設定をおこないます。  
+  ※設定済なら6へ進む
   
-3.Detailsタブの以下をメモします。
-* Consumer key
-* Consumer secret
+2.「Create an app」をクリックします。  
   
-4.Settingタブをクリックし、Application TypeをRead and Wtireにして  
-　「Update this Twitter application’s settings」ボタンをクリックします。  
+3.HObby list→Making botをクリックしてNextを押します。  
   
-5.Detailsタブに戻り、画面の最下部に「Create my access token」ボタンがあるのでクリックします。  
+4.各項目を入力し、Nextを押します。  
+  What country do you live in? はJapanを選択します。  
+  What would you like us to call you? はDeveropper Accountでのユーザ名（英数字）を入力します。  
+  Want updates about the Twitter API? は必要に応じてチェックします。  
   
-6.以下をメモします。
+5.各項目にbotを作成する用途を英語で入力し、Nextを押します。  
+  In your words以外は「NO」にチェックしてもいいかもしれません。  
+  最後に「Looks good!」を押します。  
+  
+6.「Create an app」をクリックします。  
+  
+7.以下の必須項目を入力し、登録します。  
+* App name（アプリ名）  
+  アプリ名は他と重複するのはNGっぽいです  
+* Application description（アプリの説明）  
+* Website URL（自分のブログのURLなど）  
+* Enable Sign in with Twitter をチェック  
+* Callback URL（コールバックしないので適当、自分のブログURLなどでいいです）  
+* Tell us how this app will be used にアプリの用途を入力します。  
+  
+8.「Create」を2回クリックします。  
+  
+9.Key and Tokensタブの以下をメモします。
+* Consumer API
+* Consumer API Secret key
+  
+10.Consumer API Secret keyの下のAccess Tokenの「Create」をクリックします。  
+  
+11.以下をメモします。
 * Access token
 * Access token secret
 

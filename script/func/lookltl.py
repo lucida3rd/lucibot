@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：LTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/8/19
 #####################################################
 # Private Function:
 #   __run(self):
@@ -149,12 +149,13 @@ class CLS_LookLTL():
 		#############################
 		#トラヒックに記録
 		if gVal.STR_Config['TrafficCnt'] == "on" :
-			if self.Obj_Parent.OBJ_Traffic.Countup()==True :
-				self.STR_Cope['Traffic'] += 1
-			else:
-				###ありえなくない？
-				self.Obj_Parent.OBJ_Traffic.CountReset()
-				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __cope: Traffic counter failer (and Reset)" )
+##			if self.Obj_Parent.OBJ_Traffic.Countup()==True :
+##				self.STR_Cope['Traffic'] += 1
+##			else:
+##				###ありえなくない？
+##				self.Obj_Parent.OBJ_Traffic.CountReset()
+##				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __cope: Traffic counter failer (and Reset)" )
+		self.Obj_Parent.OBJ_Traffic.Countup()
 		
 		#############################
 		#ユーザ収集ファイルに記録
@@ -186,7 +187,8 @@ class CLS_LookLTL():
 	def Get_LTL(self):
 		self.ARR_NewTL = []
 		wNext_Id = None
-		wMax_Toots = gVal.STR_Config["getLTLnum"]
+##		wMax_Toots = gVal.STR_Config["getLTLnum"]
+		wMax_Toots = gVal.STR_TLnum["getLTLnum"]
 		while (len(self.ARR_NewTL) < wMax_Toots ):
 			#############################
 			# TL取得

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: UTF-8
 #####################################################
-# るしぼっと4
+# public
 #   Class   ：mastodon API
 #   Site URL：https://mynoghra.jp/
 #   Update  ：2019/3/13

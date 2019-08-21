@@ -1,0 +1,6 @@
+
+DBhost=
+DBname=
+DBuser=
+DBpass=
+

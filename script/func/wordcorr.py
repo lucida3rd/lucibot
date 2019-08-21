@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ワード収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/8/17
 #####################################################
 # Private Function:
 #   __selectMeCabDic(self):
@@ -184,7 +184,8 @@ class CLS_WordCorr():
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: __deleteOldWord: sGetTime failed" )
 			return
 		
-		wStudyDay = gVal.STR_MasterConfig['studyDay']	#覚えておく日数
+##		wStudyDay = gVal.STR_MasterConfig['studyDay']	#覚えておく日数
+		wStudyDay = gVal.STR_TLnum['studyDay']	#覚えておく日数
 		#############################
 		# 辞書のうち古い単語を検索して消す
 		wKeylist = self.STR_WordDic.keys()
@@ -406,7 +407,8 @@ class CLS_WordCorr():
 		
 		#############################
 		# 今回の学習数が上限か
-		if self.STR_Stat['StudyNum'] >= gVal.STR_MasterConfig['studyNum'] :
+##		if self.STR_Stat['StudyNum'] >= gVal.STR_MasterConfig['studyNum'] :
+		if self.STR_Stat['StudyNum'] >= gVal.STR_TLnum['studyNum'] :
 			return False	#今回は学習しない
 		
 		#############################
@@ -423,7 +425,8 @@ class CLS_WordCorr():
 		
 		#############################
 		# 学習数が上限か
-		wStudyMax = gVal.STR_MasterConfig['studyMax']
+##		wStudyMax = gVal.STR_MasterConfig['studyMax']
+		wStudyMax = gVal.STR_TLnum['studyMax']
 		if wStudyMax <= len(self.STR_WordDic) :
 			if self.STR_Stat['WordLimit']==False :
 				self.Obj_Parent.OBJ_Mylog.Log( 'b', "学習不能(単語登録数上限: " + str(wStudyMax) + "件)" )
@@ -543,7 +546,8 @@ class CLS_WordCorr():
 			# 同じパターンがなければ
 			if wClazList not in self.STR_ClazList :
 				#品詞リストの最大超えならランダムで1個減らす
-				if len(self.STR_ClazList) >= gVal.STR_MasterConfig['clazListNum']:
+##				if len(self.STR_ClazList) >= gVal.STR_MasterConfig['clazListNum']:
+				if len(self.STR_ClazList) >= gVal.STR_TLnum['clazListNum']:
 					wVal = CLS_OSIF.sGetRand( len(self.STR_ClazList) )
 					if wVal>=0 :
 						self.STR_ClazList.pop(wVal)

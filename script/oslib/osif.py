@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: UTF-8
 #####################################################
-# るしぼっと4
+# public
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
 #   Update  ：2019/3/25

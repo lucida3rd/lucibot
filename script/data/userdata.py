@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/15
+#   Update  ：2019/8/16
 #####################################################
 # Private Function:
 #   (none)
@@ -87,12 +87,12 @@ class CLS_UserData() :
 			else:
 				wStr = wStr + " "
 			
-			#############################
-			# PR Userフラグ
-			if gVal.STR_MasterConfig['PRUser']==f :
-				wStr = wStr + "P"
-			else:
-				wStr = wStr + " "
+##			#############################
+##			# PR Userフラグ
+##			if gVal.STR_MasterConfig['PRUser']==f :
+##				wStr = wStr + "P"
+##			else:
+##				wStr = wStr + " "
 			
 			#############################
 			# 同報配信ユーザフラグ

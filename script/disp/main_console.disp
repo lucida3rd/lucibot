@@ -1,21 +1,16 @@
 --------------------
  るしぼっとCONSOLE
 --------------------
-    [-v]   システム情報の表示
-    [-vm]  Master環境情報の表示
-    [-vu]  User環境情報の表示
+    [-v]         システム情報の表示
+    [-vm / -c]   Master環境情報の表示 / 変更
+    [-cm / -ca]  Master User / Admin User の変更
+    [-ct]        Twitter接続情報と有効無効の変更
 
-    [-c]   Master環境情報の変更
-    [-cm / -ca / -cp]  Master User / Admin User / PR Userの変更
-
-    [-u]   ユーザ一覧
-    [-uc]  User環境情報の表示・操作
+    [-u]         ユーザ一覧
     [-ur / -uu / -ud]  ユーザ登録 / 再登録 / 削除
 
-    [-t / -tm]  手動トゥート / 同報配信トゥート
+    [-t / -tm]   手動トゥート / 同報配信トゥート
+    [-run]       システムbot運用の変更
+    [-test]      通信テスト
 
-    [-test]  通信テスト
-    [-run]   システムbot運用の変更
-    [-men]   全体botメンテ設定の変更
-
-    [\q] [exit]  るしぼっと終了
+    [\q] [exit]  コンソール終了
