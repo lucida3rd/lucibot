@@ -4,7 +4,7 @@
 # public
 #   Class   ：ぽすぐれユーズ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/21
+#   Update  ：2019/8/23
 #####################################################
 # Private Function:
 #   __init__( self, inPath=None ):
@@ -220,6 +220,15 @@ class CLS_PostgreSQL_Use():
 
 
 #####################################################
+# dbdata存在チェック
+#####################################################
+##	def __existDBdata( self, inPath ):
+##		wRes = os.path.exists( inPath )
+##		return wRes
+
+
+
+#####################################################
 # dbdataのロード
 #####################################################
 	def __loadDBdata( self, inPath ):
@@ -233,8 +242,10 @@ class CLS_PostgreSQL_Use():
 		#############################
 		# 存在チェック
 		wRes = os.path.exists( inPath )
+##		wRes = self.__existDBdata( inPath )
 		if wRes==False :
-			self.IniStatus['Reason'] = "CLS_PostgreSQL_Use: __loadDBdata: DBfile is not found"
+##			self.IniStatus['Reason'] = "CLS_PostgreSQL_Use: __loadDBdata: DBfile is not found"
+			self.IniStatus['Reason'] = "CLS_PostgreSQL_Use: __loadDBdata: DBfile is not found: " + inPath
 			return False
 		
 		#############################
@@ -430,7 +441,7 @@ class CLS_PostgreSQL_Use():
 					"Collum" : wColum,
 					"Data"   : wCur.fetchall()
 				}
-				
+			
 			except ValueError as err :
 				self.QueryStat['Reason'] = "CLS_PostgreSQL_Use: __runQuerySelect: Query error: " + err
 				return False
@@ -462,6 +473,25 @@ class CLS_PostgreSQL_Use():
 
 
 
+#####################################################
+# クエリ結果をリスト型に取りだす
+#   ※共通フル取得
+#####################################################
+	def ChgList( self, inData, outList=[] ):
+		if len( inData )==0 :
+			return False
+		
+		wList = outList
+		#############################
+		# カウント値の取り出し
+		for wLineTap in inData :
+			wGetTap = []
+			for wCel in wLineTap :
+				wCel = wCel.strip()
+				wGetTap.append( wCel )
+			wList.append( wGetTap )
+		
+		return True
 
 
 
@@ -489,6 +519,21 @@ class CLS_PostgreSQL_Use():
 ##	# クローズ
 ##	>>> cur.close()
 ##	>>> conn.close()
+
+
+####カラム名の取得
+## select 
+##	* 
+## from 
+## 	information_schema.columns 
+## where 
+##	table_catalog='データベース名' 
+##	and 
+##	table_name='テーブル名' 
+## order by 
+##	ordinal_position;
+##
+
 
 
 

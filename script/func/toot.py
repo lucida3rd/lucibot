@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トゥート処理 (コンソール操作用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/21
+#   Update  ：2019/8/22
 #####################################################
 # Private Function:
 #   __manualToot_Disp( self, inFulluser ):
@@ -30,7 +30,7 @@ from userdata import CLS_UserData
 from traffic import CLS_Traffic
 
 from twitter_use import CLS_Twitter_Use
-from postgresql_use import CLS_PostgreSQL_Use
+##from postgresql_use import CLS_PostgreSQL_Use
 from mastodon_use import CLS_Mastodon_Use
 from gval import gVal
 #####################################################

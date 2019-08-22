@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/21
+#   Update  ：2019/8/23
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -30,6 +30,7 @@ from config import CLS_Config
 from regist import CLS_Regist
 from userdata import CLS_UserData
 from bot_ctrl import CLS_Bot_Ctrl
+from dbedit import CLS_DBedit
 
 from twitter_use import CLS_Twitter_Use
 from gval import gVal
@@ -269,6 +270,13 @@ class CLS_Main_Console() :
 		elif inCommand=="-test" :
 			wCLS_work = CLS_Regist()
 			wCLS_work.Test()
+			wFlg = True
+		
+		#############################
+		# DBエディタ
+		elif inCommand=="-vdb" :
+			wCLS_work = CLS_DBedit()
+			wCLS_work.View()
 			wFlg = True
 
 ###		CLS_OSIF.sInp("test====")

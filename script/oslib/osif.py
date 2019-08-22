@@ -4,7 +4,7 @@
 # public
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/25
+#   Update  ：2019/8/22
 #####################################################
 # Private Function:
 #   (none)
@@ -43,7 +43,9 @@ import random
 class CLS_OSIF() :
 #####################################################
 
-	__DEF_TIMEZONE = 9	#タイムゾーン: 9=東京
+	__DEF_TIMEZONE = 9				#タイムゾーン: 9=東京
+	DEF_PING_COUNT   = "2"			#Ping回数 (文字型)
+	DEF_PING_TIMEOUT = "1000"		#Pingタイムアウト秒 (文字型)
 
 	#############################
 	# ping除外
@@ -218,7 +220,8 @@ class CLS_OSIF() :
 #####################################################
 	@classmethod
 ###	def sPing( cls, inSend_Ping, inCount=4, inTimeout=5000 ):
-	def sPing( cls, inSend_Ping, inCount=4 ):
+###	def sPing( cls, inSend_Ping, inCount=4 ):
+	def sPing( cls, inSend_Ping ):
 		#############################
 		# ping除外ホスト
 		if inSend_Ping in cls.STR_NotPing :
@@ -237,7 +240,9 @@ class CLS_OSIF() :
 				return True	#自hostなら疎通チェックせずOKとする
 		
 ###		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " -w " + str(inTimeout) + " " + str(inSend_Ping) )
-		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " " + str(inSend_Ping) )
+###		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " " + str(inSend_Ping) )
+		wPingComm = "ping -c " + self.DEF_PING_COUNT + " -w " + self.DEF_PING_TIMEOUT + " " + str(inSend_Ping)
+		wStatus, wResult = sp.getstatusoutput( wPingComm )
 		if wStatus==0 :
 			return True	# Link UP
 		

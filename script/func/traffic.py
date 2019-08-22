@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トラヒック処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/19
+#   Update  ：2019/8/22
 #####################################################
 # Private Function:
 #   (none)
@@ -61,14 +61,14 @@ class CLS_Traffic():
 			return False
 		wDomain = wDomain[1]
 		
-		#############################
-		# DB接続情報ファイルのチェック
-		wFile_path = gVal.STR_File['DBinfo_File']
-		if CLS_File.sExist( wFile_path )!=True :
-			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Database file is not found: " + wFile_path + " domain=" + wDomain )
-			return False
-		
+##		#############################
+##		# DB接続情報ファイルのチェック
+##		wFile_path = gVal.STR_File['DBinfo_File']
+##		if CLS_File.sExist( wFile_path )!=True :
+##			##失敗
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Database file is not found: " + wFile_path + " domain=" + wDomain )
+##			return False
+##		
 		#############################
 		# DB接続
 		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
@@ -131,14 +131,14 @@ class CLS_Traffic():
 		if len(wList)==0 :
 			return True
 		
-		#############################
-		# DB接続情報ファイルのチェック
-		wFile_path = gVal.STR_File['DBinfo_File']
-		if CLS_File.sExist( wFile_path )!=True :
-			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Database file is not found: " + wFile_path )
-			return False
-		
+##		#############################
+##		# DB接続情報ファイルのチェック
+##		wFile_path = gVal.STR_File['DBinfo_File']
+##		if CLS_File.sExist( wFile_path )!=True :
+##			##失敗
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Database file is not found: " + wFile_path )
+##			return False
+##		
 		#############################
 		# DB接続
 		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
@@ -275,14 +275,14 @@ class CLS_Traffic():
 			return False
 		wDomain = wDomain[1]
 		
-		#############################
-		# DB接続情報ファイルのチェック
-		wFile_path = gVal.STR_File['DBinfo_File']
-		if CLS_File.sExist( wFile_path )!=True :
-			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Database file is not found: " + wFile_path + " domain=" + wDomain )
-			return False
-		
+##		#############################
+##		# DB接続情報ファイルのチェック
+##		wFile_path = gVal.STR_File['DBinfo_File']
+##		if CLS_File.sExist( wFile_path )!=True :
+##			##失敗
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Database file is not found: " + wFile_path + " domain=" + wDomain )
+##			return False
+##		
 		#############################
 		# DB接続
 		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
