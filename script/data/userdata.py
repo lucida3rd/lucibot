@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/16
+#   Update  ：2019/8/28
 #####################################################
 # Private Function:
 #   (none)
@@ -48,7 +48,8 @@ class CLS_UserData() :
 # 一覧表示
 #   コンソールへの出力機能
 #####################################################
-	def ViewUserList( self, inMulticastList=[] ):
+##	def ViewUserList( self, inMulticastList=[] ):
+	def ViewUserList(self):
 		#############################
 		# 画面クリア
 		CLS_OSIF.sDispClr()
@@ -94,12 +95,12 @@ class CLS_UserData() :
 ##			else:
 ##				wStr = wStr + " "
 			
-			#############################
-			# 同報配信ユーザフラグ
-			if f in inMulticastList :
-				wStr = wStr + "M"
-			else:
-				wStr = wStr + " "
+##			#############################
+##			# 同報配信ユーザフラグ
+##			if f in inMulticastList :
+##				wStr = wStr + "M"
+##			else:
+##				wStr = wStr + " "
 			
 			#############################
 			# ユーザ名
@@ -227,6 +228,108 @@ class CLS_UserData() :
 		wRes['Domain']   = wDomain
 		wRes['Result']   = True
 		return wRes
+
+
+
+#####################################################
+# トラヒックユーザ チェック
+#####################################################
+	@classmethod
+	def sCheckTrafficUser( cls, inUsername ):
+		#############################
+		# 名前の妥当性チェック
+		wResUser = cls.sUserCheck( inUsername )
+			##	"Result"	: False,
+			##	"User"		: "",
+			##	"Domain"	: "",
+			##	"Reason"	: "",
+			##	"Registed"	: False,
+		if wResUser['Result']!=True :
+			return False	#不正
+		
+		#############################
+		# 読み出し先初期化
+		wTrafficUser = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.STR_File['TrafficFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
+			return False	#失敗
+		
+		#############################
+		# 対象ユーザか
+		for wLine in wTrafficUser :
+			if wLine==inUsername :
+				return True	#対象ユーザ
+		
+		return False		#対象ではない
+
+
+
+#####################################################
+# トラヒックユーザ切替
+#   入力ユーザが計測ユーザの場合、同一ドメインの別ユーザに切り替える
+#####################################################
+	@classmethod
+	def sChangeTrafficUser( cls, inUsername ):
+		#############################
+		# 名前の妥当性チェック
+		wResUser = cls.sUserCheck( inUsername )
+			##	"Result"	: False,
+			##	"User"		: "",
+			##	"Domain"	: "",
+			##	"Reason"	: "",
+			##	"Registed"	: False,
+		if wResUser['Result']!=True :
+			return False	#不正
+		
+		#############################
+		# 読み出し先初期化
+		wTrafficUser = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.STR_File['TrafficFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
+			return False	#失敗
+		
+		#############################
+		# 計測ユーザか
+		if inUsername not in wTrafficUser :
+			return True	#対象外
+		
+		##自分は抜いておく
+		wTrafficUser.remove( inUsername )
+		
+		#############################
+		# 同一ドメインの別ユーザを検索
+		wUserList = cls.sGetUserList()
+		wNewUser  = None
+		for wLine in wUserList :
+			if wLine==inUsername :
+				continue	#自分は除く
+			
+			wDomain = wLine.split("@")
+			if wDomain[1]==wResUser['Domain'] :
+				wNewUser = wLine
+				break
+		
+		if wNewUser==None :
+			##ありえない
+			return False
+		
+		#############################
+		# 切替
+		wTrafficUser.append( wNewUser )
+		
+		#############################
+		# ファイル書き込み (改行つき)
+		wFile_path = gVal.STR_File['TrafficFile']
+		if CLS_File.sWriteFile( wFile_path, wTrafficUser, inRT=True )!=True :
+			return False	#失敗
+		
+		return True	#正常
 
 
 

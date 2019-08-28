@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/21
+#   Update  ：2019/8/28
 #####################################################
 
 #####################################################
@@ -171,7 +171,6 @@ class gVal() :
 		"defMasterConfig"		: "_master/mconfig.txt",
 		"LockFile"				: "data/_lock.txt",
 		"Chk1HourFile"			: "data/_chk1hour.txt",
-		"TweetFile"				: "data/tweet.txt",
 		
 		"MasterConfig_path"		: DEF_MASTERCONFIG,
 		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig.txt",
@@ -195,6 +194,9 @@ class gVal() :
 		"DBinfo_File"			: DEF_MASTERCONFIG + ".dbinfo",
 		"Twitter_File"			: DEF_MASTERCONFIG + ".twitter",
 		
+		"TweetFile"				: DEF_MASTERCONFIG + "data/tweet.txt",
+		"TrafficFile"			: DEF_MASTERCONFIG + "data/traffic.txt",
+		
 ##		"UserConfig"			: "config.txt",
 		"Reg_RegFile"			: "data/reg_reg_file.txt",
 		"Reg_UserFile"			: "data/reg_user_file.txt",
@@ -211,6 +213,9 @@ class gVal() :
 		"Rate_RipFile"			: "data/rreply.txt",
 		"Rate_FavFile"			: "data/rfav.txt",
 		"IndLim_File"			: "data/indlim.txt",
+		
+		"MstdnDomains_File"		: DEF_MASTERCONFIG + "data/_domains.txt",
+		"MstdnInfo_File"		: DEF_MASTERCONFIG + ".mstdninfo",
 		
 		"(dummy)"				: 0
 	}

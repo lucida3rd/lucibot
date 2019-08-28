@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トラヒック処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/22
+#   Update  ：2019/8/28
 #####################################################
 # Private Function:
 #   (none)
@@ -16,6 +16,20 @@
 #
 # Class Function(static):
 #   (none)
+#
+#####################################################
+# トラヒック設計仕様
+#・計測対象アカウントの制御は、ユーザクラスでおこなう。
+#・MasterUserのドメインはデフォルトで計測対象となる。
+#  その他は、toot/traffic.txtでドメインを指定する。
+#・計測用のアカウントは、ユーザ登録時に
+#  data/_traffic.txtに登録される。
+#  既に同じドメインのものが登録されている場合はおこなわない。
+#  ユーザ削除されると、同じドメインの別のアカウントを登録する。
+#  ない場合はそのドメインは計測対象から外れる。
+#・MasterUserのドメインで他のアカウントが登録されたときは、
+#  そのアカウントが計測対象となる。
+#・計測対象はLocalTLからおこなう。この際、言語は問わないこと。
 #
 #####################################################
 from postgresql_use import CLS_PostgreSQL_Use
@@ -51,16 +65,16 @@ class CLS_Traffic():
 #####################################################
 # ドメイン追加
 #####################################################
-	def AddDomain(self) :
-		#############################
-		# ドメインの抽出
-		wDomain = self.Obj_Parent.CHR_Account.split("@")
-		if len(wDomain)!=2 :
-			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Illigal admin_id: " + self.Obj_Parent.CHR_Account )
-			return False
-		wDomain = wDomain[1]
-		
+##	def AddDomain(self) :
+##		#############################
+##		# ドメインの抽出
+##		wDomain = self.Obj_Parent.CHR_Account.split("@")
+##		if len(wDomain)!=2 :
+##			##失敗
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Illigal admin_id: " + self.Obj_Parent.CHR_Account )
+##			return False
+##		wDomain = wDomain[1]
+##		
 ##		#############################
 ##		# DB接続情報ファイルのチェック
 ##		wFile_path = gVal.STR_File['DBinfo_File']
@@ -69,68 +83,67 @@ class CLS_Traffic():
 ##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Database file is not found: " + wFile_path + " domain=" + wDomain )
 ##			return False
 ##		
-		#############################
-		# DB接続
-		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
-		wRes = wOBJ_DB.GetIniStatus()
-		if wRes['Result']!=True :
-			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: DB Connect test is failed: " + wRes['Reason'] + " domain=" + wDomain )
-			wOBJ_DB.Close()
-			return False
-		
-		#############################
-		# ドメイン存在チェック
-		wQuery = "select * from TBL_TRAFFIC_DATA where exists (select domain from " +  \
-					wDomain + ") ;"
-		
-		wRes = wOBJ_DB.RunQuery( wQuery )
-		if wRes['Result']!=True :
-			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Run Query is failed: " + wRes['Reason'] + " domain=" + wDomain )
-			wOBJ_DB.Close()
-			return False
-		
-		if len( wRes['Responce']['Data'] )>0 :
-			##既に存在している
-			wOBJ_DB.Close()
-			return True
-		
-		#############################
-		# ドメイン追加
-		wQuery = "insert into TBL_TRAFFIC_DATA values (" + \
-					"'" + wDomain + "'," + \
-					"'" + self.Obj_Parent.CHR_Account + "'," + \
-					"1," + \
-					"0," + \
-					") ;"
-		
-		self.Obj_Parent.OBJ_Mylog.Log( 'b', "TBL_TRAFFIC_DATA ドメイン追加: " + wDomain )
-		
-		wRes = wOBJ_DB.RunQuery( wQuery )
-		if wRes['Result']!=True :
-			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Add Domain is failed: " + wRes['Reason'] + " domain=" + wDomain )
-			wOBJ_DB.Close()
-			return False
-		
-		#############################
-		# DB切断
-		wOBJ_DB.Close()
-		return True
+##		#############################
+##		# DB接続
+##		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
+##		wRes = wOBJ_DB.GetIniStatus()
+##		if wRes['Result']!=True :
+##			##失敗
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: DB Connect test is failed: " + wRes['Reason'] + " domain=" + wDomain )
+##			wOBJ_DB.Close()
+##			return False
+##		
+##		#############################
+##		# ドメイン存在チェック
+##		wQuery = "select * from TBL_TRAFFIC_DATA where exists (select domain from " +  \
+##					wDomain + ") ;"
+##		
+##		wRes = wOBJ_DB.RunQuery( wQuery )
+##		if wRes['Result']!=True :
+##			##失敗
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Run Query is failed: " + wRes['Reason'] + " domain=" + wDomain )
+##			wOBJ_DB.Close()
+##			return False
+##		
+##		if len( wRes['Responce']['Data'] )>0 :
+##			##既に存在している
+##			wOBJ_DB.Close()
+##			return True
+##		
+##		#############################
+##		# ドメイン追加
+##		wQuery = "insert into TBL_TRAFFIC_DATA values (" + \
+##					"'" + wDomain + "'," + \
+##					"1," + \
+##					"0," + \
+##					") ;"
+##		
+##		self.Obj_Parent.OBJ_Mylog.Log( 'b', "TBL_TRAFFIC_DATA ドメイン追加: " + wDomain )
+##		
+##		wRes = wOBJ_DB.RunQuery( wQuery )
+##		if wRes['Result']!=True :
+##			##失敗
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Add Domain is failed: " + wRes['Reason'] + " domain=" + wDomain )
+##			wOBJ_DB.Close()
+##			return False
+##		
+##		#############################
+##		# DB切断
+##		wOBJ_DB.Close()
+##		return True
 
 
 
 #####################################################
 # ドメイン削除
 #####################################################
-	def DelDomain(self) :
-		#############################
-		# ユーザ一覧の抽出
-		wList = CLS_UserData.sGetUserList()
-		if len(wList)==0 :
-			return True
-		
+##	def DelDomain(self) :
+##		#############################
+##		# ユーザ一覧の抽出
+##		wList = CLS_UserData.sGetUserList()
+##		if len(wList)==0 :
+##			return True
+##		
 ##		#############################
 ##		# DB接続情報ファイルのチェック
 ##		wFile_path = gVal.STR_File['DBinfo_File']
@@ -139,76 +152,75 @@ class CLS_Traffic():
 ##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Database file is not found: " + wFile_path )
 ##			return False
 ##		
-		#############################
-		# DB接続
-		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
-		wRes = wOBJ_DB.GetIniStatus()
-		if wRes['Result']!=True :
-			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: DB Connect test is failed: " + wRes['Reason'] )
-			wOBJ_DB.Close()
-			return False
-		
-		#############################
-		# ドメイン存在チェック
-		wQuery = "select * from TBL_TRAFFIC_DATA where exists (select domain from " +  \
-					wDomain + ") ;"
-		
-		wRes = wOBJ_DB.RunQuery( wQuery )
-		if wRes['Result']!=True :
-			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Run Query is failed: " + wRes['Reason'] )
-			wOBJ_DB.Close()
-			return False
-		
-		if len( wRes['Responce']['Data'] )!=1 :
-			##存在しない
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Domain is not found: " )
-			wOBJ_DB.Close()
-			return False
-		
-		#############################
-		# ドメイン情報の辞書化
-		wDomainCheck = {}
-		for wLineTap in wRes['Responce']['Data'] :
-			wGetTap = []
-			for wCel in wLineTap :
-				wCel = wCel.strip()
-				wGetTap.append( wCel )
-				## [0] ..domain
-				## [1] ..admin_id
-				## [2] ..count
-				## [3] ..rat_count
-			
-			wDomainCheck({ wGetTap[0] : "" })
-			wDomainCheck[wIndex]({ "exist"  : False })
-		
-		#############################
-		# ドメイン存在時にexist=true
-		for wCel in wList :
-			wDomainCheck[wCel]["exist"] = True
-		
-		#############################
-		# 存在しないドメインを削除する
-		wKeyList = wDomainCheck.keys()
-		for wCel in wKeyList :
-			if wDomainCheck[wCel]["exist"]==False :
-				wQuery = "delete from TBL_TRAFFIC_DATA where domain = " + wCel + \
-							") ;"
-			
-			self.Obj_Parent.OBJ_Mylog.Log( 'b', "TBL_TRAFFIC_DATA ドメイン削除: " + wCel )
-			
-			wRes = wOBJ_DB.RunQuery( wQuery )
-			if wRes['Result']!=True :
-				##失敗
-				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Delete Domain is failed: " + wRes['Reason'] )
-				wOBJ_DB.Close()
-				return False
-		
-		#############################
-		# DB切断
-		wOBJ_DB.Close()
-		return True
+##		#############################
+##		# DB接続
+##		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
+##		wRes = wOBJ_DB.GetIniStatus()
+##		if wRes['Result']!=True :
+##			##失敗
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: DB Connect test is failed: " + wRes['Reason'] )
+##			wOBJ_DB.Close()
+##			return False
+##		
+##		#############################
+##		# ドメイン存在チェック
+##		wQuery = "select * from TBL_TRAFFIC_DATA where exists (select domain from " +  \
+##					wDomain + ") ;"
+##		
+##		wRes = wOBJ_DB.RunQuery( wQuery )
+##		if wRes['Result']!=True :
+##			##失敗
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Run Query is failed: " + wRes['Reason'] )
+##			wOBJ_DB.Close()
+##			return False
+##		
+##		if len( wRes['Responce']['Data'] )!=1 :
+##			##存在しない
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Domain is not found: " )
+##			wOBJ_DB.Close()
+##			return False
+##		
+##		#############################
+##		# ドメイン情報の辞書化
+##		wDomainCheck = {}
+##		for wLineTap in wRes['Responce']['Data'] :
+##			wGetTap = []
+##			for wCel in wLineTap :
+##				wCel = wCel.strip()
+##				wGetTap.append( wCel )
+##				## [0] ..domain
+##				## [1] ..count
+##				## [2] ..rat_count
+##			
+##			wDomainCheck({ wGetTap[0] : "" })
+##			wDomainCheck[wIndex]({ "exist"  : False })
+##		
+##		#############################
+##		# ドメイン存在時にexist=true
+##		for wCel in wList :
+##			wDomainCheck[wCel]["exist"] = True
+##		
+##		#############################
+##		# 存在しないドメインを削除する
+##		wKeyList = wDomainCheck.keys()
+##		for wCel in wKeyList :
+##			if wDomainCheck[wCel]["exist"]==False :
+##				wQuery = "delete from TBL_TRAFFIC_DATA where domain = " + wCel + \
+##							") ;"
+##			
+##			self.Obj_Parent.OBJ_Mylog.Log( 'b', "TBL_TRAFFIC_DATA ドメイン削除: " + wCel )
+##			
+##			wRes = wOBJ_DB.RunQuery( wQuery )
+##			if wRes['Result']!=True :
+##				##失敗
+##				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Delete Domain is failed: " + wRes['Reason'] )
+##				wOBJ_DB.Close()
+##				return False
+##		
+##		#############################
+##		# DB切断
+##		wOBJ_DB.Close()
+##		return True
 
 
 
@@ -295,17 +307,23 @@ class CLS_Traffic():
 		
 		#############################
 		# ドメイン存在チェック
-		wQuery = "select * from TBL_TRAFFIC_DATA where exists (select domain from " +  \
-					wDomain + ") ;"
-		
-		wRes = wOBJ_DB.RunQuery( wQuery )
+##		wQuery = "select * from TBL_TRAFFIC_DATA where exists (select domain from " +  \
+##					wDomain + ") ;"
+##		wQuery = "select exists (select * from TBL_TRAFFIC_DATA where domain = '" + wDomain + "');"
+##		
+##		wRes = wOBJ_DB.RunQuery( wQuery )
+##		wRes = wOBJ_DB.GetQueryStat()
+		wQuery = "domain = '" + wDomain + "'"
+		wDBRes = wOBJ_DB.RunExist( inObjTable="TBL_TRAFFIC_DATA", inWhere=wQuery )
+		wDBRes = wOBJ_DB.GetQueryStat()
 		if wRes['Result']!=True :
 			##失敗
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Run Query is failed: " + wRes['Reason'] + " domain=" + wDomain )
 			wOBJ_DB.Close()
 			return False
 		
-		if len( wRes['Responce']['Data'] )!=1 :
+##		if len( wRes['Responce']['Data'] )!=1 :
+		if wRes['Responce']!=True :
 			##存在しない
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Domain is not found: " + " domain=" + wDomain )
 			wOBJ_DB.Close()
@@ -319,12 +337,11 @@ class CLS_Traffic():
 				wCel = wCel.strip()
 				wGetTap.append( wCel )
 				## [0] ..domain
-				## [1] ..admin_id
-				## [2] ..count
-				## [3] ..rat_count
+				## [1] ..count
+				## [2] ..rat_count
 		
-		wCount    = int( wGetTap[2] )
-		wRatCount = int( wGetTap[3] )
+		wCount    = int( wGetTap[1] )
+		wRatCount = int( wGetTap[2] )
 		
 		#############################
 		# カウントを取るユーザか？
@@ -351,6 +368,7 @@ class CLS_Traffic():
 					";"
 		
 		wRes = wOBJ_DB.RunQuery( wQuery )
+		wRes = wOBJ_DB.GetQueryStat()
 		if wRes['Result']!=True :
 			##失敗
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Update Count is failed: " + wRes['Reason'] + " domain=" + wDomain )

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/19
+#   Update  ：2019/8/28
 #####################################################
 # Private Function:
 #   (none)
@@ -80,8 +80,6 @@ class CLS_BOT_Sub() :
 		cls.CHR_User_path = wRes['Responce']['User_path']
 		
 		cls.OBJ_Mylog    = CLS_Mylog( cls.CHR_User_path + gVal.STR_File['UserLog_path'] )
-##		cls.OBJ_Traffic  = CLS_Traffic( cls.CHR_User_path )
-##		cls.OBJ_UserCorr = CLS_UserCorr( cls.CHR_User_path, cls.CHR_Account )
 		cls.OBJ_Traffic  = CLS_Traffic( parentObj=cls )
 		cls.OBJ_UserCorr = CLS_UserCorr( parentObj=cls )
 		cls.OBJ_WordCorr = CLS_WordCorr( parentObj=cls )
@@ -112,24 +110,6 @@ class CLS_BOT_Sub() :
 			
 			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
 			return
-		
-##		#############################
-##		# ユーザ情報読み込み
-##		if cls.OBJ_UserCorr.GetUserInfo_Min()!=True :
-##			wStr = "CLS_BOT_Sub: GetUserInfo_Min failure"
-##			cls.OBJ_Mylog.Log( 'a', wStr )
-##			
-##			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
-##			return
-		
-##		#############################
-##		# 単語辞書読み込み
-##		if cls.OBJ_WordCorr.GetWorddic()!=True :
-##			wStr = "CLS_BOT_Sub: GetWorddic failure"
-##			cls.OBJ_Mylog.Log( 'a', wStr )
-##			
-##			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
-##			return
 		
 ##		#############################
 ##		# 除外ドメイン読み込み
@@ -169,11 +149,8 @@ class CLS_BOT_Sub() :
 	#############################
 		#############################
 		# HTL監視処理
-##		if gVal.STR_Config['HTL_Boost']=="on" and \
-##		   gVal.STR_MasterConfig['PRUser']!=cls.CHR_Account :
-##		if gVal.STR_Config['HTL_Boost']=="on" :
-		if gVal.STR_MasterConfig['HTL_Boost']=="on" :
-			wOBJ_LookHTL = CLS_LookHTL( parentObj=cls )
+##		if gVal.STR_MasterConfig['HTL_Boost']=="on" :
+##			wOBJ_LookHTL = CLS_LookHTL( parentObj=cls )
 		
 ##		#############################
 ##		# LTL監視処理
@@ -181,56 +158,20 @@ class CLS_BOT_Sub() :
 		
 		#############################
 		# RIP監視処理
-##		if gVal.STR_MasterConfig['PRUser']!=cls.CHR_Account :
-##			wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
-		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
+##		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
 		
 		#############################
 		# 周期トゥート処理
-##		if gVal.STR_MasterConfig['CircleToot']=="on" and \
-##		   gVal.STR_MasterConfig['PRUser']==cls.CHR_Account :
-		if gVal.STR_MasterConfig['CircleToot']=="on" :
-			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
+##		if gVal.STR_MasterConfig['CircleToot']=="on" :
+##			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
 		
 	#############################
 	# 後処理
 	#############################
-##		#############################
-##		# ユーザ情報書き込み
-##		if cls.OBJ_UserCorr.SetUserInfo_Min()!=True :
-##			wStr = "CLS_BOT_Sub: SetUserInfo_Min failure"
-##			cls.OBJ_Mylog.Log( 'a', wStr )
-		
-##		#############################
-##		# 単語辞書書き込み
-##		if cls.OBJ_WordCorr.SetWorddic()!=True :
-##			wStr = "CLS_BOT_Sub: SetWorddic failure"
-##			cls.OBJ_Mylog.Log( 'a', wStr )
-		
 		#############################
 		# 排他解除
 		CLS_BotCtrl.sUnlock( cls.CHR_User_path )
 		return
-
-
-
-##		cls().__testRun()
-##		cls.OBJ_Mylog.Log( 'a', "てすと。"+'\n'+"てすちょーw"+'\n'+"てすと３。", True )
-##		cls.OBJ_Mylog.Log( 'a', str(cls.FlgTest), True )
-
-##		wVal = 0
-##		cls().__testRun2( wVal )
-##		CLS_OSIF.sPrn( str(wVal) )
-
-##	def __testRun(cls):
-##		cls.OBJ_Mylog.Log( 'a', "Test Log", True )
-##		return
-
-##	def __testRun2( cls, outVal ):
-##		wVal = outVal
-##		
-##		wVal = 2
-##		return
 
 
 

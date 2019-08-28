@@ -308,7 +308,6 @@ class CLS_Setup():
 		# テーブル枠の作成
 		wQuery = "create table " + inTBLname + "(" + \
 					"domain      TEXT  NOT NULL," + \
-					"admin_id    TEXT  NOT NULL," + \
 					"count       INTEGER  DEFAULT 0," + \
 					"rat_count   INTEGER  DEFAULT 0," + \
 					" PRIMARY KEY ( domain ) ) ;"

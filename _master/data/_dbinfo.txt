@@ -1,6 +1,6 @@
 
-DBhost=
-DBname=
-DBuser=
-DBpass=
+hostname=
+database=
+username=
+password=
 

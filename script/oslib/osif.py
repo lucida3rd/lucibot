@@ -4,7 +4,7 @@
 # public
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/22
+#   Update  ：2019/8/28
 #####################################################
 # Private Function:
 #   (none)
@@ -241,7 +241,7 @@ class CLS_OSIF() :
 		
 ###		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " -w " + str(inTimeout) + " " + str(inSend_Ping) )
 ###		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " " + str(inSend_Ping) )
-		wPingComm = "ping -c " + self.DEF_PING_COUNT + " -w " + self.DEF_PING_TIMEOUT + " " + str(inSend_Ping)
+		wPingComm = "ping -c " + cls.DEF_PING_COUNT + " -w " + cls.DEF_PING_TIMEOUT + " " + str(inSend_Ping)
 		wStatus, wResult = sp.getstatusoutput( wPingComm )
 		if wStatus==0 :
 			return True	# Link UP

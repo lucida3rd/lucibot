@@ -4,7 +4,7 @@
 # public
 #   Class   ：ぽすぐれユーズ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/23
+#   Update  ：2019/8/28
 #####################################################
 # Private Function:
 #   __init__( self, inPath=None ):
@@ -404,6 +404,7 @@ class CLS_PostgreSQL_Use():
 		   wCommand!="create" and \
 		   wCommand!="drop"   and \
 		   wCommand!="insert" and \
+		   wCommand!="delete" and \
 		   wCommand!="update" :
 			self.QueryStat['Reason'] = "CLS_PostgreSQL_Use: RunQuery: Unknown command: " + inQuery
 			return False
@@ -470,6 +471,58 @@ class CLS_PostgreSQL_Use():
 		#############################
 		# 正常
 		return True
+
+
+
+#####################################################
+# クエリ実行  存在チェック
+#####################################################
+	def RunExist( self, inObjTable=None, inWhere=None ):
+		#############################
+		# 状態初期化
+		self.__initQueryStat()
+		
+		#############################
+		# 実行前チェック
+		if inObjTable==None :
+			self.QueryStat['Reason'] = "CLS_PostgreSQL_Use: RunExist: None Object table"
+			return False
+		if inWhere==None :
+			self.QueryStat['Reason'] = "CLS_PostgreSQL_Use: RunExist: None Where"
+			return False
+		if self.IniStatus['Result']!=True :
+			self.QueryStat['Reason'] = "CLS_PostgreSQL_Use: RunExist: DB not connect"
+			return False
+		
+		#############################
+		# クエリ作成
+		wQuery = "select exists (select * from " + \
+					inObjTable + " where " + \
+					inWhere + ");"
+		
+		#############################
+		# クエリ実行
+		with self.PostgreSQL_use.cursor() as wCur :
+			try:
+				#############################
+				# 本実行
+				self.QueryStat['Query'] = wQuery	#デバック用記録
+				wCur.execute( wQuery )
+				
+				#############################
+				# 結果を格納
+				wRes = wCur.fetchall()
+				self.QueryStat['Responce'] = wRes[0][0]
+			
+			except ValueError as err :
+				self.QueryStat['Reason'] = "CLS_PostgreSQL_Use: RunExist: Query error: " + err
+				return False
+		
+		#############################
+		# 正常
+		self.QueryStat['Result'] = True
+		return True
+
 
 
 

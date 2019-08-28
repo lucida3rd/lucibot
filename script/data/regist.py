@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ登録
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/25
+#   Update  ：2019/8/28
 #####################################################
 # Private Function:
 #   __registUser( self, inFulluser, inMail, inPass ):
@@ -23,6 +23,7 @@
 #   sRegistMastodon( cls, inFulluser, inMail, inPass ):
 #
 #####################################################
+from postgresql_use import CLS_PostgreSQL_Use
 
 from osif import CLS_OSIF
 from filectrl import CLS_File
@@ -349,10 +350,22 @@ class CLS_Regist() :
 		wCLS_botjib = CLS_Botjob()
 		wPutRes = wCLS_botjib.Put( wKind, inFulluser )
 		if wPutRes['Result']!=True :
-			CLS_OSIF.sPrn( "CLS_Regist: Regist: cron create failed: " + wPutRes['Reason'] )
-			return False
+##			CLS_OSIF.sPrn( "CLS_Regist: Regist: cron create failed: " + wPutRes['Reason'] )
+##			return False
+##		
+##		CLS_OSIF.sPrn( '\n' + "cronを起動しました" )
+			CLS_OSIF.sPrn( "cronの起動に失敗しました: " + wPutRes['Reason'] )
+		else :
+			CLS_OSIF.sPrn( '\n' + "cronを起動しました" )
 		
-		CLS_OSIF.sPrn( '\n' + "cronを起動しました" )
+		#############################
+		# トラヒックの登録
+		wRes = self.__regTrafficUser( inFulluser )
+		if wRes['Result']!=True :
+			CLS_OSIF.sPrn( "CLS_Regist: Regist: " + wRes['Reason'] )
+			return False
+		if wRes['Update']==True :
+			CLS_OSIF.sPrn( "DBにトラヒック情報が追加されました" )
 		
 		#############################
 		# 完了
@@ -516,6 +529,9 @@ class CLS_Regist() :
 			#############################
 			# 実行中のcronが処理が終わるまで待機
 			CLS_OSIF.sSleep( 120 )
+		else :
+##			CLS_OSIF.sPrn( "cronの削除に失敗しました: " + wDelRes['Reason'] )
+			CLS_OSIF.sPrn( "cronの削除をスキップします: " + wDelRes['Reason'] )
 		
 		#############################
 		# データ削除
@@ -529,11 +545,265 @@ class CLS_Regist() :
 			return False
 		
 		#############################
+		# トラヒックの削除
+		wRes = self.__delTrafficUser( inFulluser )
+		if wRes['Result']!=True :
+			CLS_OSIF.sPrn( "CLS_Regist: Delete: " + wRes['Reason'] )
+			return False
+		if wRes['Update']==True :
+			CLS_OSIF.sPrn( "DBからトラヒック情報が削除されました" )
+##		else :
+##			CLS_OSIF.sPrn( "トラヒックを計測するユーザが切り替わります" )
+		
+		#############################
 		# 完了
 		wStr = inFulluser + " のデータは全て削除されました" + '\n'
 		wStr = wStr + "mastodon側の認証済みアプリ情報は手で消してください。" + '\n'
 		CLS_OSIF.sPrn( wStr )
 		return True
+
+
+
+#####################################################
+# トラヒックユーザ登録
+#####################################################
+	def __regTrafficUser( self, inUsername ):
+		#############################
+		# 応答データ
+		wRes = {
+			"Result"	: False,
+			"Reason"	: "",
+			"Update"	: False
+		}
+		
+		#############################
+		# 名前の妥当性チェック
+		wResUser = CLS_UserData.sUserCheck( inUsername )
+			##	"Result"	: False,
+			##	"User"		: "",
+			##	"Domain"	: "",
+			##	"Reason"	: "",
+			##	"Registed"	: False,
+		if wResUser['Result']!=True or wResUser['Registed']==False :
+			wRes['Reason'] = "CLS_Regist : __regTrafficUser: Username is not valid: " + inUsername
+			return wRes	#不正
+		
+		#############################
+		# 読み出し先初期化
+		wTrafficUser = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.STR_File['TrafficFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
+			wRes['Reason'] = "CLS_Regist : __regTrafficUser: TrafficFile read is failed: " + gVal.STR_File['TrafficFile']
+			return wRes	#失敗
+		
+		#############################
+		# 既登録のドメインがあるか
+		wFlg = False
+		for wLine in wTrafficUser :
+			wDomain = wLine.split("@")
+			if wDomain[1]==wResUser['Domain'] :
+				## 既登録で既にドメインがあった
+				if wLine==gVal.STR_MasterConfig['MasterUser'] :
+					##MasterUserの場合差し替え
+					wTrafficUser.remove( gVal.STR_MasterConfig['MasterUser'] )
+				else :
+					##登録あり
+					wFlg = True
+				break
+		
+		if wFlg==True :
+			wRes['Result'] = True
+			return wRes	#更新しないで終了
+		
+		#############################
+		# DBに登録
+		
+		#############################
+		# DB接続
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.STR_File['DBinfo_File'] )
+		wDBRes = wOBJ_DB.GetIniStatus()
+		if wDBRes['Result']!=True :
+			##失敗
+			wRes['Reason'] = "CLS_Regist : __regTrafficUser: DB Connect test is failed: " + wDBRes['Reason']
+##			wOBJ_DB.Close()
+			return wRes
+		
+		#############################
+		# ドメイン存在チェック
+		wQuery = "domain = '" + wResUser['Domain'] + "'"
+		wDBRes = wOBJ_DB.RunExist( inObjTable="TBL_TRAFFIC_DATA", inWhere=wQuery )
+		wDBRes = wOBJ_DB.GetQueryStat()
+		if wDBRes['Result']!=True :
+			##失敗
+			wRes['Reason'] = "CLS_Regist : __regTrafficUser: Run Query is failed: " + wDBRes['Reason']
+			wOBJ_DB.Close()
+			return wRes
+		
+		#############################
+		# 存在しなければ追加
+		if wDBRes['Responce']==False :
+			wQuery = "insert into TBL_TRAFFIC_DATA values (" + \
+						"'" + wResUser['Domain'] + "'," + \
+						"0," + \
+						"0" + \
+						") ;"
+			wDBRes = wOBJ_DB.RunQuery( wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				wRes['Reason'] = "CLS_Regist : __regTrafficUser: DB insert is failed: " + wDBRes['Reason']
+				wOBJ_DB.Close()
+				return wRes
+		
+		#############################
+		# DB切断
+		wOBJ_DB.Close()
+		
+		#############################
+		# トラヒックに登録
+		wTrafficUser.append( inUsername )
+		if self.__setTrafficUser( wTrafficUser )!=True :
+			wRes['Reason'] = "CLS_Regist : __regTrafficUser: TrafficFile write is failed: " + gVal.STR_File['TrafficFile']
+			return wRes
+		
+		#############################
+		# 正常
+		wRes['Update'] = True
+		wRes['Result'] = True
+		return wRes
+
+
+
+#####################################################
+# トラヒックユーザ削除
+#####################################################
+	def __delTrafficUser( self, inUsername ):
+		#############################
+		# 応答データ
+		wRes = {
+			"Result"	: False,
+			"Reason"	: "",
+			"Update"	: False
+		}
+		
+		#############################
+		# 名前の妥当性チェック
+		wResUser = CLS_UserData.sUserCheck( inUsername )
+			##	"Result"	: False,
+			##	"User"		: "",
+			##	"Domain"	: "",
+			##	"Reason"	: "",
+			##	"Registed"	: False,
+##		if wResUser['Result']!=True or wResUser['Registed']==False :
+		if wResUser['Result']!=True :
+			wRes['Reason'] = "CLS_Regist : __delTrafficUser: Username is not valid: " + inUsername
+			return wRes	#不正
+		
+		#############################
+		# 読み出し先初期化
+		wTrafficUser = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.STR_File['TrafficFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
+			wRes['Reason'] = "CLS_Regist : __delTrafficUser: TrafficFile read is failed: " + gVal.STR_File['TrafficFile']
+			return wRes	#失敗
+		
+		#############################
+		# トラヒック対象ではなら削除しない
+		if inUsername not in wTrafficUser :
+			wRes['Result'] = True
+			return wRes	#削除しないで終了
+		
+		###対象なので削除する
+		wTrafficUser.remove( inUsername )
+		
+		#############################
+		# ユーザ一覧取得
+		wUserList = CLS_UserData.sGetUserList()
+		
+		#############################
+		# 削除ユーザと同一の既登録ドメインがあるか
+		wUsername = None
+		for wLine in wUserList :
+			wDomain = wLine.split("@")
+			if wDomain[1]==wResUser['Domain'] :
+				## 既登録で既にドメインがあった
+				wUsername = wLine
+				break
+		
+		if wUsername!=None :
+			##同一ドメインの別ユーザに切り替える
+			wTrafficUser.append( wUsername )
+		else :
+			##同一ドメインの別ユーザがなければDBから削除する
+			#############################
+			# DB接続
+			wOBJ_DB = CLS_PostgreSQL_Use( gVal.STR_File['DBinfo_File'] )
+			wDBRes = wOBJ_DB.GetIniStatus()
+			if wDBRes['Result']!=True :
+				##失敗
+				wRes['Reason'] = "CLS_Regist : __delTrafficUser: DB Connect test is failed: " + wDBRes['Reason']
+##				wOBJ_DB.Close()
+				return wRes
+			
+			#############################
+			# ドメイン存在チェック
+			wQuery = "domain = '" + wResUser['Domain'] + "'"
+			wDBRes = wOBJ_DB.RunExist( inObjTable="TBL_TRAFFIC_DATA", inWhere=wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				wRes['Reason'] = "CLS_Regist : __delTrafficUser: Run Query is failed: " + wDBRes['Reason']
+				wOBJ_DB.Close()
+				return wRes
+			
+			#############################
+			# 存在していれば削除
+			if wDBRes['Responce']==True :
+				wQuery = "delete from TBL_TRAFFIC_DATA where domain = '" + wResUser['Domain'] + \
+							"' ;"
+				wDBRes = wOBJ_DB.RunQuery( wQuery )
+				wDBRes = wOBJ_DB.GetQueryStat()
+				if wDBRes['Result']!=True :
+					##失敗
+					wRes['Reason'] = "CLS_Regist : __delTrafficUser: DB insert is failed: " + wDBRes['Reason']
+					wOBJ_DB.Close()
+					return wRes
+			
+			#############################
+			# DB切断
+			wRes['Update'] = True	#DBからは削除
+			wOBJ_DB.Close()
+		
+		#############################
+		# トラヒックを更新
+		if self.__setTrafficUser( wTrafficUser )!=True :
+			wRes['Reason'] = "CLS_Regist : __delTrafficUser: TrafficFile write is failed: " + gVal.STR_File['TrafficFile']
+			return wRes
+		
+		#############################
+		# 正常
+		wRes['Result'] = True
+		return wRes
+
+
+
+#####################################################
+# トラヒックユーザ 書き込み
+#####################################################
+	def __setTrafficUser( self, inUserList ):
+		#############################
+		# ファイル書き込み (改行つき)
+		wFile_path = gVal.STR_File['TrafficFile']
+		if CLS_File.sWriteFile( wFile_path, inUserList, inRT=True )!=True :
+			return False	#失敗
+		
+		return True			#成功
 
 
 

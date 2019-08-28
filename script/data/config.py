@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/21
+#   Update  ：2019/8/28
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -401,32 +401,43 @@ class CLS_Config() :
 		if gVal.STR_MasterConfig['MasterUser'] != "" :
 			wDelRes = wCLS_botjib.Del( gVal.DEF_CRON_MASTER, gVal.STR_MasterConfig['MasterUser'] )
 			if wDelRes['Result']!=True :
-				return False
+##				return False
+				CLS_OSIF.sPrn( "cronの削除をスキップしました: user=" + gVal.STR_MasterConfig['MasterUser'] + " : " + wDelRes['Reason'] )
 			
 			wDelRes = wCLS_botjib.Del( gVal.DEF_CRON_SUB, inFulluser )
 			if wDelRes['Result']!=True :
-				return False
+##				return False
+				CLS_OSIF.sPrn( "cronの削除をスキップしました: user=" + inFulluser + " : " + wDelRes['Reason'] )
 			
 			#############################
 			# 実行中のcronが処理が終わるまで待機
-			wStr = "cronの切替中（2分かかります）......" + '\n'
+			wStr = '\n' + "cronの切替中（2分かかります）......" + '\n'
 			CLS_OSIF.sPrn( wStr )
 			CLS_OSIF.sSleep( 120 )
 			
 			wDelRes = wCLS_botjib.Put( gVal.DEF_CRON_MASTER, inFulluser )
 			if wDelRes['Result']!=True :
+				CLS_OSIF.sPrn( "cronの登録が失敗しました: user=" + inFulluser + " : " + wDelRes['Reason'] )
 				return False
 			
 			wDelRes = wCLS_botjib.Put( gVal.DEF_CRON_SUB, gVal.STR_MasterConfig['MasterUser'] )
 			if wDelRes['Result']!=True :
+				CLS_OSIF.sPrn( "cronの登録が失敗しました: user=" + gVal.STR_MasterConfig['MasterUser'] + " : " + wDelRes['Reason'] )
 				return False
 		
 		#############################
 		# 変更＆反映
-		gVal.STR_MasterConfig['MasterUser'] = inFulluser 
+		wOldMaster = gVal.STR_MasterConfig['MasterUser']
+		gVal.STR_MasterConfig['MasterUser'] = inFulluser
 		wRes = self.sSetMasterConfig()
 		if wRes!=True :
 			return False
+		
+		#############################
+		# トラヒック計測ユーザの場合、切替る
+		if CLS_UserData.sChangeTrafficUser( inFulluser )!=True :
+			CLS_OSIF.sPrn( "トラヒック計測ユーザの切替が失敗しました: user=" + wOldMaster + " master=" + gVal.STR_MasterConfig['MasterUser'] )
+##			return False
 		
 		wStr = inFulluser + " をMasterUserに設定しました。" + '\n'
 		wStr = wStr + "このユーザをmastodon上でbotとして動作させます。" + '\n'

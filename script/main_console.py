@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/23
+#   Update  ：2019/8/28
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -212,7 +212,8 @@ class CLS_Main_Console() :
 ##				return
 ##			
 			wCLS_work = CLS_UserData()
-			wCLS_work.ViewUserList( wRes['Responce'] )
+##			wCLS_work.ViewUserList( wRes['Responce'] )
+			wCLS_work.ViewUserList()
 			wFlg = True
 		
 		#############################

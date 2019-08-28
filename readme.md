@@ -1,7 +1,7 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4  
-::BotDate= 2019/8/23  
-::Version= 4.0.10.2  
+::BotDate= 2019/8/28  
+::Version= 4.0.10.3  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
 
@@ -137,7 +137,7 @@ $ python3 run.py
 | リプライ機能          | 通知TL         |   〇   |   〇    |                      |
 | ホームブースト機能    | ホームTL       |   －   |   〇    |                      |
 | 周期トゥート機能      | －             |   〇   |   －    |                      |
-| ランダムトゥート機能  | 連合TL         |   〇   |   －    |                      |
+| ランダムトゥート機能  | －             |   〇   |   －    |                      |
 | ワード学習機能        | 連合・ローカル |   〇   |   〇    |                      |
 | トラヒック機能        | 連合・ローカル |   〇   |   〇    |                      |
 | ハード監視機能        | －             |   〇   |   －    |                      |
