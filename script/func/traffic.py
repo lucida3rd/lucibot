@@ -241,7 +241,8 @@ class CLS_Traffic():
 		
 		#############################
 		# 全トラヒックのロード
-		wQuery = "select * from TBL_TRAFFIC_DATA order by domain ;"
+##		wQuery = "select * from TBL_TRAFFIC_DATA order by domain ;"
+		wQuery = "select * from TBL_TRAFFIC_DATA ;"
 		
 		wRes = wOBJ_DB.RunQuery( wQuery )
 		wRes = wOBJ_DB.GetQueryStat()
@@ -342,22 +343,40 @@ class CLS_Traffic():
 		# 送信するトラヒックの作成
 		
 		#############################
+		# トラヒック送信対象の順番に入れ替える
+		wARR_SendTraffic = {}
+		wIndex = 0
+		wKeyList = wTraffic.keys()
+		for wSendDomain in self.ARR_SendDomain :
+			##対象のトラヒックを探す
+			for wKey in wKeyList :
+				if wTraffic[wKey]['domain']!=wSendDomain :
+					continue
+				##ヒット
+				wARR_SendTraffic.update({ wIndex : wTraffic[wKey] })
+				wIndex += 1
+		
+		#############################
 		# トゥートの組み立て
 		wCHR_TimeDate = gVal.STR_TimeInfo['TimeDate'].split(" ")
 ##		wCHR_Title = "Mastodon Traffic: " + wCHR_TimeDate[0] + " " + str(gVal.STR_TimeInfo['Hour']) + "時台"
 		wCHR_Title = "Mastodon Traffic: " + wCHR_TimeDate[0] + " " + str(gVal.STR_TimeInfo['Hour']) + "時"
 		
 		wCHR_Body = ""
-		wKeyList  = wTraffic.keys()
+##		wKeyList  = wTraffic.keys()
+		wKeyList  = wARR_SendTraffic.keys()
 		for wIndex in wKeyList :
-			if wTraffic[wIndex]['domain'] not in self.ARR_SendDomain :
-				continue	#送信対象ではない
+##			if wTraffic[wIndex]['domain'] not in self.ARR_SendDomain :
+##				continue	#送信対象ではない
+##			
+##			wCHR_Body = wCHR_Body + wTraffic[wIndex]['domain'] + ": " + str(wTraffic[wIndex]['now_count'])
+			wCHR_Body = wCHR_Body + wARR_SendTraffic[wIndex]['domain'] + ": " + str(wARR_SendTraffic[wIndex]['now_count'])
 			
-			wCHR_Body = wCHR_Body + wTraffic[wIndex]['domain'] + ": " + str(wTraffic[wIndex]['now_count'])
-			
-			if wTraffic[wIndex]['rat_count']>=0 :
+##			if wTraffic[wIndex]['rat_count']>=0 :
+			if wARR_SendTraffic[wIndex]['rat_count']>=0 :
 				##bot起動の最初の1時間は差を出さない
-				wRateCount = wTraffic[wIndex]['now_count'] - wTraffic[wIndex]['rat_count']
+##				wRateCount = wTraffic[wIndex]['now_count'] - wTraffic[wIndex]['rat_count']
+				wRateCount = wARR_SendTraffic[wIndex]['now_count'] - wARR_SendTraffic[wIndex]['rat_count']
 				wCHR_Body = wCHR_Body + "("
 				if wRateCount>0 :
 					wCHR_Body = wCHR_Body + "+"
@@ -394,6 +413,13 @@ class CLS_Traffic():
 			##最後尾を削って文字列に直す
 			del wARR_Tweet[-1]
 			wCHR_Tweet = '\n'.join(wARR_Tweet)
+		
+		#############################
+		# 1番目のドメインを最後尾に移動(Twitter上で目立たせる)
+		wARR_Tweet = wCHR_Tweet.split('\n')
+		wARR_Tweet.append( wARR_Tweet[1] )
+		del wARR_Tweet[1]
+		wCHR_Tweet = '\n'.join(wARR_Tweet)
 		
 		#############################
 		# ツイートの送信

@@ -5,9 +5,9 @@
 r|,|unlisted
 
 ###トラヒック送信対象ドメイン(d|,|ドメイン名)
+#d|,|mstdn.mynoghra.jp
 d|,|mastodon.social
 d|,|mstdn.jp
 d|,|pawoo.net
 d|,|mastodon.cloud
-#d|,|mstdn.mynoghra.jp
 

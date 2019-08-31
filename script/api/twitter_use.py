@@ -489,6 +489,7 @@ class CLS_Twitter_Use():
 		#############################
 		# twitter接続情報のロード
 		if inPath==None :
+			self.IniStatus['Reason'] = "Twitter information file path is not specified"
 			return False
 		
 		if self.__loadTwitter( inPath )!=True :
@@ -520,6 +521,7 @@ class CLS_Twitter_Use():
 		#############################
 		# twitter接続情報のロード
 		if inPath==None :
+			self.IniStatus['Reason'] = "Twitter information file path is not specified"
 			return False
 		
 		if self.__loadTwitter( inPath )!=True :

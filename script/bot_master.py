@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理(Master)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/8/31
 #####################################################
 # Private Function:
 #   (none)
@@ -147,7 +147,7 @@ class CLS_BOT_Master() :
 		
 		#############################
 		# Twitterと接続 (クラス生成)
-		if gVal.STR_MasterConfig['Twitter']!="on" :
+		if gVal.STR_MasterConfig['Twitter']=="on" :
 			cls.OBJ_Twitter = CLS_Twitter_Use( gVal.DEF_STR_FILE['Twitter_File'], gVal.DEF_STR_TLNUM['getTwitTLnum'] )
 		else :
 			cls.OBJ_Twitter = CLS_Twitter_Use()
