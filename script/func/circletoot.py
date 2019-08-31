@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：周期トゥート処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/4/5
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   (none)
@@ -180,7 +180,7 @@ class CLS_CircleToot():
 		# ファイル読み出し
 		wToot = []
 		
-		wFile_path = gVal.STR_File['Toot_path'] + inFileName
+		wFile_path = gVal.DEF_STR_FILE['Toot_path'] + inFileName
 		if CLS_File.sReadFile( wFile_path, outLine=wToot )!=True :
 			wRes['Reason'] = "CLS_CircleToot: __sendToot: Toot file read failed: " + wFile_path
 			return wRes		#失敗
@@ -246,12 +246,12 @@ class CLS_CircleToot():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.STR_File['CLTootFile']
+		wFile_path = gVal.DEF_STR_FILE['CLTootFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wCLTootList )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: Get_CLData: CLTootFile read failed: " + wFile_path )
 			return False	#失敗
 		
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['CLDataFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['CLDataFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wCLDataList )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: Get_CLData: CLDataFile read failed: " + wFile_path )
 			return False	#失敗
@@ -331,7 +331,7 @@ class CLS_CircleToot():
 		
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['CLDataFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['CLDataFile']
 		if CLS_File.sWriteFile( wFile_path, wCLDataList, inRT=True )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: Set_CLData: CLDataFile read failed: " + wFile_path )
 			return False	#失敗

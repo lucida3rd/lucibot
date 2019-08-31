@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ワード収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/17
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   __selectMeCabDic(self):
@@ -99,7 +99,7 @@ class CLS_WordCorr():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.STR_File['WordREMFile']
+		wFile_path = gVal.DEF_STR_FILE['WordREMFile']
 		if CLS_File.sReadFile( wFile_path, outLine=gVal.STR_WordREM )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: GetWordREM: WordREM file read failed: " + wFile_path )
 			return False	#失敗
@@ -136,7 +136,7 @@ class CLS_WordCorr():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['WorddicFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['WorddicFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wWork_WordDic )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetWorddic: Worddic file read failed: " + wFile_path )
 			return False	#失敗
@@ -185,7 +185,7 @@ class CLS_WordCorr():
 			return
 		
 ##		wStudyDay = gVal.STR_MasterConfig['studyDay']	#覚えておく日数
-		wStudyDay = gVal.STR_TLnum['studyDay']	#覚えておく日数
+		wStudyDay = gVal.DEF_STR_TLNUM['studyDay']	#覚えておく日数
 		#############################
 		# 辞書のうち古い単語を検索して消す
 		wKeylist = self.STR_WordDic.keys()
@@ -222,7 +222,7 @@ class CLS_WordCorr():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['ClazListFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['ClazListFile']
 		if CLS_File.sReadFile( wFile_path, outLine=self.STR_ClazList )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: __getClazList: ClazList file read failed: " + wFile_path )
 			return False	#失敗
@@ -248,7 +248,7 @@ class CLS_WordCorr():
 		
 		#############################
 		# ファイル書き込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['WorddicFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['WorddicFile']
 		if CLS_File.sWriteFile( wFile_path, wWork_WordDic, inRT=True )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetWorddic: Worddic file write failed: " + wFile_path )
 			return False	#失敗
@@ -263,7 +263,7 @@ class CLS_WordCorr():
 	def __setClazList(self) :
 		#############################
 		# ファイル書き込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['ClazListFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['ClazListFile']
 		if CLS_File.sWriteFile( wFile_path, self.STR_ClazList, inRT=True )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: __setClazList: Userinfo file write failed: " + wFile_path )
 			return False	#失敗
@@ -408,7 +408,7 @@ class CLS_WordCorr():
 		#############################
 		# 今回の学習数が上限か
 ##		if self.STR_Stat['StudyNum'] >= gVal.STR_MasterConfig['studyNum'] :
-		if self.STR_Stat['StudyNum'] >= gVal.STR_TLnum['studyNum'] :
+		if self.STR_Stat['StudyNum'] >= gVal.DEF_STR_TLNUM['studyNum'] :
 			return False	#今回は学習しない
 		
 		#############################
@@ -426,7 +426,7 @@ class CLS_WordCorr():
 		#############################
 		# 学習数が上限か
 ##		wStudyMax = gVal.STR_MasterConfig['studyMax']
-		wStudyMax = gVal.STR_TLnum['studyMax']
+		wStudyMax = gVal.DEF_STR_TLNUM['studyMax']
 		if wStudyMax <= len(self.STR_WordDic) :
 			if self.STR_Stat['WordLimit']==False :
 				self.Obj_Parent.OBJ_Mylog.Log( 'b', "学習不能(単語登録数上限: " + str(wStudyMax) + "件)" )
@@ -547,7 +547,7 @@ class CLS_WordCorr():
 			if wClazList not in self.STR_ClazList :
 				#品詞リストの最大超えならランダムで1個減らす
 ##				if len(self.STR_ClazList) >= gVal.STR_MasterConfig['clazListNum']:
-				if len(self.STR_ClazList) >= gVal.STR_TLnum['clazListNum']:
+				if len(self.STR_ClazList) >= gVal.DEF_STR_TLNUM['clazListNum']:
 					wVal = CLS_OSIF.sGetRand( len(self.STR_ClazList) )
 					if wVal>=0 :
 						self.STR_ClazList.pop(wVal)

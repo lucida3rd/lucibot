@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/28
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -300,7 +300,7 @@ class CLS_Main_Console() :
 		# Twitter連携
 		elif inCommand=="-ct" :
 			wCLS_Twitter = CLS_Twitter_Use()
-			wCLS_Twitter.CreateTwitter( gVal.STR_File['Twitter_File'], gVal.STR_File['defTwitter_File'] )
+			wCLS_Twitter.CreateTwitter( gVal.DEF_STR_FILE['Twitter_File'], gVal.DEF_STR_FILE['defTwitter_File'] )
 ##			gVal.STR_MasterConfig['TwitterUser'] = wCLS_Twitter.GetUsername()
 ##			if gVal.STR_MasterConfig['TwitterUser']=="" :
 ##				gVal.STR_MasterConfig['Twitter'] = "off"
@@ -310,9 +310,10 @@ class CLS_Main_Console() :
 			
 			##タイムラインの設定
 			CLS_OSIF.sPrn( '\n' + "Twitterと接続しています......" )
-			wCLS_Twitter = CLS_Twitter_Use( gVal.STR_File['Twitter_File'] )
+##			wCLS_Twitter = CLS_Twitter_Use( gVal.STR_File['Twitter_File'] )
+			wCLS_Twitter = CLS_Twitter_Use( gVal.DEF_STR_FILE['Twitter_File'], gVal.DEF_STR_TLNUM['getTwitTLnum'] )
 			if gVal.STR_MasterConfig['Twitter']=="on" :
-				wCLS_Twitter.CnfTimeline( gVal.STR_File['Twitter_File'] )
+				wCLS_Twitter.CnfTimeline( gVal.DEF_STR_FILE['Twitter_File'] )
 			
 			wFlg = True
 		
@@ -327,15 +328,15 @@ class CLS_Main_Console() :
 	def sViewDisp( cls, inDisp ):
 		#############################
 		# ディスプレイファイルの確認
-		wKeylist = gVal.STR_DispFile.keys()
+		wKeylist = gVal.DEF_STR_DISPFILE.keys()
 		if inDisp not in wKeylist :
 			###キーがない(指定ミス)
 			CLS_OSIF.sPrn( "CLS_Main_Console: __viewDisp: Display key is not found: inDisp= " + inDisp )
 			return False
 		
-		if CLS_File.sExist( gVal.STR_DispFile[inDisp] )!=True :
+		if CLS_File.sExist( gVal.DEF_STR_DISPFILE[inDisp] )!=True :
 			###ファイルがない...(消した？)
-			CLS_OSIF.sPrn( "CLS_Main_Console: __viewDisp: Display file is not found: " + gVal.STR_DispFile[inDisp] )
+			CLS_OSIF.sPrn( "CLS_Main_Console: __viewDisp: Display file is not found: " + gVal.DEF_STR_DISPFILE[inDisp] )
 			return False
 		
 		#############################
@@ -345,7 +346,7 @@ class CLS_Main_Console() :
 		#############################
 		# 中身表示
 		wStr = ""
-		for wLine in open( gVal.STR_DispFile[inDisp], 'r'):	#ファイルを開く
+		for wLine in open( gVal.DEF_STR_DISPFILE[inDisp], 'r'):	#ファイルを開く
 			wStr = wStr + wLine
 		
 		CLS_OSIF.sPrn( wStr )
@@ -397,12 +398,12 @@ class CLS_Main_Console() :
 # るしぼっとVersion
 #####################################################
 	def __getLucibotVer(cls):
-		if CLS_File.sExist( gVal.STR_File['Readme'] )!=True :
+		if CLS_File.sExist( gVal.DEF_STR_FILE['Readme'] )!=True :
 			###readmeファイル消すなwww
-			CLS_OSIF.sPrn( "CLS_Main_Console: __getLucibotVer: Readme file is not found: " + gVal.STR_File['Readme'] )
+			CLS_OSIF.sPrn( "CLS_Main_Console: __getLucibotVer: Readme file is not found: " + gVal.DEF_STR_FILE['Readme'] )
 			return False
 		
-		for wLine in open( gVal.STR_File['Readme'], 'r'):	#ファイルを開く
+		for wLine in open( gVal.DEF_STR_FILE['Readme'], 'r'):	#ファイルを開く
 			#############################
 			# 分解+要素数の確認
 			wLine = wLine.strip()

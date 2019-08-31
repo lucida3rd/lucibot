@@ -2,9 +2,9 @@
 # coding: UTF-8
 #####################################################
 # るしぼっと4
-#   Class   ：bot実行 (Background用)
+#   Class   ：bot実行 (Master用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/10
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   (none)
@@ -26,12 +26,9 @@ sys.path.append('script/disp')
 sys.path.append('script/func')
 sys.path.append('script/oslib')
 
-from crontest import CLS_CronTest
-##from main_console import CLS_Main_Console
+from bot_master import CLS_BOT_Master
 from gval import gVal
 #####################################################
-##CLS_Main_Console.sRun( sys.argv )	#コンソール起動
-##									#いちお引数も渡しておく
+CLS_BOT_Master.sRun()	#起動
 
-wCLS_test = CLS_CronTest()				# cronテスト
 

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ登録
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/28
+#   Update  ：2019/8/31
 #####################################################
 # Private Function:
 #   __registUser( self, inFulluser, inMail, inPass ):
@@ -113,12 +113,12 @@ class CLS_Regist() :
 ##			wRes['Reason'] = "CLS_Regist: CreateMastodon: User path ng: " + wGetPath['Reason']
 ##			return wRes
 		
-		wRegFile = wGetPath['Responce'] + gVal.STR_File['Reg_RegFile']
+		wRegFile = wGetPath['Responce'] + gVal.DEF_STR_FILE['Reg_RegFile']
 		if CLS_File.sExist( wRegFile )!=True :
 			wRes['Reason'] = "CLS_Regist: CreateMastodon: Regist File not is found: " + wRegFile
 			return wRes		#ファイルがない
 		
-		wUserFile = wGetPath['Responce'] + gVal.STR_File['Reg_UserFile']
+		wUserFile = wGetPath['Responce'] + gVal.DEF_STR_FILE['Reg_UserFile']
 		if CLS_File.sExist( wUserFile )!=True :
 			wRes['Reason'] = "CLS_Regist: CreateMastodon: Userreg File not is found: " + wUserFile
 			return wRes		#ファイルがない
@@ -173,13 +173,13 @@ class CLS_Regist() :
 		wRes = CLS_Mastodon_Use.create_app(
 			client_name  = gVal.STR_SystemInfo['Client_Name'],
 			api_base_url = "https://" + wSTR_user['Domain'],
-			to_file = wGetPath['Responce'] + gVal.STR_File['Reg_RegFile'] )
+			to_file = wGetPath['Responce'] + gVal.DEF_STR_FILE['Reg_RegFile'] )
 		
 		if wRes['Result']!=True :
 			return wRes
 		
 		wMastodon = CLS_Mastodon_Use(
-			client_id = wGetPath['Responce'] + gVal.STR_File['Reg_RegFile'],
+			client_id = wGetPath['Responce'] + gVal.DEF_STR_FILE['Reg_RegFile'],
 			api_base_url = "https://" + wSTR_user['Domain'] )
 		
 		wIniStatus = wMastodon.GetIniStatus()
@@ -190,7 +190,7 @@ class CLS_Regist() :
 		wRes = wMastodon.log_in(
 			username = inMail,
 			password = inPass,
-			to_file = wGetPath['Responce'] + gVal.STR_File['Reg_UserFile'] )
+			to_file = wGetPath['Responce'] + gVal.DEF_STR_FILE['Reg_UserFile'] )
 		
 		return wRes		#応答形式(mastodon形式)
 
@@ -303,7 +303,7 @@ class CLS_Regist() :
 ##			return False
 		
 		if CLS_File.sCopytree(
-			gVal.STR_File['defUserdata_path'],
+			gVal.DEF_STR_FILE['defUserdata_path'],
 			wGetPath['Responce'] )!=True :
 			###ありえない
 			CLS_OSIF.sPrn( "CLS_Regist: Regist: defaultデータコピー失敗" )
@@ -436,12 +436,12 @@ class CLS_Regist() :
 			CLS_OSIF.sPrn( "CLS_Regist: Update: User path ng: " + wGetPath['Reason'] )
 			return False
 		
-		if CLS_File.sClrFile( wGetPath['Responce'] + gVal.STR_File['Reg_RegFile'] )!=True :
-			CLS_OSIF.sPrn( "CLS_Regist: Update: Reg File is not found: " + wGetPath['Responce'] + gVal.STR_File['Reg_RegFile'] )
+		if CLS_File.sClrFile( wGetPath['Responce'] + gVal.DEF_STR_FILE['Reg_RegFile'] )!=True :
+			CLS_OSIF.sPrn( "CLS_Regist: Update: Reg File is not found: " + wGetPath['Responce'] + gVal.DEF_STR_FILE['Reg_RegFile'] )
 			return False
 		
-		if CLS_File.sClrFile( wGetPath['Responce'] + gVal.STR_File['Reg_UserFile'] )!=True :
-			CLS_OSIF.sPrn( "CLS_Regist: Update: User File is not found: " + wGetPath['Responce'] + gVal.STR_File['Reg_UserFile'] )
+		if CLS_File.sClrFile( wGetPath['Responce'] + gVal.DEF_STR_FILE['Reg_UserFile'] )!=True :
+			CLS_OSIF.sPrn( "CLS_Regist: Update: User File is not found: " + wGetPath['Responce'] + gVal.DEF_STR_FILE['Reg_UserFile'] )
 			return False
 		
 		#############################
@@ -594,9 +594,9 @@ class CLS_Regist() :
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.STR_File['TrafficFile']
+		wFile_path = gVal.DEF_STR_FILE['TrafficFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
-			wRes['Reason'] = "CLS_Regist : __regTrafficUser: TrafficFile read is failed: " + gVal.STR_File['TrafficFile']
+			wRes['Reason'] = "CLS_Regist : __regTrafficUser: TrafficFile read is failed: " + gVal.DEF_STR_FILE['TrafficFile']
 			return wRes	#失敗
 		
 		#############################
@@ -623,7 +623,7 @@ class CLS_Regist() :
 		
 		#############################
 		# DB接続
-		wOBJ_DB = CLS_PostgreSQL_Use( gVal.STR_File['DBinfo_File'] )
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
 		wDBRes = wOBJ_DB.GetIniStatus()
 		if wDBRes['Result']!=True :
 			##失敗
@@ -648,7 +648,8 @@ class CLS_Regist() :
 			wQuery = "insert into TBL_TRAFFIC_DATA values (" + \
 						"'" + wResUser['Domain'] + "'," + \
 						"0," + \
-						"0" + \
+						"-1," + \
+						"-1" + \
 						") ;"
 			wDBRes = wOBJ_DB.RunQuery( wQuery )
 			wDBRes = wOBJ_DB.GetQueryStat()
@@ -666,7 +667,7 @@ class CLS_Regist() :
 		# トラヒックに登録
 		wTrafficUser.append( inUsername )
 		if self.__setTrafficUser( wTrafficUser )!=True :
-			wRes['Reason'] = "CLS_Regist : __regTrafficUser: TrafficFile write is failed: " + gVal.STR_File['TrafficFile']
+			wRes['Reason'] = "CLS_Regist : __regTrafficUser: TrafficFile write is failed: " + gVal.DEF_STR_FILE['TrafficFile']
 			return wRes
 		
 		#############################
@@ -708,9 +709,9 @@ class CLS_Regist() :
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.STR_File['TrafficFile']
+		wFile_path = gVal.DEF_STR_FILE['TrafficFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
-			wRes['Reason'] = "CLS_Regist : __delTrafficUser: TrafficFile read is failed: " + gVal.STR_File['TrafficFile']
+			wRes['Reason'] = "CLS_Regist : __delTrafficUser: TrafficFile read is failed: " + gVal.DEF_STR_FILE['TrafficFile']
 			return wRes	#失敗
 		
 		#############################
@@ -743,7 +744,7 @@ class CLS_Regist() :
 			##同一ドメインの別ユーザがなければDBから削除する
 			#############################
 			# DB接続
-			wOBJ_DB = CLS_PostgreSQL_Use( gVal.STR_File['DBinfo_File'] )
+			wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
 			wDBRes = wOBJ_DB.GetIniStatus()
 			if wDBRes['Result']!=True :
 				##失敗
@@ -783,7 +784,7 @@ class CLS_Regist() :
 		#############################
 		# トラヒックを更新
 		if self.__setTrafficUser( wTrafficUser )!=True :
-			wRes['Reason'] = "CLS_Regist : __delTrafficUser: TrafficFile write is failed: " + gVal.STR_File['TrafficFile']
+			wRes['Reason'] = "CLS_Regist : __delTrafficUser: TrafficFile write is failed: " + gVal.DEF_STR_FILE['TrafficFile']
 			return wRes
 		
 		#############################
@@ -799,7 +800,7 @@ class CLS_Regist() :
 	def __setTrafficUser( self, inUserList ):
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = gVal.STR_File['TrafficFile']
+		wFile_path = gVal.DEF_STR_FILE['TrafficFile']
 		if CLS_File.sWriteFile( wFile_path, inUserList, inRT=True )!=True :
 			return False	#失敗
 		

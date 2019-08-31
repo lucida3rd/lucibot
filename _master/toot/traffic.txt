@@ -1,5 +1,13 @@
-mastodon.social
-mstdn.jp
-pawoo.net
-mastodon.cloud
-mstdn.mynoghra.jp
+###公開範囲(r|,|public)
+###		public   ..公開
+###		unlisted ..未収載
+###		private  ..非公開
+r|,|unlisted
+
+###トラヒック送信対象ドメイン(d|,|ドメイン名)
+d|,|mastodon.social
+d|,|mstdn.jp
+d|,|pawoo.net
+d|,|mastodon.cloud
+#d|,|mstdn.mynoghra.jp
+

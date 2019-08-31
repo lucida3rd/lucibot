@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/21
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   __run(self):
@@ -99,7 +99,7 @@ class CLS_LookRIP():
 		#############################
 		# 通知制限時間の算出(分→秒へ)
 ##		self.VAL_indLimmin = gVal.STR_Config['indLimmin'] * 60	#秒に変換
-		self.VAL_indLimmin = gVal.STR_TLnum['indLimmin'] * 60	#秒に変換
+		self.VAL_indLimmin = gVal.DEF_STR_TLNUM['indLimmin'] * 60	#秒に変換
 		
 		self.Obj_Parent = parentObj
 		self.__run()	#処理開始
@@ -448,8 +448,8 @@ class CLS_LookRIP():
 		#############################
 		# directかprivateリプライの場合はニコる
 		if inROW['visibility']=="direct" or \
-##		   ( inROW['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" ) :
 		   inROW['visibility']=="private" :
+##		   ( inROW['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" ) :
 			wRes = self.Obj_Parent.OBJ_MyDon.Favo( inROW['status_id'] )
 			if wRes['Result']!=True :
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeRIP: Favo error: " + wRes['Reason'] )
@@ -481,7 +481,7 @@ class CLS_LookRIP():
 		wGet_TootList = []
 		wNext_Id = None
 ##		wMax_Toots = gVal.STR_Config["getRIPnum"]
-		wMax_Toots = gVal.STR_TLnum["getRIPnum"]
+		wMax_Toots = gVal.DEF_STR_TLNUM["getRIPnum"]
 		while (len(wGet_TootList) < wMax_Toots ):
 			#############################
 			# TL取得
@@ -547,8 +547,8 @@ class CLS_LookRIP():
 			#############################
 			# ふぁぼ or ぶーすと
 			if ( wToot['type']=="favourite" or wToot['type']=="reblog" ) \
-##			  and gVal.STR_Config['IND_Favo']=="on" :
 			  and gVal.STR_MasterConfig['IND_Favo']=="on" :
+##			  and gVal.STR_Config['IND_Favo']=="on" :
 				### タグなしcontents
 				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
 				wInde = wCont.find( "[Admin]" )
@@ -757,7 +757,7 @@ class CLS_LookRIP():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['Rate_FavFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_FavFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wRateList )!=True :
 			return False	#失敗
 		
@@ -781,7 +781,7 @@ class CLS_LookRIP():
 	def Set_RateFV(self):
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['Rate_FavFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_FavFile']
 		if CLS_File.sWriteFile( wFile_path, self.ARR_UpdateFV, inRT=True )!=True :
 			return False	#失敗
 		
@@ -799,7 +799,7 @@ class CLS_LookRIP():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['Rate_RipFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_RipFile']
 		if CLS_File.sReadFile( wFile_path, outLine=self.ARR_RateTL )!=True :
 			return False	#失敗
 		
@@ -809,7 +809,7 @@ class CLS_LookRIP():
 	def Set_RateRIP(self):
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['Rate_RipFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_RipFile']
 		if CLS_File.sWriteFile( wFile_path, self.ARR_UpdateTL, inRT=True )!=True :
 			return False	#失敗
 		
@@ -827,7 +827,7 @@ class CLS_LookRIP():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['IndLim_File']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['IndLim_File']
 		if CLS_File.sReadFile( wFile_path, outLine=wARR_Lim )!=True :
 			return False	#失敗
 		
@@ -871,7 +871,7 @@ class CLS_LookRIP():
 		
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['IndLim_File']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['IndLim_File']
 		if CLS_File.sWriteFile( wFile_path, wARR_Lim )!=True :
 			return False	#失敗
 		
@@ -891,14 +891,14 @@ class CLS_LookRIP():
 		#############################
 		# 回数チェック
 ##		if self.STR_Ind['Count']<gVal.STR_Config['indLimcnt'] :
-		if self.STR_Ind['Count']<gVal.STR_TLnum['indLimcnt'] :
+		if self.STR_Ind['Count']<gVal.DEF_STR_TLNUM['indLimcnt'] :
 			if self.STR_Ind['Count']==0 :	#最初にカウント開始した時間をメモる
 				self.STR_Ind['TimeDate'] = str(inCreateAt)
 			return True		#制限なし
 		
 		# 規制中
 ##		elif self.STR_Ind['Count']>gVal.STR_Config['indLimcnt'] :
-		elif self.STR_Ind['Count']>gVal.STR_TLnum['indLimcnt'] :
+		elif self.STR_Ind['Count']>gVal.DEF_STR_TLNUM['indLimcnt'] :
 			self.STR_Ind['Count'] += 1	#カウントはする
 			self.FLG_indLim = True
 			return False	#制限
@@ -915,7 +915,7 @@ class CLS_LookRIP():
 		# 管理者がいれば通知する
 		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
 ##			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.STR_Config['indLimmin']) + "分"
-			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.STR_TLnum['indLimmin']) + "分"
+			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.DEF_STR_TLNUM['indLimmin']) + "分"
 			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility="direct" )
 		
 		return False	#制限

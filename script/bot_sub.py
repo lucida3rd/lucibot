@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/28
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   (none)
@@ -16,6 +16,7 @@
 #   sRun(cls):
 #
 #####################################################
+from twitter_use import CLS_Twitter_Use
 
 from osif import CLS_OSIF
 ##from toot import CLS_Toot
@@ -44,6 +45,7 @@ class CLS_BOT_Sub() :
 	OBJ_Mylog    = ""
 	OBJ_Mastodon = ""
 	OBJ_MyDon    = ""		# CHR_Account用のmastodonオブジェクト
+	OBJ_Twitter  = ""
 	OBJ_Traffic  = ""
 	OBJ_UserCorr = ""
 	OBJ_WordCorr = ""
@@ -79,7 +81,7 @@ class CLS_BOT_Sub() :
 		cls.CHR_Account   = wRes['Responce']['Account']
 		cls.CHR_User_path = wRes['Responce']['User_path']
 		
-		cls.OBJ_Mylog    = CLS_Mylog( cls.CHR_User_path + gVal.STR_File['UserLog_path'] )
+		cls.OBJ_Mylog    = CLS_Mylog( cls.CHR_User_path + gVal.DEF_STR_FILE['UserLog_path'] )
 		cls.OBJ_Traffic  = CLS_Traffic( parentObj=cls )
 		cls.OBJ_UserCorr = CLS_UserCorr( parentObj=cls )
 		cls.OBJ_WordCorr = CLS_WordCorr( parentObj=cls )
@@ -105,8 +107,7 @@ class CLS_BOT_Sub() :
 		#############################
 		# 1時間監視
 		if CLS_BotCtrl.sChk1HourTime( cls.CHR_User_path )!=True :
-			wStr = "CLS_BOT_Sub: sChk1HourTime failure"
-			cls.OBJ_Mylog.Log( 'a', wStr )
+			cls.OBJ_Mylog.Log( 'a', "CLS_BOT_Sub: sChk1HourTime failure" )
 			
 			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
 			return
@@ -144,26 +145,28 @@ class CLS_BOT_Sub() :
 		
 		cls.OBJ_MyDon = wRes['Responce']	#1個だけ取り出す
 		
+		#############################
+		# Twitterと接続 (クラス生成)
+		if gVal.STR_MasterConfig['Twitter']!="on" :
+			cls.OBJ_Twitter = CLS_Twitter_Use( gVal.DEF_STR_FILE['Twitter_File'], gVal.DEF_STR_TLNUM['getTwitTLnum'] )
+		else :
+			cls.OBJ_Twitter = CLS_Twitter_Use()
+		
 	#############################
 	# mastodon処理
 	#############################
+		#############################
+		# LTL監視処理
+		wOBJ_LookLTL = CLS_LookLTL( parentObj=cls )
+		
 		#############################
 		# HTL監視処理
 ##		if gVal.STR_MasterConfig['HTL_Boost']=="on" :
 ##			wOBJ_LookHTL = CLS_LookHTL( parentObj=cls )
 		
-##		#############################
-##		# LTL監視処理
-##		wOBJ_LookLTL = CLS_LookLTL( parentObj=cls )
-		
 		#############################
 		# RIP監視処理
 ##		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
-		
-		#############################
-		# 周期トゥート処理
-##		if gVal.STR_MasterConfig['CircleToot']=="on" :
-##			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
 		
 	#############################
 	# 後処理

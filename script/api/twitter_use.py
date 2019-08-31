@@ -4,7 +4,7 @@
 # public
 #   Class   ：ついったーユーズ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/22
+#   Update  ：2019/8/31
 #####################################################
 # Private Function:
 #   __conn(self):
@@ -29,7 +29,8 @@ import json
 import shutil
 import subprocess as sp
 from requests_oauthlib import OAuth1Session
-from gval import gVal
+
+##from gval import gVal
 #####################################################
 class CLS_Twitter_Use():
 	Twitter_use = ''						#Twitterモジュール実体
@@ -47,11 +48,13 @@ class CLS_Twitter_Use():
 		"NoReply"		: "on",
 		"Retweet"		: "off"
 	}
+	
+	VAL_TwitNum = 120
 
 	DEF_TWITTER_HOSTNAME = "twitter.com"	#Twitterホスト名
 	DEF_MOJI_ENCODE      = 'utf-8'			#ファイル文字エンコード
 	DEF_TWITTER_PING_COUNT   = "2"			#Ping回数 (文字型)
-	DEF_TWITTER_PING_TIMEOUT = "1000"		#Pingタイムアウト秒 (文字型)
+##	DEF_TWITTER_PING_TIMEOUT = "1000"		#Pingタイムアウト秒 (文字型)
 
 #####################################################
 # 初期化状態取得
@@ -110,13 +113,15 @@ class CLS_Twitter_Use():
 #####################################################
 ##	def __init__(self):
 ##	def __init__( self, inPath ):
-	def __init__( self, inPath=None, inNoConn=False ):
+###	def __init__( self, inPath=None, inNoConn=False ):
+	def __init__( self, inPath=None, inGetNum=120, inNoConn=False ):
 ##		self.__conn()	#接続
 		if inNoConn==True :
 			##未接続モードで初期化
 			self.__NoConn( inPath )
 			return
 		
+		self.VAL_TwitNum = inGetNum
 		self.Connect( inPath )
 		return
 
@@ -238,7 +243,8 @@ class CLS_Twitter_Use():
 ##			wFile.close()
 ##		except ValueError as err :
 ##			return False
-		if self.SaveTwitter( gVal.STR_File['Twitter_File'] )!=True :
+###		if self.SaveTwitter( gVal.STR_File['Twitter_File'] )!=True :
+		if self.SaveTwitter( inDstPath )!=True :
 			return False
 		
 		print( "Twitterの接続情報の作成 成功!!" + '\n' )
@@ -351,7 +357,8 @@ class CLS_Twitter_Use():
 		print( "Twitterの接続情報の更新中......" + '\n' )
 		#############################
 		# セーブ
-		if self.SaveTwitter( gVal.STR_File['Twitter_File'] )!=True :
+###		if self.SaveTwitter( gVal.STR_File['Twitter_File'] )!=True :
+		if self.SaveTwitter( inPath )!=True :
 			wStr = "CLS_Twitter_Use: CnfTimeline: Twitter file save is failed: " + inPath + '\n'
 			print( wStr )
 			return False
@@ -573,7 +580,8 @@ class CLS_Twitter_Use():
 ##	def __TwitterPing( self, inCount=4 ):
 	def __TwitterPing(self):
 ##		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " " + str( self.DEF_TWITTER_HOSTNAME ) )
-		wPingComm = "ping -c " + self.DEF_TWITTER_PING_COUNT + " -w " + self.DEF_TWITTER_PING_TIMEOUT + " " + self.DEF_TWITTER_HOSTNAME
+##		wPingComm = "ping -c " + self.DEF_TWITTER_PING_COUNT + " -w " + self.DEF_TWITTER_PING_TIMEOUT + " " + self.DEF_TWITTER_HOSTNAME
+		wPingComm = "ping -c " + self.DEF_TWITTER_PING_COUNT + " " + self.DEF_TWITTER_HOSTNAME
 		wStatus, wResult = sp.getstatusoutput( wPingComm )
 		if wStatus==0 :
 			return True	# Link UP
@@ -601,12 +609,14 @@ class CLS_Twitter_Use():
 ##		wRes = CLS_OSIF.sGet_Resp()
 		wRes = self.__Get_Resp()
 		
+##		#############################
+##		# Twitterが利用可能か
+##		if gVal.STR_MasterConfig['Twitter'] != 'on' :
+##			wRes['Reason'] = "Twitter機能=off"
+##			return wRes
+##		
 		#############################
-		# Twitterが利用可能か
-		if gVal.STR_MasterConfig['Twitter'] != 'on' :
-			wRes['Reason'] = "Twitter機能=off"
-			return wRes
-		
+		# 入力チェック
 		if inTweet=='' :
 			wRes['Reason'] = "Twitter内容がない"
 			return wRes
@@ -665,12 +675,12 @@ class CLS_Twitter_Use():
 ##		wRes = CLS_OSIF.sGet_Resp()
 		wRes = self.__Get_Resp()
 		
-		#############################
-		# Twitterが利用可能か
-		if gVal.STR_MasterConfig['Twitter'] != 'on' :
-			wRes['Reason'] = "Twitter機能=off"
-			return wRes
-		
+##		#############################
+##		# Twitterが利用可能か
+##		if gVal.STR_MasterConfig['Twitter'] != 'on' :
+##			wRes['Reason'] = "Twitter機能=off"
+##			return wRes
+##		
 		#############################
 		# 初期化状態のチェック
 		wResIni = self.GetIniStatus()
@@ -715,12 +725,14 @@ class CLS_Twitter_Use():
 ##		if inTLmode=="list" :
 		if self.STR_TWITTERdata['Mode']=="list" :
 			wParams = {
-				"count"       : gVal.STR_TLnum['getTwitTLnum'],
+##				"count"       : gVal.STR_TLnum['getTwitTLnum'],
+				"count"       : self.VAL_TwitNum,
 				"list_id"     : self.STR_TWITTERdata['List']
 			}
 		else :
 			wParams = {
-				"count"       : gVal.STR_TLnum['getTwitTLnum'],
+##				"count"       : gVal.STR_TLnum['getTwitTLnum'],
+				"count"       : self.VAL_TwitNum,
 				"screen_name" : self.STR_TWITTERdata['TwitterUser'],
 ##				"exclude_replies" : inReply,
 ##				"include_rts"     : inRetweet
@@ -765,11 +777,11 @@ class CLS_Twitter_Use():
 ##		wRes = CLS_OSIF.sGet_Resp()
 		wRes = self.__Get_Resp()
 		
-		#############################
-		# Twitterが利用可能か
-		if gVal.STR_MasterConfig['Twitter'] != 'on' :
-			wRes['Reason'] = "Twitter機能=off"
-			return wRes
+##		#############################
+##		# Twitterが利用可能か
+##		if gVal.STR_MasterConfig['Twitter'] != 'on' :
+##			wRes['Reason'] = "Twitter機能=off"
+##			return wRes
 		
 		#############################
 		# 初期化状態のチェック
@@ -785,7 +797,8 @@ class CLS_Twitter_Use():
 		#############################
 		# パラメータの生成
 		wParams = {
-			"count"       : gVal.STR_TLnum['getTwitTLnum'],
+##			"count"       : gVal.STR_TLnum['getTwitTLnum'],
+			"count"       : self.VAL_TwitNum,
 			"screen_name" : self.STR_TWITTERdata['TwitterUser'],
 		}
 		

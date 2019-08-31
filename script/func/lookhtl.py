@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/21
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   __run(self):
@@ -187,7 +187,7 @@ class CLS_LookHTL():
 		#############################
 		# トゥートの時間 (変換＆差)
 ##		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
-		wReaRIPmin = gVal.STR_TLnum['reaRIPmin'] * 60	#秒に変換
+		wReaRIPmin = gVal.DEF_STR_TLNUM['reaRIPmin'] * 60	#秒に変換
 		wGetLag = CLS_OSIF.sTimeLag( str(inROW['created_at']), inThreshold=wReaRIPmin )
 		if wGetLag['Result']!=True :
 			self.STR_Cope['Invalid'] += 1
@@ -274,7 +274,7 @@ class CLS_LookHTL():
 		self.ARR_NewTL = []
 		wNext_Id = None
 ##		wMax_Toots = gVal.STR_Config["getHTLnum"]
-		wMax_Toots = gVal.STR_TLnum["getHTLnum"]
+		wMax_Toots = gVal.DEF_STR_TLNUM["getHTLnum"]
 		while (len(self.ARR_NewTL) < wMax_Toots ):
 			#############################
 			# TL取得
@@ -320,7 +320,7 @@ class CLS_LookHTL():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['Rate_HTLFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_HTLFile']
 		if CLS_File.sReadFile( wFile_path, outLine=self.ARR_RateTL )!=True :
 			return False	#失敗
 		
@@ -330,7 +330,7 @@ class CLS_LookHTL():
 	def Set_RateHTL(self):
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['Rate_HTLFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_HTLFile']
 		if CLS_File.sWriteFile( wFile_path, self.ARR_UpdateTL, inRT=True )!=True :
 			return False	#失敗
 		
@@ -349,7 +349,7 @@ class CLS_LookHTL():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.STR_File['HTLBoostFile']
+		wFile_path = gVal.DEF_STR_FILE['HTLBoostFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wAnapList )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHTL: Get_Anap: HTLBoostFile read failed: " + wFile_path )
 			return False	#失敗

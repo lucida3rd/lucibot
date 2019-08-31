@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：bot制御(共通)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   __openLock( cls, inPath ):
@@ -53,7 +53,7 @@ class CLS_BotCtrl():
 		if wLockStat == "0" :
 			wLock = []
 			wLock.append("1")
-			wFilePath = inPath + gVal.STR_File['LockFile']
+			wFilePath = inPath + gVal.DEF_STR_FILE['LockFile']
 			if CLS_File.sWriteFile( wFilePath, wLock )!=True :
 				return True	#失敗=排他あり にしてる
 			
@@ -87,7 +87,7 @@ class CLS_BotCtrl():
 	def sUnlock( cls, inPath ):
 		wLock = []
 		wLock.append("0")
-		wFilePath = inPath + gVal.STR_File['LockFile']
+		wFilePath = inPath + gVal.DEF_STR_FILE['LockFile']
 		CLS_File.sWriteFile( wFilePath, wLock )
 		return
 
@@ -99,7 +99,7 @@ class CLS_BotCtrl():
 	@classmethod
 	def __openLock( cls, inPath ):
 		wLock = []
-		wFilePath = inPath + gVal.STR_File['LockFile']
+		wFilePath = inPath + gVal.DEF_STR_FILE['LockFile']
 		if CLS_File.sReadFile( wFilePath, wLock )!=True :
 			return "3"	#失敗=排他あり にしてる
 		
@@ -171,7 +171,7 @@ class CLS_BotCtrl():
 		#############################
 		# 記録ファイルをロード
 		w1HourTime = []
-		wFilePath = inPath + gVal.STR_File['Chk1HourFile']
+		wFilePath = inPath + gVal.DEF_STR_FILE['Chk1HourFile']
 		if CLS_File.sReadFile( wFilePath, w1HourTime )!=True :
 			return False	#処理失敗
 		
@@ -195,11 +195,16 @@ class CLS_BotCtrl():
 		
 		#############################
 		# 時間が同じ＝少なくとも1時間経ってないか？
-		if wHour == wGetTime['Hour'] :
-			gVal.STR_TimeInfo['OneHour'] = False
-			return True
+		if w1HourTime[0]!="1900-01-01" :
+			if wHour == wGetTime['Hour'] :
+				gVal.STR_TimeInfo['OneHour'] = False
+				return True
+			else :
+				gVal.STR_TimeInfo['OneHour'] = True
+				
 		else :
-			gVal.STR_TimeInfo['OneHour'] = True
+			##bot起動初回の場合は時間だけ保存する
+			gVal.STR_TimeInfo['OneHour'] = False
 		
 		#############################
 		# 時間をセーブ

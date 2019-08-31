@@ -4,7 +4,7 @@
 # public
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/28
+#   Update  ：2019/8/31
 #####################################################
 # Private Function:
 #   (none)
@@ -45,12 +45,13 @@ class CLS_OSIF() :
 
 	__DEF_TIMEZONE = 9				#タイムゾーン: 9=東京
 	DEF_PING_COUNT   = "2"			#Ping回数 (文字型)
-	DEF_PING_TIMEOUT = "1000"		#Pingタイムアウト秒 (文字型)
+##	DEF_PING_TIMEOUT = "1000"		#Pingタイムアウト秒 (文字型)
 
 	#############################
 	# ping除外
 	STR_NotPing = [
 		"friends.nico",
+		"flower.afn.social",
 		"(dummy)"
 	]
 
@@ -241,7 +242,8 @@ class CLS_OSIF() :
 		
 ###		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " -w " + str(inTimeout) + " " + str(inSend_Ping) )
 ###		wStatus, wResult = sp.getstatusoutput( "ping -c " + str(inCount) + " " + str(inSend_Ping) )
-		wPingComm = "ping -c " + cls.DEF_PING_COUNT + " -w " + cls.DEF_PING_TIMEOUT + " " + str(inSend_Ping)
+##		wPingComm = "ping -c " + cls.DEF_PING_COUNT + " -w " + cls.DEF_PING_TIMEOUT + " " + str(inSend_Ping)
+		wPingComm = "ping -c " + cls.DEF_PING_COUNT + " " + str(inSend_Ping)
 		wStatus, wResult = sp.getstatusoutput( wPingComm )
 		if wStatus==0 :
 			return True	# Link UP

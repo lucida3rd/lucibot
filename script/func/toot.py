@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トゥート処理 (コンソール操作用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/22
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   __manualToot_Disp( self, inFulluser ):
@@ -359,7 +359,7 @@ class CLS_Toot():
 			wSend += 1
 			if wListLen>wSend :
 				###送り切ってなければディレイする
-				CLS_OSIF.sSleep( gVal.STR_TLnum['getMcDelay'] )
+				CLS_OSIF.sSleep( gVal.DEF_STR_TLNUM['getMcDelay'] )
 		
 		wRes = CLS_OSIF.sPrn( "配信完了。[RT]" )
 		return True
@@ -496,7 +496,8 @@ class CLS_Toot():
 		CLS_OSIF.sPrn( "Twitterと接続しています......" )
 		#############################
 		# Twitterと接続 (クラス生成)
-		wCLS_Twitter = CLS_Twitter_Use( gVal.STR_File['Twitter_File'] )
+##		wCLS_Twitter = CLS_Twitter_Use( gVal.STR_File['Twitter_File'] )
+		wCLS_Twitter = CLS_Twitter_Use( gVal.DEF_STR_FILE['Twitter_File'], gVal.DEF_STR_TLNUM['getTwitTLnum'] )
 		wStat = wCLS_Twitter.GetIniStatus()
 		if wStat['Result']!=True :
 			###失敗

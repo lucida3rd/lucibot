@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：データベース編集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/26
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   (none)
@@ -154,7 +154,7 @@ class CLS_DBedit():
 	def __oneRunQuery( self, inQuery ):
 		#############################
 		# DB接続
-		wOBJ_DB = CLS_PostgreSQL_Use( gVal.STR_File['DBinfo_File'] )
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
 		wRes = wOBJ_DB.GetIniStatus()
 		if wRes['Result']!=True :
 			##失敗
@@ -326,9 +326,9 @@ class CLS_DBedit():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.STR_File['MstdnDomains_File']
+		wFile_path = gVal.DEF_STR_FILE['MstdnDomains_File']
 		if CLS_File.sReadFile( wFile_path, outLine=self.ARR_Domains )!=True :
-			wStr = "CLS_DBedit: __getDomainsFile: MstdnDomains_File read is failed: " + gVal.STR_File['MstdnDomains_File']
+			wStr = "CLS_DBedit: __getDomainsFile: MstdnDomains_File read is failed: " + gVal.DEF_STR_FILE['MstdnDomains_File']
 			CLS_OSIF.sPrn( wStr )
 			return False	#失敗
 		
@@ -339,9 +339,9 @@ class CLS_DBedit():
 	def __setDomainsFile(self):
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = gVal.STR_File['MstdnDomains_File']
+		wFile_path = gVal.DEF_STR_FILE['MstdnDomains_File']
 		if CLS_File.sWriteFile( wFile_path, self.ARR_Domains, inRT=True )!=True :
-			wStr = "CLS_DBedit: __setDomainsFile: MstdnDomains_File write is failed: " + gVal.STR_File['MstdnDomains_File']
+			wStr = "CLS_DBedit: __setDomainsFile: MstdnDomains_File write is failed: " + gVal.DEF_STR_FILE['MstdnDomains_File']
 			CLS_OSIF.sPrn( wStr )
 			return False	#失敗
 		
@@ -352,7 +352,7 @@ class CLS_DBedit():
 	def __oneRunQueryMstdn( self, inQuery ):
 		#############################
 		# DB接続
-		wOBJ_DB = CLS_PostgreSQL_Use( gVal.STR_File['MstdnInfo_File'] )
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['MstdnInfo_File'] )
 		wRes = wOBJ_DB.GetIniStatus()
 		if wRes['Result']!=True :
 			##失敗

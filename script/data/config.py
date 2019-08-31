@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/28
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -51,6 +51,7 @@ class CLS_Config() :
 ##		"iFavoTag"		: False,
 		"iActionTag"	: False,
 		"prTag"			: False,
+		"TrafficTag"	: False,
 		
 ##		"TwitterUser"	: False,
 ##		"Twitter"		: True,
@@ -118,12 +119,12 @@ class CLS_Config() :
 	def sGetMasterConfig(cls):
 		#############################
 		# ファイルの存在チェック
-		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
+		if CLS_File.sExist( gVal.DEF_STR_FILE['MasterConfig'] )!=True :
 			return False	#ない
 		
 		#############################
 		# 読み込み
-		for wLine in open( gVal.STR_File['MasterConfig'], 'r'):
+		for wLine in open( gVal.DEF_STR_FILE['MasterConfig'], 'r'):
 			#############################
 			# 分解+要素数の確認
 			wLine = wLine.strip()
@@ -175,7 +176,7 @@ class CLS_Config() :
 		
 		#############################
 		# ファイル上書き書き込み
-		if CLS_File.sWriteFile( gVal.STR_File['MasterConfig'], wSetLine )!=True :
+		if CLS_File.sWriteFile( gVal.DEF_STR_FILE['MasterConfig'], wSetLine )!=True :
 			return False	#失敗
 		
 		return True
@@ -221,9 +222,9 @@ class CLS_Config() :
 	def CnfMasterConfig(self):
 		#############################
 		# ファイルの存在チェック
-		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
+		if CLS_File.sExist( gVal.DEF_STR_FILE['MasterConfig'] )!=True :
 			###ありえない
-			CLS_OSIF.sPrn( "CLS_Config: CnfMasterConfig: MasterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
+			CLS_OSIF.sPrn( "CLS_Config: CnfMasterConfig: MasterConfig file is not found : " + gVal.DEF_STR_FILE['MasterConfig'] )
 			return False	#ない
 		
 		#############################
@@ -260,11 +261,11 @@ class CLS_Config() :
 		for iKey in wKeylist :
 			#############################
 			# 表示しないメニューは排除
-			if iKey=='Twitter' and gVal.STR_MasterConfig['twAS']=="" :
-				###twitterのキー設定がされていなければメニューを出さない
-				gVal.STR_MasterConfig[iKey] = "off"
-				continue
-			
+##			if iKey=='Twitter' and gVal.STR_MasterConfig['twAS']=="" :
+##				###twitterのキー設定がされていなければメニューを出さない
+##				gVal.STR_MasterConfig[iKey] = "off"
+##				continue
+##			
 			if self.STR_View_masterConf[iKey]==False :
 				###これらは別メニューで変更させる
 				continue
@@ -303,7 +304,7 @@ class CLS_Config() :
 				gVal.STR_MasterConfig["mTootTag"] = wTag
 		
 ##		wStr = "iFavoTag= " + str( gVal.STR_MasterConfig["iFavoTag"]) + " : "
-		wStr = "iActionTag= " + str( gVal.STR_MasterConfig["iFavoTag"]) + " : "
+		wStr = "iActionTag= " + str( gVal.STR_MasterConfig["iActionTag"]) + " : "
 		wStr = wStr + "c: 変更する / othwe: 変更しない"
 		CLS_OSIF.sPrn( wStr )
 		wSelect = CLS_OSIF.sInp( "選択? => " )
@@ -441,7 +442,7 @@ class CLS_Config() :
 		
 		wStr = inFulluser + " をMasterUserに設定しました。" + '\n'
 		wStr = wStr + "このユーザをmastodon上でbotとして動作させます。" + '\n'
-		wStr = wStr + "Master環境情報をセーブしました: " + gVal.STR_File['MasterConfig'] + '\n'
+		wStr = wStr + "Master環境情報をセーブしました: " + gVal.DEF_STR_FILE['MasterConfig'] + '\n'
 		CLS_OSIF.sPrn( wStr )
 		CLS_OSIF.sInp( "確認したらリターンキーを押してください。[RT]" )
 		return True
@@ -454,9 +455,9 @@ class CLS_Config() :
 	def CnfAdminUser(self):
 		#############################
 		# ファイルの存在チェック
-		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
+		if CLS_File.sExist( gVal.DEF_STR_FILE['MasterConfig'] )!=True :
 			###ありえない
-			CLS_OSIF.sPrn( "CLS_Config: cCnfAdminUser: masterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
+			CLS_OSIF.sPrn( "CLS_Config: cCnfAdminUser: masterConfig file is not found : " + gVal.DEF_STR_FILE['MasterConfig'] )
 			return False	#ない
 		
 		#############################
@@ -475,7 +476,7 @@ class CLS_Config() :
 			gVal.STR_MasterConfig['AdminUser'] = ""
 			self.sSetMasterConfig()
 			CLS_OSIF.sPrn( "AdminUserの設定を解除しました。" + '\n' )
-			CLS_OSIF.sPrn( "設定内容をMaster環境情報にセーブしました: " + gVal.STR_File['MasterConfig'] + '\n' )
+			CLS_OSIF.sPrn( "設定内容をMaster環境情報にセーブしました: " + gVal.DEF_STR_FILE['MasterConfig'] + '\n' )
 			return True
 		elif wSelect!="y" :
 			###設定しない
@@ -513,7 +514,7 @@ class CLS_Config() :
 		# 変更
 		gVal.STR_MasterConfig['AdminUser'] = wAdminUser
 		self.sSetMasterConfig()
-		CLS_OSIF.sPrn( "設定内容をMaster環境情報にセーブしました: " + gVal.STR_File['MasterConfig'] + '\n' )
+		CLS_OSIF.sPrn( "設定内容をMaster環境情報にセーブしました: " + gVal.DEF_STR_FILE['MasterConfig'] + '\n' )
 		return True
 
 
@@ -591,9 +592,9 @@ class CLS_Config() :
 	def CnfMasterRun(self):
 		#############################
 		# ファイルの存在チェック
-		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
+		if CLS_File.sExist( gVal.DEF_STR_FILE['MasterConfig'] )!=True :
 			###ありえない
-			CLS_OSIF.sPrn( "CLS_Config: cCnfMasterRun: masterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
+			CLS_OSIF.sPrn( "CLS_Config: cCnfMasterRun: masterConfig file is not found : " + gVal.DEF_STR_FILE['MasterConfig'] )
 			return False	#ない
 		
 		#############################
@@ -623,7 +624,7 @@ class CLS_Config() :
 		self.sSetMasterConfig()
 		
 		wStr = "botの運用設定を変更しました。 mRun= " + wChg + '\n'
-		wStr = wStr + "変更した内容でMaster環境情報をセーブしました: " + gVal.STR_File['MasterConfig'] + '\n'
+		wStr = wStr + "変更した内容でMaster環境情報をセーブしました: " + gVal.DEF_STR_FILE['MasterConfig'] + '\n'
 		CLS_OSIF.sPrn( wStr )
 		return True
 
@@ -1028,9 +1029,9 @@ class CLS_Config() :
 	def CnfTwitter(self):
 		#############################
 		# ファイルの存在チェック
-		if CLS_File.sExist( gVal.STR_File['MasterConfig'] )!=True :
+		if CLS_File.sExist( gVal.DEF_STR_FILE['MasterConfig'] )!=True :
 			###ありえない
-			CLS_OSIF.sPrn( "CLS_Config: CnfTwitter: masterConfig file is not found : " + gVal.STR_File['MasterConfig'] )
+			CLS_OSIF.sPrn( "CLS_Config: CnfTwitter: masterConfig file is not found : " + gVal.DEF_STR_FILE['MasterConfig'] )
 			return False	#ない
 		
 		#############################
@@ -1060,7 +1061,7 @@ class CLS_Config() :
 		self.sSetMasterConfig()
 		
 		wStr = "Twitter連携を変更しました。 Twitter= " + wChg + '\n'
-		wStr = wStr + "変更した内容でMaster環境情報をセーブしました: " + gVal.STR_File['MasterConfig'] + '\n'
+		wStr = wStr + "変更した内容でMaster環境情報をセーブしました: " + gVal.DEF_STR_FILE['MasterConfig'] + '\n'
 		CLS_OSIF.sPrn( wStr )
 		return True
 

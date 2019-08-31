@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/28
+#   Update  ：2019/8/30
 #####################################################
 
 #####################################################
@@ -45,6 +45,7 @@ class gVal() :
 ##		"iFavoTag"			: "[favoind]",				#ファボ通知タグ
 		"iActionTag"		: "[action]",				#アクション通知タグ
 		"prTag"				: "[prtoot]",				#PRトゥートタグ
+		"TrafficTag"		: "[traffic]",				#トラヒックトゥートタグ
 		
 ##		"TwitterUser"	: "",						#twiterユーザ
 		"Twitter"		: "off",					#twiter連携
@@ -120,7 +121,8 @@ class gVal() :
 
 #############################
 # Timeline調整数
-	STR_TLnum = {
+###	STR_TLnum = {
+	DEF_STR_TLNUM = {
 		"getPTLnum"			: 120,						#PublicTL取得数
 		"getHTLnum"			: 120,						#HomeTL取得数
 		"getLTLnum"			: 120,						#LocalTL取得数
@@ -137,6 +139,8 @@ class gVal() :
 		"reaRIPmin"			: 10,						#反応リプライ時間(分)
 		"indLimmin"			: 5,						#通知制限時間(分)
 		"indLimcnt"			: 3,						#通知回数制限
+		
+		"maxTrafficStby"	: 3,						#トラヒック送信 最大待機回数
 		
 		"getMcDelay"		: 5,						#同報配信ディレイ
 		
@@ -164,7 +168,8 @@ class gVal() :
 	DEF_MASTERCONFIG_NAME = "masterConfig"
 	DEF_MASTERCONFIG      = DEF_USERDATA_PATH + DEF_MASTERCONFIG_NAME + "/"
 
-	STR_File = {
+##	STR_File = {
+	DEF_STR_FILE = {
 		"Readme"				: "readme.md",
 		"defUserdata_path"		: "_default/",
 		"defMasterdata_path"	: "_master/",
@@ -181,6 +186,7 @@ class gVal() :
 		"Toot_path"				: DEF_MASTERCONFIG + "toot/",
 		"CLTootFile"			: DEF_MASTERCONFIG + "toot/ctoot.txt",
 		"HTLBoostFile"			: DEF_MASTERCONFIG + "toot/hboost.txt",
+		"TrafficTootFile"		: DEF_MASTERCONFIG + "toot/traffic.txt",
 		"TweetPatternFile"		: DEF_MASTERCONFIG + "toot/twitter.txt",
 		"DBInfoFile"			: DEF_MASTERCONFIG + "toot/.dbinfo.txt",
 		
@@ -222,13 +228,14 @@ class gVal() :
 
 	DEF_DISPPATH = "script/disp/"
 
-	STR_DispFile = {
+##	STR_DispFile = {
+	DEF_STR_DISPFILE = {
 		"MainConsole"			: DEF_DISPPATH + "main_console.disp",
 		"(dummy)"				: 0
 	}
 
 #############################
-# デフォルトのトゥート公開設定
+# トゥート公開設定 (固定)
 ##	STR_defaultRange = {
 ##		"ManualToot"	: "public",
 ##		"Multicast"		: "unlisted",
@@ -247,7 +254,7 @@ class gVal() :
 		"_back.py"		: True,
 		
 		"CronName"		: "lucibot",
-		"Log_path"		: STR_File['MasterLog_path'],
+		"Log_path"		: DEF_STR_FILE['MasterLog_path'],
 		"(dummy)"		: 0
 	}
 	
@@ -274,16 +281,16 @@ class gVal() :
 
 #############################
 # 登録禁止サーバ(間違えやすいドメインとか)
-	STR_NoRegistDomain = [
-		"yahoo.co.jp",
-		"ybb.ne.jp",
-		"gmail.com",
-		"outlook.jp",
-		"outlook.com",
-		"hotmail.co.jp",
-		"live.jp",
-		"(dummy)"
-	]
+##	STR_NoRegistDomain = [
+##		"yahoo.co.jp",
+##		"ybb.ne.jp",
+##		"gmail.com",
+##		"outlook.jp",
+##		"outlook.com",
+##		"hotmail.co.jp",
+##		"live.jp",
+##		"(dummy)"
+##	]
 
 
 

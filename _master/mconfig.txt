@@ -5,6 +5,7 @@ AdminUser=
 mTootTag=[Sender]
 iActionTag=[action]
 prTag=[prtoot]
+TrafficTag=[traffic]
 
 Twitter=off
 

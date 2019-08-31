@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/28
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   (none)
@@ -35,6 +35,18 @@ class CLS_UserData() :
 		"d"	:	"direct"
 	}
 	DEF_RANGE = "unlisted"
+
+	##登録禁止サーバ(間違えやすいドメインとか)
+	DEF_ARR_NO_REGISTDOMAIN = [
+		"yahoo.co.jp",
+		"ybb.ne.jp",
+		"gmail.com",
+		"outlook.jp",
+		"outlook.com",
+		"hotmail.co.jp",
+		"live.jp",
+		"(dummy)"
+	]
 
 #####################################################
 # Init
@@ -179,7 +191,8 @@ class CLS_UserData() :
 		
 		#############################
 		# 禁止ドメインのチェック(たぶん入力間違え)
-		if wUser[1] in gVal.STR_NoRegistDomain :
+###		if wUser[1] in gVal.STR_NoRegistDomain :
+		if wUser[1] in cls.DEF_ARR_NO_REGISTDOMAIN :
 			wRes['Reason'] = "そのドメインは禁止されています。(or入力誤り)"
 			return wRes
 		
@@ -253,7 +266,7 @@ class CLS_UserData() :
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.STR_File['TrafficFile']
+		wFile_path = gVal.DEF_STR_FILE['TrafficFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
 			return False	#失敗
 		
@@ -290,7 +303,7 @@ class CLS_UserData() :
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.STR_File['TrafficFile']
+		wFile_path = gVal.DEF_STR_FILE['TrafficFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
 			return False	#失敗
 		
@@ -325,7 +338,7 @@ class CLS_UserData() :
 		
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = gVal.STR_File['TrafficFile']
+		wFile_path = gVal.DEF_STR_FILE['TrafficFile']
 		if CLS_File.sWriteFile( wFile_path, wTrafficUser, inRT=True )!=True :
 			return False	#失敗
 		
@@ -347,7 +360,21 @@ class CLS_UserData() :
 
 
 #####################################################
-# 範囲の変換
+# 範囲チェック
+#####################################################
+	@classmethod
+	def sCheckRange( cls, inRange ):
+		wKeylist = cls.STR_RANGE.keys()
+		for wKey in wKeylist :
+			if cls.STR_RANGE[wKey]==inRange :
+				return True
+		
+		return False
+
+
+
+#####################################################
+# ヒットチェック
 #####################################################
 	@classmethod
 	def sChkHitPatt( cls, inHitPatt, inPatt ):

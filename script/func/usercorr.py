@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ情報収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/17
+#   Update  ：2019/8/30
 #####################################################
 # Private Function:
 #   __getUserInfo_Full(self) :
@@ -60,7 +60,7 @@ class CLS_UserCorr():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['UserinfoFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['UserinfoFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wWork_UserInfo )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: GetUserInfo_Min: Userinfo file read failed: " + wFile_path )
 			return False	#失敗
@@ -101,7 +101,7 @@ class CLS_UserCorr():
 		
 		#############################
 		# ファイル書き込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['UserinfoFile']
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['UserinfoFile']
 		if CLS_File.sWriteFile( wFile_path, wWork_UserInfo, inRT=True )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: SetUserInfo_Min: Userinfo file write failed: " + wFile_path )
 			return False	#失敗
@@ -189,7 +189,7 @@ class CLS_UserCorr():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.STR_File['DomainREMFile']
+		wFile_path = gVal.DEF_STR_FILE['DomainREMFile']
 		if CLS_File.sReadFile( wFile_path, outLine=gVal.STR_DomainREM )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: GetDomainREM: DomainREM file read failed: " + wFile_path )
 			return False	#失敗

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トラヒック処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/28
+#   Update  ：2019/8/31
 #####################################################
 # Private Function:
 #   (none)
@@ -41,16 +41,23 @@ from gval import gVal
 #####################################################
 class CLS_Traffic():
 #####################################################
-	Obj_Parent = ""		#親クラス実体
+	Obj_Parent = ""				#親クラス実体
+	
+	FLG_Valid  = False			#カウント対象
+	VAL_NowCount = 0			#カウント値
 
-###	CHR_DataPath = ""
-
+								#**パターン解析からロードする
+	CHR_SendRange  = ""			#トラヒック送信範囲
+	ARR_SendDomain = []			#トラヒック送信対象ドメイン
+	DEF_SENDRANGE  = "unlisted"
+	DEF_ARR_CHECKRANGE = [
+		"public",
+		"unlisted",
+		"private" ]
 
 #####################################################
 # Init
 #####################################################
-##	def __init__( self, inPath ):
-##		self.CHR_DataPath = inPath
 	def __init__( self, parentObj=None ):
 		if parentObj==None :
 			###親クラス実体の未設定
@@ -58,274 +65,74 @@ class CLS_Traffic():
 			return
 		
 		self.Obj_Parent = parentObj
+		self.FLG_Valid    = CLS_UserData.sCheckTrafficUser( self.Obj_Parent.CHR_Account )
+		self.VAL_NowCount = 0
 		return
 
 
 
 #####################################################
-# ドメイン追加
-#####################################################
-##	def AddDomain(self) :
-##		#############################
-##		# ドメインの抽出
-##		wDomain = self.Obj_Parent.CHR_Account.split("@")
-##		if len(wDomain)!=2 :
-##			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Illigal admin_id: " + self.Obj_Parent.CHR_Account )
-##			return False
-##		wDomain = wDomain[1]
-##		
-##		#############################
-##		# DB接続情報ファイルのチェック
-##		wFile_path = gVal.STR_File['DBinfo_File']
-##		if CLS_File.sExist( wFile_path )!=True :
-##			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Database file is not found: " + wFile_path + " domain=" + wDomain )
-##			return False
-##		
-##		#############################
-##		# DB接続
-##		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
-##		wRes = wOBJ_DB.GetIniStatus()
-##		if wRes['Result']!=True :
-##			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: DB Connect test is failed: " + wRes['Reason'] + " domain=" + wDomain )
-##			wOBJ_DB.Close()
-##			return False
-##		
-##		#############################
-##		# ドメイン存在チェック
-##		wQuery = "select * from TBL_TRAFFIC_DATA where exists (select domain from " +  \
-##					wDomain + ") ;"
-##		
-##		wRes = wOBJ_DB.RunQuery( wQuery )
-##		if wRes['Result']!=True :
-##			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Run Query is failed: " + wRes['Reason'] + " domain=" + wDomain )
-##			wOBJ_DB.Close()
-##			return False
-##		
-##		if len( wRes['Responce']['Data'] )>0 :
-##			##既に存在している
-##			wOBJ_DB.Close()
-##			return True
-##		
-##		#############################
-##		# ドメイン追加
-##		wQuery = "insert into TBL_TRAFFIC_DATA values (" + \
-##					"'" + wDomain + "'," + \
-##					"1," + \
-##					"0," + \
-##					") ;"
-##		
-##		self.Obj_Parent.OBJ_Mylog.Log( 'b', "TBL_TRAFFIC_DATA ドメイン追加: " + wDomain )
-##		
-##		wRes = wOBJ_DB.RunQuery( wQuery )
-##		if wRes['Result']!=True :
-##			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: AddDomain: Add Domain is failed: " + wRes['Reason'] + " domain=" + wDomain )
-##			wOBJ_DB.Close()
-##			return False
-##		
-##		#############################
-##		# DB切断
-##		wOBJ_DB.Close()
-##		return True
-
-
-
-#####################################################
-# ドメイン削除
-#####################################################
-##	def DelDomain(self) :
-##		#############################
-##		# ユーザ一覧の抽出
-##		wList = CLS_UserData.sGetUserList()
-##		if len(wList)==0 :
-##			return True
-##		
-##		#############################
-##		# DB接続情報ファイルのチェック
-##		wFile_path = gVal.STR_File['DBinfo_File']
-##		if CLS_File.sExist( wFile_path )!=True :
-##			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Database file is not found: " + wFile_path )
-##			return False
-##		
-##		#############################
-##		# DB接続
-##		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
-##		wRes = wOBJ_DB.GetIniStatus()
-##		if wRes['Result']!=True :
-##			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: DB Connect test is failed: " + wRes['Reason'] )
-##			wOBJ_DB.Close()
-##			return False
-##		
-##		#############################
-##		# ドメイン存在チェック
-##		wQuery = "select * from TBL_TRAFFIC_DATA where exists (select domain from " +  \
-##					wDomain + ") ;"
-##		
-##		wRes = wOBJ_DB.RunQuery( wQuery )
-##		if wRes['Result']!=True :
-##			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Run Query is failed: " + wRes['Reason'] )
-##			wOBJ_DB.Close()
-##			return False
-##		
-##		if len( wRes['Responce']['Data'] )!=1 :
-##			##存在しない
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Domain is not found: " )
-##			wOBJ_DB.Close()
-##			return False
-##		
-##		#############################
-##		# ドメイン情報の辞書化
-##		wDomainCheck = {}
-##		for wLineTap in wRes['Responce']['Data'] :
-##			wGetTap = []
-##			for wCel in wLineTap :
-##				wCel = wCel.strip()
-##				wGetTap.append( wCel )
-##				## [0] ..domain
-##				## [1] ..count
-##				## [2] ..rat_count
-##			
-##			wDomainCheck({ wGetTap[0] : "" })
-##			wDomainCheck[wIndex]({ "exist"  : False })
-##		
-##		#############################
-##		# ドメイン存在時にexist=true
-##		for wCel in wList :
-##			wDomainCheck[wCel]["exist"] = True
-##		
-##		#############################
-##		# 存在しないドメインを削除する
-##		wKeyList = wDomainCheck.keys()
-##		for wCel in wKeyList :
-##			if wDomainCheck[wCel]["exist"]==False :
-##				wQuery = "delete from TBL_TRAFFIC_DATA where domain = " + wCel + \
-##							") ;"
-##			
-##			self.Obj_Parent.OBJ_Mylog.Log( 'b', "TBL_TRAFFIC_DATA ドメイン削除: " + wCel )
-##			
-##			wRes = wOBJ_DB.RunQuery( wQuery )
-##			if wRes['Result']!=True :
-##				##失敗
-##				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: DelDomain: Delete Domain is failed: " + wRes['Reason'] )
-##				wOBJ_DB.Close()
-##				return False
-##		
-##		#############################
-##		# DB切断
-##		wOBJ_DB.Close()
-##		return True
-
-
-
-#####################################################
 # カウントアップ
+#   カウントしたらTrueを返す
 #####################################################
 	def Countup(self):
-##		#############################
-##		# 読み出し先初期化
-##		wCount = []
-##		
-##		#############################
-##		# ファイル読み込み
-##		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['TrafficFile']
-##		if CLS_File.sReadFile( wFile_path, outLine=wCount )!=True :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Traffic count file read failed: " + wFile_path )
-##			return False	#失敗
-##		
-##		#############################
-##		# データチェック
-##		#   空の時、リセット
-##		if len(wCount)==0 :
-##			wCount.append( "0,0" )
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Traffic counter value null(Crash?). Counter Reset." )
-##		
-##		#############################
-##		# データ整形
-##		try:
-##			wCount = wCount[0].split(",")
-##			wCount[0] = int( wCount[0] )	# 現カウント
-##			wCount[1] = int( wCount[1] )	# 1時間前のカウント
-##		except ValueError as err :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Traffic count exception: " + str(err) )
-##			return False	#失敗
-##		
-##		#############################
-##		# 1時間経ってる周回か
-##		if gVal.STR_TimeInfo['OneHour']==True :
-##			wCount[1] = wCount[0]
-##			wCount[0] = 1
-##		#############################
-##		# カウントアップ
-##		else:
-##			wCount[0] += 1
-##		
-##		#############################
-##		# 書き込み用データ整形
-##		wLine = str( wCount[0] ) + "," + str( wCount[1] )
-##		
-##		#############################
-##		# ファイル書き込み
-##		wSetLine = []
-##		wSetLine.append( wLine )
-##		if CLS_File.sWriteFile( wFile_path, wSetLine )!=True :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Traffic count file write failed: " + wFile_path )
-##			return False	#失敗
+		#############################
+		# カウント対象か
+		if self.FLG_Valid!=True :
+			return False
+		
+		#############################
+		# カウントアップする
+		self.VAL_NowCount += 1
+		return True
 
+
+
+#####################################################
+# カウンタを更新
+#####################################################
+	def Update(self):
+		#############################
+		# カウント対象か
+		if self.FLG_Valid!=True :
+			##更新なし
+			return True
+		
 		#############################
 		# ドメインの抽出
 		wDomain = self.Obj_Parent.CHR_Account.split("@")
 		if len(wDomain)!=2 :
 			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Illigal admin_id: " + self.Obj_Parent.CHR_Account )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: Illigal admin_id: " + self.Obj_Parent.CHR_Account )
 			return False
 		wDomain = wDomain[1]
 		
-##		#############################
-##		# DB接続情報ファイルのチェック
-##		wFile_path = gVal.STR_File['DBinfo_File']
-##		if CLS_File.sExist( wFile_path )!=True :
-##			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Database file is not found: " + wFile_path + " domain=" + wDomain )
-##			return False
-##		
 		#############################
 		# DB接続
-		wOBJ_DB = CLS_PostgreSQL_Use( wFile_path )
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
 		wRes = wOBJ_DB.GetIniStatus()
 		if wRes['Result']!=True :
 			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: DB Connect test is failed: " + wRes['Reason'] + " domain=" + wDomain )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: DB Connect test is failed: " + wRes['Reason'] + " domain=" + wDomain )
 			wOBJ_DB.Close()
 			return False
 		
 		#############################
 		# ドメイン存在チェック
-##		wQuery = "select * from TBL_TRAFFIC_DATA where exists (select domain from " +  \
-##					wDomain + ") ;"
-##		wQuery = "select exists (select * from TBL_TRAFFIC_DATA where domain = '" + wDomain + "');"
-##		
-##		wRes = wOBJ_DB.RunQuery( wQuery )
-##		wRes = wOBJ_DB.GetQueryStat()
-		wQuery = "domain = '" + wDomain + "'"
-		wDBRes = wOBJ_DB.RunExist( inObjTable="TBL_TRAFFIC_DATA", inWhere=wQuery )
-		wDBRes = wOBJ_DB.GetQueryStat()
+		wQuery = "select * from TBL_TRAFFIC_DATA where " + \
+					" domain = '" + wDomain + "' " + \
+					";"
+		wRes = wOBJ_DB.RunQuery( wQuery )
+		wRes = wOBJ_DB.GetQueryStat()
 		if wRes['Result']!=True :
 			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Run Query is failed: " + wRes['Reason'] + " domain=" + wDomain )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: Run Query is failed: " + wRes['Reason'] + " domain=" + wDomain )
 			wOBJ_DB.Close()
 			return False
 		
-##		if len( wRes['Responce']['Data'] )!=1 :
-		if wRes['Responce']!=True :
+		if len(wRes['Responce']['Data'])!=1 :
 			##存在しない
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Domain is not found: " + " domain=" + wDomain )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: select Domain is failed: " + " domain=" + wDomain + " nums=" + str(len(wRes['Responce']['Data'])) )
 			wOBJ_DB.Close()
 			return False
 		
@@ -334,44 +141,42 @@ class CLS_Traffic():
 		for wLineTap in wRes['Responce']['Data'] :
 			wGetTap = []
 			for wCel in wLineTap :
-				wCel = wCel.strip()
 				wGetTap.append( wCel )
 				## [0] ..domain
 				## [1] ..count
 				## [2] ..rat_count
+				## [3] ..now_count
 		
 		wCount    = int( wGetTap[1] )
-		wRatCount = int( wGetTap[2] )
+##		wRatCount = int( wGetTap[2] )
+##		wNowCount = int( wGetTap[3] )
 		
-		#############################
-		# カウントを取るユーザか？
-		if wGetTap[1]!=self.Obj_Parent.CHR_Account :
-			##対象外
-			wOBJ_DB.Close()
-			return True
+##		#############################
+##		# 1時間経ってる周回か
+##		if gVal.STR_TimeInfo['OneHour']==True :
+##			wRatCount = wNowCount					#前の1時間カウント
+##			wNowCount = wCount + self.VAL_NowCount	#今1時間のカウント(Traffic送信用)
+##			wCount    = 0							#カウントリセット
+##			if gVal.FLG_Test_Mode==True :
+##				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: 1時間経過検知", inView=True )
 		
-		#############################
-		# 1時間経ってる周回か
-		if gVal.STR_TimeInfo['OneHour']==True :
-			wRatCount = wCount
-			wCount    = 1
 		#############################
 		# カウントアップ
-		else:
-			wCount += 1
+##		else:
+##			wCount += self.VAL_NowCount
+		wCount += self.VAL_NowCount
 		
 		#############################
 		# テーブルの更新
-		wQuery = "update TBL_TRAFFIC_DATA set domain = " + wDomain + " where " + \
-					"count = " + wCount + " " + \
-					"rat_count = " + wRatCount + " " + \
-					";"
+		wQuery = "update TBL_TRAFFIC_DATA set " + \
+					"count = " + str(wCount) + " " + \
+					"where domain = '" + wDomain + "' ;"
 		
 		wRes = wOBJ_DB.RunQuery( wQuery )
 		wRes = wOBJ_DB.GetQueryStat()
 		if wRes['Result']!=True :
 			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Countup: Update Count is failed: " + wRes['Reason'] + " domain=" + wDomain )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: Update Count is failed: " + wRes['Reason'] + " domain=" + wDomain )
 			wOBJ_DB.Close()
 			return False
 		
@@ -383,27 +188,274 @@ class CLS_Traffic():
 
 
 #####################################################
-# カウントリセット
+# トラヒック送信
+#   送信済ならTrueを返す
 #####################################################
-##	def CountReset(self):
-##		#############################
-##		# パス設定
-##		wFile_path = self.Obj_Parent.CHR_User_path + gVal.STR_File['TrafficFile']
-##		
-##		#############################
-##		# 書き込み用データ整形
-##		wLine = "0,0"
-##		
-##		#############################
-##		# ファイル書き込み
-##		wSetLine = []
-##		wSetLine.append( wLine )
-##		if CLS_File.sWriteFile( wFile_path, wSetLine )!=True :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: CountReset: Traffic count file write failed: " + wFile_path )
-##			return False	#失敗
-##		
-##		self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: CountReset: トラヒックカウント リセット済" )
-##		return True			#成功
+	def SendTraffic(self):
+		#############################
+		# トラヒックが有効か
+		if gVal.STR_MasterConfig['Traffic']!="on" :
+			return False
+		
+		#############################
+		# MasterUserか
+		if gVal.STR_MasterConfig['MasterUser']!=self.Obj_Parent.CHR_Account :
+			return False	#SubUserは抜ける
+		
+		#############################
+		# 1時間経ってる周回か
+		if gVal.STR_TimeInfo['OneHour']==False :
+			return False	#Traffic送信周回ではない
+		
+		#############################
+		# トゥート送信対象のトラヒックドメイン読み込み
+		###読み出し先初期化
+		if self.__getTrafficPatt()!=True :
+			return False	#失敗
+		if len(self.ARR_SendDomain)==0 :
+			###デフォルトだと指定あるのでいちお入れる
+			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_Traffic: トラヒック送信の指定先=なし" )
+			return False	###対象なし
+		
+		#############################
+		# ドメインの抽出
+		wDomain = self.Obj_Parent.CHR_Account.split("@")
+		if len(wDomain)!=2 :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: Illigal admin_id: " + self.Obj_Parent.CHR_Account )
+			return False
+		wDomain = wDomain[1]
+		
+		#############################
+		# 送信処理開始
+		
+		#############################
+		# DB接続
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
+		wRes = wOBJ_DB.GetIniStatus()
+		if wRes['Result']!=True :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: DB Connect test is failed: " + wRes['Reason'] + " domain=" + wDomain )
+			wOBJ_DB.Close()
+			return False
+		
+		#############################
+		# 全トラヒックのロード
+		wQuery = "select * from TBL_TRAFFIC_DATA order by domain ;"
+		
+		wRes = wOBJ_DB.RunQuery( wQuery )
+		wRes = wOBJ_DB.GetQueryStat()
+		if wRes['Result']!=True :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Run Query is failed: " + wRes['Reason'] )
+			wOBJ_DB.Close()
+			return False
+		
+		if len(wRes['Responce']['Data'])==0 :
+			##トラヒック情報なし
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: TBL_TRAFFIC_DATA record is 0" )
+			wOBJ_DB.Close()
+			return False
+		
+		#############################
+		# カウント値の取り出しと、リセット
+##		wFLG_noHr = False	# 1個でもまだ1時間待ちでない
+##		wFLG_Over = False	# 1個でも待ち回数超えあり
+		wTraffic  = {}
+		wIndex    = 0
+		for wLineTap in wRes['Responce']['Data'] :
+			##領域の準備
+			wTraffic.update({ wIndex : "" })
+			wTraffic[wIndex] = {}
+			wTraffic[wIndex].update({ "domain"    : "" })
+			wTraffic[wIndex].update({ "count"     : 0 })
+			wTraffic[wIndex].update({ "rat_count" : 0 })
+			wTraffic[wIndex].update({ "now_count" : 0 })
+			
+			##カウンタの取り出し
+			wGetTap = []
+			for wCel in wLineTap :
+				wGetTap.append( wCel )
+				## [0] ..domain
+				## [1] ..count
+				## [2] ..rat_count
+				## [3] ..now_count
+			
+			##領域へロード
+			wTraffic[wIndex].update({ "domain"    : wGetTap[0].strip() })
+			wTraffic[wIndex].update({ "count"     : int( wGetTap[1] ) })
+			wTraffic[wIndex].update({ "rat_count" : int( wGetTap[2] ) })
+			wTraffic[wIndex].update({ "now_count" : int( wGetTap[3] ) })
+			
+##			##対象ドメインの場合、待機チェック
+##			##  1個でも待ち回数超えたら送信する
+##			if wTraffic[wIndex]['domain'] in self.ARR_SendDomain :
+##				## 待機中
+##				if wTraffic[wIndex]['standby']>=0 :
+##					wTraffic[wIndex]['standby'] += 1
+##					if gVal.DEF_STR_TLNUM['maxTrafficStby']<=wTraffic[wIndex]['standby'] :
+##						wFLG_Over = True	# 待ち回数超え =送信確定
+##					
+##					wQuery = "update TBL_TRAFFIC_DATA set standby = " + str(wTraffic[wIndex]['standby']) + \
+##								" where domain = '" + wTraffic[wIndex]['domain'] + "' ;"
+##					
+##					wRes = wOBJ_DB.RunQuery( wQuery )
+##					wRes = wOBJ_DB.GetQueryStat()
+##					if wRes['Result']!=True :
+##						##失敗
+##						self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Standby counter is failed: " + \
+##															wRes['Reason'] + " domain=" + wTraffic[wIndex]['domain'] )
+##						wOBJ_DB.Close()
+##						return False
+##				else :
+##					##まだ1時間経ってない
+##					wFLG_noHr = True
+			
+			##カウンタのリセットと、過去カウンタの記録（入れ替え）
+			wTraffic[wIndex]['rat_count'] = wTraffic[wIndex]['now_count']	# 1時間前
+			wTraffic[wIndex]['now_count'] = wTraffic[wIndex]['count']		# 現在(後ろで送信)
+			wTraffic[wIndex]['count']     = 0
+			
+			##DBを更新
+			wQuery = "update TBL_TRAFFIC_DATA set " + \
+					"count = " + str(wTraffic[wIndex]['count']) + ", " + \
+					"rat_count = " + str(wTraffic[wIndex]['rat_count']) + ", " + \
+					"now_count = " + str(wTraffic[wIndex]['now_count']) + " " + \
+					"where domain = '" + wTraffic[wIndex]['domain'] + "' ;"
+			
+			wRes = wOBJ_DB.RunQuery( wQuery )
+			wRes = wOBJ_DB.GetQueryStat()
+			if wRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Standby reset is failed: " + wRes['Reason'] + " domain=" + wTraffic[wIndex]['domain'] )
+				wOBJ_DB.Close()
+				return False
+			
+			##インデックス更新
+			wIndex += 1
+		
+		#############################
+		# DB切断
+		wOBJ_DB.Close()
+		
+		#############################
+		# 送信するトラヒックの作成
+		
+		#############################
+		# トゥートの組み立て
+		wCHR_TimeDate = gVal.STR_TimeInfo['TimeDate'].split(" ")
+##		wCHR_Title = "Mastodon Traffic: " + wCHR_TimeDate[0] + " " + str(gVal.STR_TimeInfo['Hour']) + "時台"
+		wCHR_Title = "Mastodon Traffic: " + wCHR_TimeDate[0] + " " + str(gVal.STR_TimeInfo['Hour']) + "時"
+		
+		wCHR_Body = ""
+		wKeyList  = wTraffic.keys()
+		for wIndex in wKeyList :
+			if wTraffic[wIndex]['domain'] not in self.ARR_SendDomain :
+				continue	#送信対象ではない
+			
+			wCHR_Body = wCHR_Body + wTraffic[wIndex]['domain'] + ": " + str(wTraffic[wIndex]['now_count'])
+			
+			if wTraffic[wIndex]['rat_count']>=0 :
+				##bot起動の最初の1時間は差を出さない
+				wRateCount = wTraffic[wIndex]['now_count'] - wTraffic[wIndex]['rat_count']
+				wCHR_Body = wCHR_Body + "("
+				if wRateCount>0 :
+					wCHR_Body = wCHR_Body + "+"
+				wCHR_Body = wCHR_Body + str(wRateCount) + ")" + '\n'
+			else :
+				wCHR_Body = wCHR_Body + '\n'
+		
+		wCHR_Toot = wCHR_Body + "#" + gVal.STR_MasterConfig['TrafficTag']
+		
+		#############################
+		# トゥートの送信
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, spoiler_text=wCHR_Title, visibility=self.CHR_SendRange )
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Mastodon error: " + wRes['Reason'] )
+			return False
+		
+		#############################
+		# Twitterが有効か
+		if gVal.STR_MasterConfig['Twitter']!="on" :
+			return True	#トラヒックは送信済
+		
+		#############################
+		# ツイートの組み立て
+		wCHR_Tweet = wCHR_Title + '\n' + wCHR_Body
+		wARR_Tweet = wCHR_Tweet.split('\n')	#チェック用の行にバラす
+		
+		#############################
+		# 文字数を140字に収める
+		#   最後尾のトラヒック情報(ドメイン別)を1つずつ削って収める
+		for wI in list( range(len(wARR_Tweet)) ) :
+			if len(wCHR_Tweet)<=140 :
+				break	#140字に収まっている
+			
+			##最後尾を削って文字列に直す
+			del wARR_Tweet[-1]
+			wCHR_Tweet = '\n'.join(wARR_Tweet)
+		
+		#############################
+		# ツイートの送信
+		if gVal.FLG_Test_Mode==False :
+			wRes = self.Obj_Parent.OBJ_Twitter.Tweet( wCHR_Tweet )
+			if wRes['Result']!=True :
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Twitter API Error: " + wRes['Reason'] )
+				##失敗しても処理は継続
+		
+		else:
+			wStr = "Twitter(TestMode): ツイート内容= " + '\n' + wCHR_Tweet
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr, inView=True )
+		
+		return True	#トラヒックは送信済
+
+
+
+#####################################################
+# トラヒック パターン読み込み
+#####################################################
+	def __getTrafficPatt(self):
+		#############################
+		# 読み出し先初期化
+		self.CHR_SendRange  = self.DEF_SENDRANGE
+		self.ARR_SendDomain = []
+		wSendDomain = []	#解析パターンファイル
+		wFLG_Range  = False
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.DEF_STR_FILE['TrafficTootFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wSendDomain )!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: __getTrafficPatt: TrafficTootFile read failed: " + wFile_path )
+			return False	#失敗
+		
+		#############################
+		# パターンの詰め込み
+		for wLine in wSendDomain :
+			wLine = wLine.split( gVal.DEF_DATA_BOUNDARY )
+			if len(wLine)!=2 :
+				continue	#フォーマットになってない
+			if wLine[0].find("#")==0 :
+				continue	#コメントアウト
+			
+			#############################
+			# 公開範囲
+			if wLine[0]=="r" :
+				if CLS_UserData.sCheckRange(wLine[1])==True :
+					self.CHR_SendRange = wLine[1]
+					wFLG_Range = True
+					continue
+			
+			#############################
+			# ドメイン
+			if wLine[0]=="d" :
+				self.ARR_SendDomain.append( wLine[1] )
+		
+		if wFLG_Range==False :
+			###デフォルトだと指定あるのでいちお入れる
+			self.Obj_Parent.OBJ_Mylog.Log( 'c', "__getTrafficPatt: トラヒック送信の公開範囲なし(内部設定=" + self.DEF_SENDRANGE + ")" )
+		
+		return True
 
 
 
