@@ -255,7 +255,7 @@ class CLS_LookPTL():
 					##アンマッチ
 					continue
 				###実行
-				if self.HimoRipry( inROW['id'], self.ARR_AnapTL[wKey]['File'], inROW['id'] )!=True :
+				if self.HimoRipry( self.ARR_AnapTL[wKey]['File'], inROW['id'] )!=True :
 					break
 				self.STR_Cope["Now_ARip"] += 1
 				break
@@ -270,7 +270,7 @@ class CLS_LookPTL():
 					##アンマッチ
 					continue
 				###実行
-				if self.AirRipry( inROW['id'], self.ARR_AnapTL[wKey]['File'] )!=True :
+				if self.AirRipry( self.ARR_AnapTL[wKey]['File'] )!=True :
 					break
 				self.STR_Cope["Now_ARip"] += 1
 				break

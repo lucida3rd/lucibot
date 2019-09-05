@@ -206,7 +206,7 @@ class CLS_BotCtrl():
 			
 			if w1HourTime[0] == wGetDate[0] :
 				gVal.STR_TimeInfo['OneDay'] = False
-				return True
+##				return True
 			else :
 				gVal.STR_TimeInfo['OneDay'] = True
 				
