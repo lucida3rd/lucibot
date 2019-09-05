@@ -4,14 +4,14 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/2
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
 #   __getSystemInfo(cls):
 #
 # Instance Function:
-#   ViewHelp(self):
+#   (none)
 #
 # Class Function(static):
 #   sRun(cls):
@@ -103,20 +103,21 @@ class CLS_Main_Console() :
 			
 			wCLS_Config = ""
 		
-##		#############################
-##		# Twitterユーザ名の取得
-##		wCLS_work = CLS_Twitter_Use( gVal.STR_File['Twitter_File'], True )
-##		gVal.STR_MasterConfig['TwitterUser'] = wCLS_work.GetUsername()
-##		if gVal.STR_MasterConfig['TwitterUser']=="" :
-##			gVal.STR_MasterConfig['Twitter'] = "off"
-##		
+		#############################
+		# ** 初期化モード **
+		wArg = CLS_OSIF.sGetArg()
+		if len(wArg)==2 :
+			if wArg[1]=="init" :
+				wCLS_Setup = CLS_Setup()
+				wCLS_Setup.AllInit()
+				CLS_OSIF.sInp( "リターンキーを押して再度コンソールアプリを起動してください。[RT]" )
+			return
+		
 		#############################
 		# コンソールを表示
 		while True :
 			wCommand = cls().sViewMainConsole()
 			
-##			if wCommand=="q" or wCommand=="exit" :
-##			if wCommand=="\q" or wCommand=="exit" :
 			if wCommand.find("\\q")>=0 or wCommand=="exit" :
 				###終了
 				CLS_OSIF.sPrn( "コンソールを停止します。" + '\n' )
@@ -168,12 +169,6 @@ class CLS_Main_Console() :
 			wCLS_work = CLS_Config()
 			wCLS_work.MasterConfig_Disp()
 			wFlg = True
-##		#############################
-##		# User環境情報の表示
-##		elif inCommand=="-vu" :
-##			wCLS_work = CLS_Config()
-##			wCLS_work.UserConfig_Disp()
-##			wFlg = True
 		
 	#####################################################
 		#############################
@@ -194,25 +189,12 @@ class CLS_Main_Console() :
 			wCLS_work = CLS_Config()
 			wCLS_work.CnfAdminUser()
 			wFlg = True
-##		#############################
-##		# PR Userの変更
-##		elif inCommand=="-cp" :
-##			wCLS_work = CLS_Config()
-##			wCLS_work.CnfPRUser()
-##			wFlg = True
 		
 	#####################################################
 		#############################
 		# ユーザ登録 一覧表示
 		elif inCommand=="-u" :
-##			wCLS_work = CLS_Config()
-##			wRes = wCLS_work.GetMulticastUserList()
-##			if wRes['Result']!=True :
-##				CLS_OSIF.sPrn( wRes['Reason'] )
-##				return
-##			
 			wCLS_work = CLS_UserData()
-##			wCLS_work.ViewUserList( wRes['Responce'] )
 			wCLS_work.ViewUserList()
 			wFlg = True
 		
@@ -279,9 +261,6 @@ class CLS_Main_Console() :
 			wCLS_work = CLS_DBedit()
 			wCLS_work.View()
 			wFlg = True
-
-###		CLS_OSIF.sInp("test====")
-
 		
 	#####################################################
 		#############################
@@ -290,27 +269,16 @@ class CLS_Main_Console() :
 			wCLS_work = CLS_Bot_Ctrl()
 			wCLS_work.Console()
 			wFlg = True
-##		#############################
-##		# masterメンテ操作
-##		elif inCommand=="-men" :
-##			wCLS_work = CLS_Config()
-##			wCLS_work.CnfMasterMainte()
-##			wFlg = True
 		#############################
 		# Twitter連携
 		elif inCommand=="-ct" :
 			wCLS_Twitter = CLS_Twitter_Use()
 			wCLS_Twitter.CreateTwitter( gVal.DEF_STR_FILE['Twitter_File'], gVal.DEF_STR_FILE['defTwitter_File'] )
-##			gVal.STR_MasterConfig['TwitterUser'] = wCLS_Twitter.GetUsername()
-##			if gVal.STR_MasterConfig['TwitterUser']=="" :
-##				gVal.STR_MasterConfig['Twitter'] = "off"
-			
 			wCLS_work = CLS_Config()
 			wCLS_work.CnfTwitter()	#有効無効設定
 			
 			##タイムラインの設定
 			CLS_OSIF.sPrn( '\n' + "Twitterと接続しています......" )
-##			wCLS_Twitter = CLS_Twitter_Use( gVal.STR_File['Twitter_File'] )
 			wCLS_Twitter = CLS_Twitter_Use( gVal.DEF_STR_FILE['Twitter_File'], gVal.DEF_STR_TLNUM['getTwitTLnum'] )
 			if gVal.STR_MasterConfig['Twitter']=="on" :
 				wCLS_Twitter.CnfTimeline( gVal.DEF_STR_FILE['Twitter_File'] )

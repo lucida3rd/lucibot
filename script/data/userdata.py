@@ -4,12 +4,13 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/5
 #####################################################
 # Private Function:
 #   (none)
 #
 # Instance Function:
+#   __init__(self):
 #   ViewUserList(self):
 #
 # Class Function(static):
@@ -17,6 +18,11 @@
 #   sGetUserPath( cls, inFulluser ):
 #   sUserCheck( cls, inFulluser ):
 #   sGetFulluser( cls, inUsername, inUrl ):
+#   sCheckTrafficUser( cls, inUsername ):
+#   sChangeTrafficUser( cls, inUsername ):
+#   sGetRange( cls, inRange ):
+#   sCheckRange( cls, inRange ):
+#   sChkHitPatt( cls, inHitPatt, inPatt ):
 #
 #####################################################
 
@@ -376,15 +382,15 @@ class CLS_UserData() :
 #####################################################
 # ヒットチェック
 #####################################################
-	@classmethod
-	def sChkHitPatt( cls, inHitPatt, inPatt ):
-		wFlg = False
-		for patt in inHitPatt:
-			if patt == inPatt:
-				wFlg = True
-				break
-		
-		return wFlg
+##	@classmethod
+##	def sChkHitPatt( cls, inHitPatt, inPatt ):
+##		wFlg = False
+##		for patt in inHitPatt:
+##			if patt == inPatt:
+##				wFlg = True
+##				break
+##		
+##		return wFlg
 
 
 

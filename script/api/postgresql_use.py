@@ -4,23 +4,55 @@
 # public
 #   Class   ：ぽすぐれユーズ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/28
+#   Update  ：2019/9/4
 #####################################################
 # Private Function:
-#   __init__( self, inPath=None ):
 #   __initIniStatus(self):
+#   __initQueryStat(self):
 #   __loadDBdata( self, inPath ):
 #   __checkDBdata(self):
 #   __dbConnect(self):
 #   __dbClose(self):
+#   __runQuerySelect( self, inQuery ):
+#   __runQueryCommit( self, inQuery ):
 #
 # Instance Function:
+#   __init__( self, inPath=None ):
 #   GetIniStatus(self):
+#   GetQueryStat(self):
+#   CreateDBdata( self, inDstPath, inSrcPath ):
+#   ChgList( self, inData, outList=[] ):
+#
+# ◇PostgreSQL実制御
 #   Connect( self, inPath=None ):
 #   Close(self):
+#   RunQuery( self, inQuery=None ):
+#   RunExist( self, inObjTable=None, inWhere=None ):
 #
 # Class Function(static):
 #   (none)
+#
+#####################################################
+# 使い方：
+#  1.CreateDBdata( inDstPath, inSrcPath )をコールして接続情報をセットする。
+#    inDstPath ..接続情報の元フォーマット(text)
+#    inDstPath ..接続情報のパス
+#
+#  ＜接続情報(text)の書式＞
+#----------------------
+#hostname=
+#database=
+#username=
+#password=
+#----------------------
+#
+#  2.Connect( inPath=None )で接続する。
+#    1で作成した inDstPath 接続情報のパス
+#  3.RunQuery( inQuery=None )でクエリを実行する。
+#    RunExist( inObjTable=None, inWhere=None )はselect exist。
+#  4.GetQueryStat(self)でクエリの実行結果と戻り値を取得する。
+#  5.終わったらClose()で切断する。
+#    updateの場合は、中でcommitもしてる。
 #
 #####################################################
 # 参考：
@@ -72,7 +104,7 @@ class CLS_PostgreSQL_Use():
 	def __initIniStatus(self):
 		self.IniStatus = {
 			"Result"   : False,
-			"Reason"   : None,
+			"Reason"   : "DB closed",
 			"Responce" : None,
 			"Query"    : None
 		}
@@ -278,7 +310,7 @@ class CLS_PostgreSQL_Use():
 		   self.STR_DBdata['database']=="" or \
 		   self.STR_DBdata['username']=="" or \
 		   self.STR_DBdata['password']=="" :
-			wMsg = "CLS_PostgreSQL_Use: __loadDBdata: Load DBfile Invalid: "
+			wMsg = "CLS_PostgreSQL_Use: __checkDBdata: Load DBfile Invalid: "
 			wMsg = wMsg + "hostname=" + self.STR_DBdata['hostname'] + " "
 			wMsg = wMsg + "database=" + self.STR_DBdata['database'] + " "
 			wMsg = wMsg + "username=" + self.STR_DBdata['username'] + " "
@@ -325,6 +357,7 @@ class CLS_PostgreSQL_Use():
 			self.IniStatus['Reason'] = "CLS_PostgreSQL_Use: __dbClose: psycopg2 error: " + err
 			return False
 		
+		self.IniStatus['Reason'] = "DB closed"
 		self.IniStatus['Result'] = False
 		return True
 
@@ -341,6 +374,7 @@ class CLS_PostgreSQL_Use():
 		#############################
 		# dbdataのロード
 		if inPath==None :
+			self.IniStatus['Reason'] = "CLS_PostgreSQL_Use: Connect: The path is not specified"
 			return False
 		
 		if self.__loadDBdata( inPath )!=True :
@@ -540,7 +574,7 @@ class CLS_PostgreSQL_Use():
 		for wLineTap in inData :
 			wGetTap = []
 			for wCel in wLineTap :
-				wCel = wCel.strip()
+##				wCel = wCel.strip()
 				wGetTap.append( wCel )
 			wList.append( wGetTap )
 		

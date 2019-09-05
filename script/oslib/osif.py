@@ -17,8 +17,9 @@
 #   sGet_Resp(cls):
 #   sGetArg(cls):
 #   sGetTime(cls):
-#   sTimeLag( cls, inTimedate, inThreshold=300, inTimezone=cls.DEF_TIMEZONE ):
 #   sGetTimeformat( cls, inTimedate, inTimezone=__DEF_TIMEZONE ):
+#   sTimeLag( cls, inTimedate, inThreshold=300, inTimezone=cls.DEF_TIMEZONE ):
+#   sSleep( cls, inSec ):
 #   sPing( cls, inSend_Ping, inCount=4 ):
 #   sDispClr( cls ):
 #   sGetCwd( cls ):
@@ -26,7 +27,9 @@
 #   sInp( cls, inMsg ):
 #   sGpp( cls, inMsg ):
 #   sDel_HTML( cls, inCont ):
+#   sChkREMString( cls, inStr, inSpace=True ):
 #   sRe_Search( cls, inPatt, inCont ):
+#   sGetRand( cls, inValue ):
 #
 #####################################################
 from datetime import datetime

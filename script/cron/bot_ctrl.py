@@ -7,15 +7,17 @@
 #   Update  ：2019/8/18
 #####################################################
 # Private Function:
-#   __getCommand( self, inKind, inAccount ):
+#   __start(self):
+#   __stop( self):
+#   __allStop(self):
+#   __reStart(self):
+#   __getKind( self, inFulluser ):
+#   __runCommand( self, inCommand ):
+#   __consoleViewList(self):
 #
 # Instance Function:
 #   __init__(self):
-#   Put( self, inKind, inAccount ):
-#   Del( self, inKind, inAccount ):
-#   isJob( self, inKind, inAccount ):
-#   Stop(self):
-#   List(self):
+#   Console(self):
 #
 # Class Function(static):
 #   (none)

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/31
+#   Update  ：2019/9/4
 #####################################################
 # Private Function:
 #   (none)
@@ -29,17 +29,15 @@ from botctrl import CLS_BotCtrl
 from lookhtl import CLS_LookHTL
 from lookltl import CLS_LookLTL
 from lookrip import CLS_LookRIP
-from circletoot import CLS_CircleToot
 from mylog import CLS_Mylog
 from traffic import CLS_Traffic
-from usercorr import CLS_UserCorr
-from wordcorr import CLS_WordCorr
 from gval import gVal
 #####################################################
 class CLS_BOT_Sub() :
 #####################################################
 	CHR_Account   = ""		#実行アカウント
 	CHR_User_path = ""		#ユーザフォルダパス
+#	ARR_MyAccountInfo = ""
 	
 	#使用クラス実体化
 	OBJ_Mylog    = ""
@@ -47,8 +45,6 @@ class CLS_BOT_Sub() :
 	OBJ_MyDon    = ""		# CHR_Account用のmastodonオブジェクト
 	OBJ_Twitter  = ""
 	OBJ_Traffic  = ""
-	OBJ_UserCorr = ""
-	OBJ_WordCorr = ""
 
 #####################################################
 # 実行
@@ -83,8 +79,6 @@ class CLS_BOT_Sub() :
 		
 		cls.OBJ_Mylog    = CLS_Mylog( cls.CHR_User_path + gVal.DEF_STR_FILE['UserLog_path'] )
 		cls.OBJ_Traffic  = CLS_Traffic( parentObj=cls )
-		cls.OBJ_UserCorr = CLS_UserCorr( parentObj=cls )
-		cls.OBJ_WordCorr = CLS_WordCorr( parentObj=cls )
 		
 		#############################
 		# 排他開始 (テストOFFの時)
@@ -118,12 +112,6 @@ class CLS_BOT_Sub() :
 ##			wStr = "CLS_BOT_Sub: GetDomainREM failure"
 ##			cls.OBJ_Mylog.Log( 'a', wStr )
 		
-##		#############################
-##		# 禁止ワード読み込み
-##		if cls.OBJ_WordCorr.GetWordREM()!=True :
-##			wStr = "CLS_BOT_Sub: GetWordREM failure"
-##			cls.OBJ_Mylog.Log( 'a', wStr )
-		
 		#############################
 		# mastodonクラス生成
 		cls.OBJ_Mastodon = CLS_Regist()
@@ -144,6 +132,21 @@ class CLS_BOT_Sub() :
 			return
 		
 		cls.OBJ_MyDon = wRes['Responce']	#1個だけ取り出す
+		
+#		#############################
+#		# 自アカウント情報の取得
+#		wRes = cls.OBJ_MyDon.GetMyAccountInfo()
+#		if wRes['Result']!=True :
+#			wStr = "CLS_BOT_Sub: Get Mastodon my account info is failure: " + wRes['Reason']
+#			cls.OBJ_Mylog.Log( 'a', wStr )
+#			
+#			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
+#			return
+#		cls.ARR_MyAccountInfo = wRes['Responce']
+#			# ['id']
+#			# ['username']
+#			# ['display_name']
+#			# ['url']
 		
 		#############################
 		# Twitterと接続 (クラス生成)

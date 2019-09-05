@@ -4,17 +4,27 @@
 # るしぼっと4
 #   Class   ：データベース編集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/4
 #####################################################
 # Private Function:
-#   (none)
+#   __View_Disp(self):
+#   __viewTblList(self):
+#   __oneRunQuery( self, inQuery ):
 #
 # Instance Function:
 #   __init__(self):
-#   MasterSetup(self):
+#   View(self):
 #
 # Class Function(static):
 #   (none)
+#
+# 隠し機能用
+#   __getMstdnDomains(self):
+#   __checkMstdnNewDomains(self):
+#   __searchMstdnDomainBlock(self):
+#   __getDomainsFile(self):
+#   __setDomainsFile(self):
+#   __oneRunQueryMstdn( self, inQuery ):
 #
 #####################################################
 
@@ -326,9 +336,11 @@ class CLS_DBedit():
 		
 		#############################
 		# ファイル読み込み
-		wFile_path = gVal.DEF_STR_FILE['MstdnDomains_File']
+##		wFile_path = gVal.DEF_STR_FILE['MstdnDomains_File']
+		wFile_path = gVal.DEF_STR_FILE['MasterConfig_path'] + gVal.DEF_STR_FILE['MstdnDomains_File']
 		if CLS_File.sReadFile( wFile_path, outLine=self.ARR_Domains )!=True :
-			wStr = "CLS_DBedit: __getDomainsFile: MstdnDomains_File read is failed: " + gVal.DEF_STR_FILE['MstdnDomains_File']
+##			wStr = "CLS_DBedit: __getDomainsFile: MstdnDomains_File read is failed: " + gVal.DEF_STR_FILE['MstdnDomains_File']
+			wStr = "CLS_DBedit: __getDomainsFile: MstdnDomains_File read is failed: " + wFile_path
 			CLS_OSIF.sPrn( wStr )
 			return False	#失敗
 		
@@ -339,9 +351,11 @@ class CLS_DBedit():
 	def __setDomainsFile(self):
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = gVal.DEF_STR_FILE['MstdnDomains_File']
+##		wFile_path = gVal.DEF_STR_FILE['MstdnDomains_File']
+		wFile_path = gVal.DEF_STR_FILE['MasterConfig_path'] + gVal.DEF_STR_FILE['MstdnDomains_File']
 		if CLS_File.sWriteFile( wFile_path, self.ARR_Domains, inRT=True )!=True :
-			wStr = "CLS_DBedit: __setDomainsFile: MstdnDomains_File write is failed: " + gVal.DEF_STR_FILE['MstdnDomains_File']
+##			wStr = "CLS_DBedit: __setDomainsFile: MstdnDomains_File write is failed: " + gVal.DEF_STR_FILE['MstdnDomains_File']
+			wStr = "CLS_DBedit: __setDomainsFile: MstdnDomains_File write is failed: " + wFile_path
 			CLS_OSIF.sPrn( wStr )
 			return False	#失敗
 		

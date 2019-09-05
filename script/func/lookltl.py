@@ -15,6 +15,7 @@
 #   Get_LTL(self):
 #   Get_RateLTL(self):
 #   Set_RateLTL(self):
+#   Init_RateLTL(self):
 #
 # Class Function(static):
 #   (none)
@@ -39,12 +40,6 @@ class CLS_LookLTL():
 		"Now_Cope"  : 0,		#処理した新トゥート数
 		
 		"Traffic"	: 0,		#トラヒック数
-##		"UserCorr"	: 0,		#ユーザ収集
-##		"Now_Word"  : 0,		#今ワード監視した数
-##		"Now_Favo"  : 0,		#今ニコった数
-##		"Now_Boot"  : 0,		#今ブーストした数
-##		"Now_ARip"  : 0,		#今エアリプした数
-		
 		"dummy"     : 0	#(未使用)
 	}
 
@@ -142,14 +137,8 @@ class CLS_LookLTL():
 		
 		#############################
 		# 処理結果ログ
-##		wSTR_Word = self.Obj_Parent.OBJ_WordCorr.GetWordCorrectStat()	#収集状況の取得
-##		
 		wStr = self.CHR_LogName + " 結果: 新Toot=" + str(self.STR_Cope['Now_Cope'])
 		wStr = wStr + " Traffic=" + str(self.STR_Cope['Traffic']) + wTrafficSended
-##		wStr = wStr + " UserCorr=" + str(self.STR_Cope['UserCorr']) + '\n'
-##		wStr = wStr + "WordCorr=[Cope:" + str(wSTR_Word['Cope']) + " Regist:" + str(wSTR_Word['Regist']) + " Delete:" + str(wSTR_Word['Delete'])
-##		wStr = wStr + " ClazList:" + str(wSTR_Word['ClazList']) + "]"
-
 		if gVal.FLG_Test_Mode==False :
 			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
 		else:
@@ -165,38 +154,9 @@ class CLS_LookLTL():
 	def __cope( self, inROW ) :
 		#############################
 		#トラヒックに記録
-##		if gVal.STR_Config['TrafficCnt'] == "on" :
-##			if self.Obj_Parent.OBJ_Traffic.Countup()==True :
-##				self.STR_Cope['Traffic'] += 1
-##			else:
-##				###ありえなくない？
-##				self.Obj_Parent.OBJ_Traffic.CountReset()
-##				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookLTL: __cope: Traffic counter failer (and Reset)" )
-##		self.Obj_Parent.OBJ_Traffic.Countup()
-##		self.STR_Cope['Traffic'] += 1
 		if self.Obj_Parent.OBJ_Traffic.Countup()==True :
 			##カウント入った
 			self.STR_Cope['Traffic'] += 1
-		
-##		#############################
-##		#ユーザ収集ファイルに記録
-##		#  ・新規  ：追加
-##		#  ・追加済：更新
-##		if self.Obj_Parent.OBJ_UserCorr.AddUser( inROW )==True :
-##			self.STR_Cope['UserCorr'] += 1
-		
-##		#############################
-##		#単語学習
-##		if gVal.STR_Config['WordCorrect'] == "on" :
-##			self.Obj_Parent.OBJ_WordCorr.WordStudy( inROW )
-		
-		#############################
-		#トゥートからHTMLタグを除去
-		#### LTLでは実装しない
-		
-		#############################
-		#解析種類の判定
-		#### LTLでは実装しない
 		
 		return
 

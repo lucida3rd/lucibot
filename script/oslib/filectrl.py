@@ -26,6 +26,7 @@
 #   sAddFile( cls, inPath, inSetLine ):
 #   sReadFile( cls, inPath, outLine ):
 #   sChmod( cls, inPath, inMod ):
+#   sGetTimedate( cls, inPath ) :
 #
 #####################################################
 from datetime import datetime

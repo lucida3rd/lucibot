@@ -12,18 +12,17 @@
 #   __cnfMasterUser( self, inFulluser ):
 #
 # Instance Function:
+#   __init__(self):
 #   MasterConfig_Disp(self):
 #   CnfMasterConfig(self):
-#   CnfMasterUser(self):
+#   CnfMasterUser( self ):
 #   CnfAdminUser(self):
 #   CnfMasterRun(self):
-#   CnfMasterMainte(self):
-#   GetMulticastUserList(self):
+#   CnfTwitter(self):
 #
 # Class Function(static):
 #   sGetMasterConfig(cls):
 #   sSetMasterConfig(cls):
-#   sGetMulticast( cls, inPath ):
 #
 #####################################################
 

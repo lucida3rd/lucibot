@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/5
 #####################################################
 
 #####################################################
@@ -127,6 +127,9 @@ class gVal() :
 		"getHTLnum"			: 120,						#HomeTL取得数
 		"getLTLnum"			: 120,						#LocalTL取得数
 		
+		"getFollowTLnum"	: 120,						#フォロー一覧取得数
+		"getFollowerTLnum"	: 120,						#フォロワー一覧取得数
+		
 		"getRandVal"		: 70,						#トゥート頻度 0-100
 		"getRandRange"		: 1000,						#トゥート頻度 乱数幅
 		
@@ -177,6 +180,10 @@ class gVal() :
 		"LockFile"				: "data/_lock.txt",
 		"Chk1HourFile"			: "data/_chk1hour.txt",
 		
+		"MstdnDomains_File"		: "data/_domains.txt",
+		"TweetFile"				: "data/tweet.txt",
+		"CLDataFile"			: "data/ctootd.txt",
+		
 		"MasterConfig_path"		: DEF_MASTERCONFIG,
 		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig.txt",
 		"MasterLog_path"		: DEF_MASTERCONFIG + "log/",
@@ -185,22 +192,26 @@ class gVal() :
 		
 		"Toot_path"				: DEF_MASTERCONFIG + "toot/",
 		"CLTootFile"			: DEF_MASTERCONFIG + "toot/ctoot.txt",
+		"PatternPTLFile"		: DEF_MASTERCONFIG + "toot/pptl.txt",
+
 		"HTLBoostFile"			: DEF_MASTERCONFIG + "toot/hboost.txt",
 		"TrafficTootFile"		: DEF_MASTERCONFIG + "toot/traffic.txt",
 		"TweetPatternFile"		: DEF_MASTERCONFIG + "toot/twitter.txt",
 		"DBInfoFile"			: DEF_MASTERCONFIG + "toot/.dbinfo.txt",
 		
-		"DomainREMFile"			: DEF_MASTERCONFIG + "user/xxdomain.txt",
-		"WordREMFile"			: DEF_MASTERCONFIG + "user/xxword.txt",
-		"UserinfoCSVFile"		: DEF_MASTERCONFIG + "user/userinfo.csv",
-		"WorddicCSVFile"		: DEF_MASTERCONFIG + "user/worddic.csv",
+##		"DomainREMFile"			: DEF_MASTERCONFIG + "user/xxdomain.txt",
+##		"WordREMFile"			: DEF_MASTERCONFIG + "user/xxword.txt",
+		"DomainREMFile"			: DEF_MASTERCONFIG + "toot/xxdomain.txt",
+		"WordREMFile"			: DEF_MASTERCONFIG + "toot/xxword.txt",
+##		"UserinfoCSVFile"		: DEF_MASTERCONFIG + "user/userinfo.csv",
+##		"WorddicCSVFile"		: DEF_MASTERCONFIG + "user/worddic.csv",
 		
 		"defDBinfo_File"		: DEF_MASTERCONFIG + "data/_dbinfo.txt",
 		"defTwitter_File"		: DEF_MASTERCONFIG + "data/_twitter.txt",
 		"DBinfo_File"			: DEF_MASTERCONFIG + ".dbinfo",
 		"Twitter_File"			: DEF_MASTERCONFIG + ".twitter",
 		
-		"TweetFile"				: DEF_MASTERCONFIG + "data/tweet.txt",
+##		"TweetFile"				: DEF_MASTERCONFIG + "data/tweet.txt",
 		"TrafficFile"			: DEF_MASTERCONFIG + "data/traffic.txt",
 		
 ##		"UserConfig"			: "config.txt",
@@ -209,18 +220,20 @@ class gVal() :
 		"UserLog_path"			: "log/",
 		
 ##		"TrafficFile"			: "data/traffic_count.txt",
-		"UserinfoFile"			: "data/userinfo.txt",
-		"WorddicFile"			: "data/worddic.txt",
-		"ClazListFile"			: "data/clazlist.txt",
-		"CLDataFile"			: "data/ctootd.txt",
+##		"UserinfoFile"			: "data/userinfo.txt",
+##		"WorddicFile"			: "data/worddic.txt",
+##		"ClazListFile"			: "data/clazlist.txt",
+##		"CLDataFile"			: "data/ctootd.txt",
 		"Rate_HTLFile"			: "data/rhtl.txt",
 		"Rate_LTLFile"			: "data/rltl.txt",
 		"Rate_PTLFile"			: "data/rptl.txt",
 		"Rate_RipFile"			: "data/rreply.txt",
 		"Rate_FavFile"			: "data/rfav.txt",
 		"IndLim_File"			: "data/indlim.txt",
+		"FollowListFile"		: "data/follow.txt",
+		"FollowerListFile"		: "data/follower.txt",
 		
-		"MstdnDomains_File"		: DEF_MASTERCONFIG + "data/_domains.txt",
+##		"MstdnDomains_File"		: DEF_MASTERCONFIG + "data/_domains.txt",
 		"MstdnInfo_File"		: DEF_MASTERCONFIG + ".mstdninfo",
 		
 		"(dummy)"				: 0
@@ -274,7 +287,8 @@ class gVal() :
 		"Hour"			: 0,
 		"Week"			: 0,
 		
-		"OneHour"		: False
+		"OneHour"		: False,
+		"OneDay"		: False
 	}
 
 

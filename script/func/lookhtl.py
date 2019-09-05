@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/5
 #####################################################
 # Private Function:
 #   __run(self):
@@ -15,6 +15,7 @@
 #   Get_HTL(self):
 #   Get_RateLTL(self):
 #   Set_RateLTL(self):
+#   Get_Anap(self):
 #
 # Class Function(static):
 #   (none)
@@ -89,6 +90,13 @@ class CLS_LookHTL():
 		wRes = self.Get_RateHTL()
 		if wRes!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHTL: __run: Get_RateHTL failed" )
+			return
+		if len(self.ARR_RateTL)==0 :
+			self.Init_RateHTL()
+			if gVal.FLG_Test_Mode==False :
+				self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " HTL過去TL初期化" )
+			else :
+				self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " HTL過去TL初期化", inView=True )
 			return
 		
 		#############################
@@ -335,6 +343,19 @@ class CLS_LookHTL():
 			return False	#失敗
 		
 		return True			#成功
+
+	#####################################################
+	def Init_RateHTL(self):
+		#############################
+		# IDを詰め込む
+		self.ARR_UpdateTL = []
+		for wROW in self.ARR_NewTL :
+			self.ARR_UpdateTL.append( wROW['id'] )
+		
+		#############################
+		# ファイル書き込み (改行つき)
+		self.Set_RateHTL()
+		return
 
 
 

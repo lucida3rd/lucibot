@@ -15,6 +15,7 @@
 #   Del( self, inKind, inAccount ):
 #   isJob( self, inKind, inAccount ):
 #   Stop(self):
+#   GetList(self):
 #   List(self):
 #
 # Class Function(static):

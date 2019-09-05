@@ -12,12 +12,16 @@
 #   __multicastToot_Disp( self, inFulluser, inNum ):
 #   __multicastList( self, inSendlist ):
 #   __multicastToot( self, inFulluser, inSendlist, inToot, inMastodon ):
+#   __ManualTweet_Disp( self, inTwitter ):
+#   __manualTweet( self, inTwitter, inTweet ):
+#   __getTwitterTL( self, inTwitter ):
 #
 # Instance Function:
 #   __init__(self):
 #   ManualToot(self):
 #   MulticastToot(self):
 #   SetRange( self, inKind ):
+#   ManualTweet(self):
 #
 # Class Function(static):
 #   (none)

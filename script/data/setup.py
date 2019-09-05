@@ -4,14 +4,21 @@
 # るしぼっと4
 #   Class   ：セットアップ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/31
+#   Update  ：2019/9/5
 #####################################################
 # Private Function:
-#   (none)
+#   __initDB(self):
+#
+# ◇テーブル作成系
+#   __create_TBL_USER_DATA( self, inOBJ_DB, inTBLname="TBL_USER_DATA" ):
+#   __create_TBL_TRAFFIC_DATA( self, inOBJ_DB, inTBLname="TBL_TRAFFIC_DATA" ):
+#   __create_TBL_WORD_CORRECT( self, inOBJ_DB, inTBLname="TBL_WORD_CORRECT" ):
+#   __create_TBL_CLAZ_LIST( self, inOBJ_DB, inTBLname="TBL_CLAZ_LIST" ):
 #
 # Instance Function:
 #   __init__(self):
 #   MasterSetup(self):
+#   AllInit(self):
 #
 # Class Function(static):
 #   (none)
@@ -185,8 +192,8 @@ class CLS_Setup():
 				wStr = wStr + " dst=" + gVal.DEF_STR_FILE['DBinfo_File']
 				CLS_OSIF.sPrn( wStr  )
 				return False
-			
-			wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
+##			
+##			wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
 		
 		else :
 			###DB接続情報変更
@@ -205,13 +212,40 @@ class CLS_Setup():
 					wStr = wStr + " dst=" + gVal.DEF_STR_FILE['DBinfo_File']
 					CLS_OSIF.sPrn( wStr  )
 					return False
-				
-				wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
+##				
+##				wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
 		
+##		#############################
+##		# DBの状態チェック
+##		wRes = wOBJ_DB.GetIniStatus()
+##		if wRes['Result']!=True :
+##			###失敗
+##			CLS_File.sRmtree( gVal.DEF_STR_FILE['MasterConfig_path'] )
+##			CLS_File.sRmtree( gVal.DEF_USERDATA_PATH + gVal.STR_MasterConfig['MasterUser'] )
+##			
+##			wStr = "CLS_Setup: DB Connect test is failed: " + wRes['Reason']
+##			CLS_OSIF.sPrn( wStr  )
+##			return False
+##		
+##		wStr = "テーブルの作成中......" + '\n'
+##		print( wStr )
+##		#############################
+##		# テーブルの作成
+##		self.__create_TBL_USER_DATA( wOBJ_DB )
+##		self.__create_TBL_TRAFFIC_DATA( wOBJ_DB )
+##		self.__create_TBL_WORD_CORRECT( wOBJ_DB )
+##		self.__create_TBL_CLAZ_LIST( wOBJ_DB )
+##		
+##		#############################
+##		# DBのクローズ
+##		wOBJ_DB.Close()
+##		wStr = "作成完了!!  DataBaseから切断しました。" + '\n'
+##		print( wStr )
+##		
 		#############################
-		# DBの状態チェック
-		wRes = wOBJ_DB.GetIniStatus()
-		if wRes['Result']!=True :
+		# DBの初期化
+		wRes = self.__initDB()
+		if wRes!=True :
 			###失敗
 			CLS_File.sRmtree( gVal.DEF_STR_FILE['MasterConfig_path'] )
 			CLS_File.sRmtree( gVal.DEF_USERDATA_PATH + gVal.STR_MasterConfig['MasterUser'] )
@@ -219,21 +253,6 @@ class CLS_Setup():
 			wStr = "CLS_Setup: DB Connect test is failed: " + wRes['Reason']
 			CLS_OSIF.sPrn( wStr  )
 			return False
-		
-		wStr = "テーブルの作成中......" + '\n'
-		print( wStr )
-		#############################
-		# テーブルの作成
-		self.__create_TBL_USER_DATA( wOBJ_DB )
-		self.__create_TBL_TRAFFIC_DATA( wOBJ_DB )
-		self.__create_TBL_WORD_CORRECT( wOBJ_DB )
-		self.__create_TBL_CLAZ_LIST( wOBJ_DB )
-		
-		#############################
-		# DBのクローズ
-		wOBJ_DB.Close()
-		wStr = "作成完了!!  DataBaseから切断しました。" + '\n'
-		print( wStr )
 		
 		#############################
 		# Twitter接続情報の作成
@@ -258,6 +277,221 @@ class CLS_Setup():
 
 
 #####################################################
+# 全初期化
+#   作業ファイルとDBを全て初期化する
+#####################################################
+	def AllInit(self):
+		#############################
+		# フォルダの存在チェック
+		if CLS_File.sExist( gVal.DEF_STR_FILE['MasterConfig_path'] )!=True :
+			CLS_OSIF.sPrn( "CLS_Config: Init: Master Data is not Exist" )
+			return False	#失敗
+		
+		#############################
+		# Master環境情報の変更
+		wStr = "データベースと全ての作業ファイルをクリアします。" + '\n'
+		wStr = wStr + "よろしいですか？(y/N)=> "
+		wSelect = CLS_OSIF.sInp( wStr )
+		if wSelect!="y" :
+			##キャンセル
+			CLS_OSIF.sInp( "リターンキーを押して再度コンソールアプリを起動してください。[RT]" )
+			return True
+		
+		CLS_OSIF.sPrn( "cronを停止中。2分ほどお待ちください..." + '\n' )
+		#############################
+		# ユーザ一覧取得
+		wUserList = CLS_UserData.sGetUserList()
+		
+		#############################
+		# cronの停止 +メモもする
+		wCLS_Botjob = CLS_Botjob()
+		
+		wFLG_Wait = False
+		wWaitRestart = {}
+		wIndex       = 0
+		for wUser in wUserList :
+			#############################
+			# 種別を判定
+			if gVal.STR_MasterConfig['MasterUser']==wUser :
+				wKind = gVal.DEF_CRON_MASTER
+			else :
+				wKind = gVal.DEF_CRON_SUB
+			
+			#############################
+			# ジョブの削除
+			wRes = wCLS_Botjob.Del( wKind, wUser )
+			if wRes['Result']!=True :
+				###おそらく動いてないcronのためスキップ
+				continue
+			
+			#############################
+			# 停止cronをメモ
+			wWaitRestart.update({ wIndex : wIndex })
+			wWaitRestart[wIndex] = {}
+			wWaitRestart[wIndex].update({ "Kind" : wKind })
+			wWaitRestart[wIndex].update({ "User" : wUser })
+			wFLG_Wait  = True
+			wIndex    += 1
+		
+		#############################
+		# 1つでも停止cronがあれば2分待つ
+		if wFLG_Wait==True :
+			CLS_OSIF.sSleep(120)
+		
+		CLS_OSIF.sPrn( "各ユーザの作業ファイルを初期化しています..." + '\n' )
+		#############################
+		# ファイルの初期化(各ユーザ)
+		for wUser in wUserList :
+			CLS_OSIF.sPrn( "ユーザ " + wUser + " 初期化中..." )
+			
+			#############################
+			# ユーザフォルダチェック
+			wRes = CLS_UserData.sGetUserPath( wUser )
+			if wRes['Result']!=True :
+				CLS_OSIF.sPrn( "CLS_Setup: Init: User folder is not Exist: user=" + wUser + '\n' )
+				continue
+			wUserPath = wRes['Responce']
+			
+			#############################
+			# 1時間ファイル
+			wDefFile_path = gVal.DEF_STR_FILE['defUserdata_path'] + gVal.DEF_STR_FILE['Chk1HourFile']
+			wDstFile_path = wUserPath + gVal.DEF_STR_FILE['Chk1HourFile']
+			self.__initFile( wDefFile_path, wDstFile_path )
+			
+			#############################
+			# HTL過去ファイル
+			wDefFile_path = gVal.DEF_STR_FILE['defUserdata_path'] + gVal.DEF_STR_FILE['Rate_HTLFile']
+			wDstFile_path = wUserPath + gVal.DEF_STR_FILE['Rate_HTLFile']
+			self.__initFile( wDefFile_path, wDstFile_path )
+			
+			#############################
+			# LTL過去ファイル
+			wDefFile_path = gVal.DEF_STR_FILE['defUserdata_path'] + gVal.DEF_STR_FILE['Rate_LTLFile']
+			wDstFile_path = wUserPath + gVal.DEF_STR_FILE['Rate_LTLFile']
+			self.__initFile( wDefFile_path, wDstFile_path )
+			
+			#############################
+			# PTL過去ファイル
+			wDefFile_path = gVal.DEF_STR_FILE['defUserdata_path'] + gVal.DEF_STR_FILE['Rate_PTLFile']
+			wDstFile_path = wUserPath + gVal.DEF_STR_FILE['Rate_PTLFile']
+			self.__initFile( wDefFile_path, wDstFile_path )
+			
+			#############################
+			# リプライ過去ファイル
+			wDefFile_path = gVal.DEF_STR_FILE['defUserdata_path'] + gVal.DEF_STR_FILE['Rate_RipFile']
+			wDstFile_path = wUserPath + gVal.DEF_STR_FILE['Rate_RipFile']
+			self.__initFile( wDefFile_path, wDstFile_path )
+			
+			#############################
+			# フォローファイル
+			wDefFile_path = gVal.DEF_STR_FILE['defUserdata_path'] + gVal.DEF_STR_FILE['FollowListFile']
+			wDstFile_path = wUserPath + gVal.DEF_STR_FILE['FollowListFile']
+			self.__initFile( wDefFile_path, wDstFile_path )
+			
+			#############################
+			# フォロワーファイル
+			wDefFile_path = gVal.DEF_STR_FILE['defUserdata_path'] + gVal.DEF_STR_FILE['FollowerListFile']
+			wDstFile_path = wUserPath + gVal.DEF_STR_FILE['FollowerListFile']
+			self.__initFile( wDefFile_path, wDstFile_path )
+		
+	#############################
+		#############################
+		# ファイルの初期化(masterConfig)
+		
+		CLS_OSIF.sPrn( "masterConfig 初期化中..." + '\n' )
+		#############################
+		# ドメイン情報
+		wDefFile_path = gVal.DEF_STR_FILE['defMasterdata_path'] + gVal.DEF_STR_FILE['MstdnDomains_File']
+		wDstFile_path = gVal.DEF_STR_FILE['MasterConfig_path'] + gVal.DEF_STR_FILE['MstdnDomains_File']
+		self.__initFile( wDefFile_path, wDstFile_path )
+		
+		#############################
+		# 過去ツイート
+		wDefFile_path = gVal.DEF_STR_FILE['defMasterdata_path'] + gVal.DEF_STR_FILE['TweetFile']
+		wDstFile_path = gVal.DEF_STR_FILE['MasterConfig_path'] + gVal.DEF_STR_FILE['TweetFile']
+		self.__initFile( wDefFile_path, wDstFile_path )
+		
+		#############################
+		# 周期トゥート
+		wDefFile_path = gVal.DEF_STR_FILE['defMasterdata_path'] + gVal.DEF_STR_FILE['CLDataFile']
+		wDstFile_path = gVal.DEF_STR_FILE['MasterConfig_path'] + gVal.DEF_STR_FILE['CLDataFile']
+		self.__initFile( wDefFile_path, wDstFile_path )
+		
+	#############################
+		CLS_OSIF.sPrn( "データベースを初期化しています..." + '\n' )
+		#############################
+		# DBの初期化
+		wFLG_Init = True
+		### 初期化
+		if self.__initDB()!=True :
+			wFLG_Init = False
+		### 修復
+		if self.__recovery_TBL_TRAFFIC_DATA()!=True :
+			wFLG_Init = False
+		
+		if wFLG_Init==True :
+			CLS_OSIF.sPrn( "データベースの初期化をおこないました" + '\n' )
+		else :
+			##ありえない
+			CLS_OSIF.sPrn( "*** データベースの初期化に失敗しました" + '\n' )
+		
+		#############################
+		# cronの再起動
+		if wFLG_Wait==True :
+			CLS_OSIF.sPrn( "停止していたcronを再開します..." + '\n' )
+			
+			wKeylist = wWaitRestart.keys()
+			for wKey in wKeylist :
+				#############################
+				# ジョブの登録
+				wRes = wCLS_Botjob.Put( wWaitRestart[wKey]["Kind"], wWaitRestart[wKey]["User"] )
+				if wRes['Result']!=True :
+					###失敗
+					CLS_OSIF.sPrn( "cronの起動に失敗しました: user=" + wWaitRestart[wKey]["User"] + '\n' )
+		
+		#############################
+		# 終わり
+		CLS_OSIF.sPrn( "初期化が正常終了しました。" )
+##		CLS_OSIF.sInp( "リターンキーを押して再度コンソールアプリを起動してください。[RT]" )
+		return True
+	
+	#####################################################
+	def __initFile( self, inSrcFile, inDstFile ):
+		if CLS_File.sCopy( inSrcFile, inDstFile )!=True :
+			##失敗
+			CLS_OSIF.sPrn( "CLS_Setup: Init: Copy error: " + inDstFile + '\n' )
+		return
+
+
+
+#####################################################
+# データベースの初期化
+#####################################################
+	def __initDB(self):
+		#############################
+		# DBの接続
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
+		wRes = wOBJ_DB.GetIniStatus()
+		if wRes['Result']!=True :
+			###失敗
+##			CLS_OSIF.sPrn( "CLS_Setup: __initDB: DB connect error: " + wRes['Reason'] + '\n' )
+			return False
+		
+		#############################
+		# テーブルの作成
+		self.__create_TBL_USER_DATA( wOBJ_DB )
+		self.__create_TBL_TRAFFIC_DATA( wOBJ_DB )
+		self.__create_TBL_WORD_CORRECT( wOBJ_DB )
+		self.__create_TBL_CLAZ_LIST( wOBJ_DB )
+		
+		#############################
+		# DBのクローズ
+		wOBJ_DB.Close()
+		return True
+
+
+
+#####################################################
 # テーブル作成: TBL_USER_DATA
 #####################################################
 	def __create_TBL_USER_DATA( self, inOBJ_DB, inTBLname="TBL_USER_DATA" ):
@@ -274,21 +508,9 @@ class CLS_Setup():
 					"domain      TEXT  NOT NULL," + \
 					"status      CHAR(1) DEFAULT '-'," + \
 					"followed    BOOL  DEFAULT false," + \
-					"follow      BOOL  DEFAULT false," + \
-					"follower    BOOL  DEFAULT false," + \
 					"locked      BOOL  DEFAULT false," + \
 					"lupdate     TIMESTAMP," + \
-					"lchacked    TIMESTAMP," + \
 					" PRIMARY KEY ( id ) ) ;"
-		
-		# "status      CHAR(1) DEFAULT '-'," + \
-			## @ フォローチェック予約(まだ未フォロー)
-			## - フォローチェック済
-			## D ドメインブロックユーザ
-			## R リムーブ予約
-			## X チェックもしくはフォロー失敗
-			## * リストから消す
-			## M 自分
 		
 		inOBJ_DB.RunQuery( wQuery )
 		return
@@ -315,6 +537,62 @@ class CLS_Setup():
 		
 		inOBJ_DB.RunQuery( wQuery )
 		return
+
+	#############################
+	# トラヒックを元にテーブルを修復する
+	def __recovery_TBL_TRAFFIC_DATA(self):
+		#############################
+		# 読み出し先初期化
+		wTrafficUser = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.DEF_STR_FILE['TrafficFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
+			wStr = "CLS_Regist : __recovery_TBL_TRAFFIC_DATA: TrafficFile read is failed: " + gVal.DEF_STR_FILE['TrafficFile']
+			CLS_OSIF.sPrn( wStr )
+			return False
+		
+		#############################
+		# DBの接続
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
+		wRes = wOBJ_DB.GetIniStatus()
+		if wRes['Result']!=True :
+			###失敗
+			wStr = "CLS_Regist : __recovery_TBL_TRAFFIC_DATA: DB connect error: " + wRes['Reason']
+			CLS_OSIF.sPrn( wStr )
+			return False
+		
+		#############################
+		# 修復
+		for wLine in wTrafficUser :
+			wDomain = wLine.split("@")
+			if len(wDomain)!=2 :
+				wStr = "CLS_Regist : __recovery_TBL_TRAFFIC_DATA: Traffic user is invalid: user=" + wLine
+				CLS_OSIF.sPrn( wStr )
+				continue
+			wDomain = wDomain[1]
+			
+			##クエリ作成＆実行
+			wQuery = "insert into TBL_TRAFFIC_DATA values (" + \
+						"'" + wDomain + "'," + \
+						"0," + \
+						"-1," + \
+						"-1" + \
+						") ;"
+			wDBRes = wOBJ_DB.RunQuery( wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				wStr = "CLS_Regist : __recovery_TBL_TRAFFIC_DATA: DB insert is failed: " + wDBRes['Reason']
+				CLS_OSIF.sPrn( wStr )
+				wOBJ_DB.Close()
+				return False
+		
+		#############################
+		# DBのクローズ
+		wOBJ_DB.Close()
+		return True
 
 
 

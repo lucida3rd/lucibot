@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理(Master)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/31
+#   Update  ：2019/9/5
 #####################################################
 # Private Function:
 #   (none)
@@ -26,10 +26,12 @@ from userdata import CLS_UserData
 
 from crontest import CLS_CronTest
 from botctrl import CLS_BotCtrl
-from lookhtl import CLS_LookHTL
+##from lookhtl import CLS_LookHTL
+from lookptl import CLS_LookPTL
 from lookltl import CLS_LookLTL
 from lookrip import CLS_LookRIP
 from circletoot import CLS_CircleToot
+from follow import CLS_Follow
 from mylog import CLS_Mylog
 from traffic import CLS_Traffic
 from usercorr import CLS_UserCorr
@@ -40,6 +42,7 @@ class CLS_BOT_Master() :
 #####################################################
 	CHR_Account   = ""		#実行アカウント
 	CHR_User_path = ""		#ユーザフォルダパス
+	ARR_MyAccountInfo = ""
 	
 	#使用クラス実体化
 	OBJ_Mylog    = ""
@@ -49,6 +52,7 @@ class CLS_BOT_Master() :
 	OBJ_Traffic  = ""
 	OBJ_UserCorr = ""
 	OBJ_WordCorr = ""
+	OBJ_Follow   = ""
 
 #####################################################
 # 実行
@@ -85,6 +89,7 @@ class CLS_BOT_Master() :
 		cls.OBJ_Traffic  = CLS_Traffic( parentObj=cls )
 		cls.OBJ_UserCorr = CLS_UserCorr( parentObj=cls )
 		cls.OBJ_WordCorr = CLS_WordCorr( parentObj=cls )
+		cls.OBJ_Follow   = CLS_Follow( parentObj=cls )
 		
 		#############################
 		# 排他開始 (テストOFFの時)
@@ -112,11 +117,11 @@ class CLS_BOT_Master() :
 			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
 			return
 		
-##		#############################
-##		# 除外ドメイン読み込み
+		#############################
+		# 除外ドメイン読み込み
 ##		if cls.OBJ_UserCorr.GetDomainREM()!=True :
-##			wStr = "CLS_BOT_Sub: GetDomainREM failure"
-##			cls.OBJ_Mylog.Log( 'a', wStr )
+##			cls.OBJ_Mylog.Log( 'a', "CLS_BOT_Master: GetDomainREM failure" )
+		cls.OBJ_UserCorr.GetDomainREM()
 		
 ##		#############################
 ##		# 禁止ワード読み込み
@@ -146,6 +151,21 @@ class CLS_BOT_Master() :
 		cls.OBJ_MyDon = wRes['Responce']	#1個だけ取り出す
 		
 		#############################
+		# 自アカウント情報の取得
+		wRes = cls.OBJ_MyDon.GetMyAccountInfo()
+		if wRes['Result']!=True :
+			wStr = "CLS_BOT_Master: Get Mastodon my account info is failure: " + wRes['Reason']
+			cls.OBJ_Mylog.Log( 'a', wStr )
+			
+			CLS_BotCtrl.sUnlock( cls.CHR_User_path )
+			return
+		cls.ARR_MyAccountInfo = wRes['Responce']
+			# ['id']
+			# ['username']
+			# ['display_name']
+			# ['url']
+		
+		#############################
 		# Twitterと接続 (クラス生成)
 		if gVal.STR_MasterConfig['Twitter']=="on" :
 			cls.OBJ_Twitter = CLS_Twitter_Use( gVal.DEF_STR_FILE['Twitter_File'], gVal.DEF_STR_TLNUM['getTwitTLnum'] )
@@ -156,22 +176,29 @@ class CLS_BOT_Master() :
 	# mastodon処理
 	#############################
 		#############################
+		# フォロー・フォロワー情報の取得
+		cls.OBJ_Follow.Get_FollowLists()
+		
+		#############################
 		# LTL監視処理
 		wOBJ_LookLTL = CLS_LookLTL( parentObj=cls )
 		
 		#############################
-		# HTL監視処理
-##		if gVal.STR_MasterConfig['HTL_Boost']=="on" :
-##			wOBJ_LookHTL = CLS_LookHTL( parentObj=cls )
+		# PTL監視処理
+		wOBJ_LookPTL = CLS_LookPTL( parentObj=cls )
 		
 		#############################
 		# RIP監視処理
 ##		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
 		
-##		#############################
-##		# 周期トゥート処理
-##		if gVal.STR_MasterConfig['CircleToot']=="on" :
-##			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
+		#############################
+		# 周期トゥート処理
+#		if gVal.STR_MasterConfig['CircleToot']=="on" :
+#			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
+		
+		#############################
+		# フォロー・フォロワー情報の更新
+		cls.OBJ_Follow.Set_FollowLists()
 		
 	#############################
 	# 後処理

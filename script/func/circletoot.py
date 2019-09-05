@@ -4,14 +4,17 @@
 # るしぼっと4
 #   Class   ：周期トゥート処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/4
 #####################################################
 # Private Function:
-#   (none)
+#   __run(self):
+#   __sendToot( self, inKind, inFileName ):
 #
 # Instance Function:
 #   __init__( self, parentObj=None ):	※親クラス実体を設定すること
-#   (none)
+#   CheckData(self):
+#   Get_CLData(self):
+#   Set_CLData(self):
 #
 # Class Function(static):
 #   (none)
@@ -62,10 +65,11 @@ class CLS_CircleToot():
 	def __run(self):
 		#############################
 		# 開始ログ
-		if gVal.FLG_Test_Mode==False :
-			self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
-		else:
-			self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始", True )
+##		if gVal.FLG_Test_Mode==False :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
+##		else:
+##			self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始", True )
+		self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
 		
 		#############################
 		# 周期Data取得
@@ -93,10 +97,11 @@ class CLS_CircleToot():
 		wStr = wStr + " Sended=" + str(self.STR_Cope['Sended'])
 		wStr = wStr + " Invalid=" + str(self.STR_Cope['Invalid'])
 		
-		if gVal.FLG_Test_Mode==False :
-			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
-		else:
-			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr, True )
+##		if gVal.FLG_Test_Mode==False :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
+##		else:
+##			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr, True )
+		self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
 		
 		return
 
@@ -251,7 +256,8 @@ class CLS_CircleToot():
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: Get_CLData: CLTootFile read failed: " + wFile_path )
 			return False	#失敗
 		
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['CLDataFile']
+##		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['CLDataFile']
+		wFile_path = gVal.DEF_STR_FILE['MasterConfig_path'] + gVal.DEF_STR_FILE['CLDataFile']
 		if CLS_File.sReadFile( wFile_path, outLine=wCLDataList )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: Get_CLData: CLDataFile read failed: " + wFile_path )
 			return False	#失敗
@@ -285,7 +291,6 @@ class CLS_CircleToot():
 		
 		#############################
 		# データの反映
-##		wFlg_Valid = False
 		wKeylist = list( self.ARR_CLData.keys() )
 		for wKey in wKeylist :
 			for wLine in wCLDataList :
@@ -303,11 +308,6 @@ class CLS_CircleToot():
 				self.ARR_CLData[wIndex]["Minute"] = wLine[3]
 				self.ARR_CLData[wIndex]["TootFile"] = wLine[4]
 				self.ARR_CLData[wIndex]["Valid"]  = True
-##				wFlg_Valid = True
-		
-##		if wFlg_Valid!=True :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_CircleToot: Get_CLData: 周期データなし" )
-##			return False	#有効なデータがない
 		
 		return True			#成功
 
@@ -331,7 +331,8 @@ class CLS_CircleToot():
 		
 		#############################
 		# ファイル書き込み (改行つき)
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['CLDataFile']
+##		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['CLDataFile']
+		wFile_path = gVal.DEF_STR_FILE['MasterConfig_path'] + gVal.DEF_STR_FILE['CLDataFile']
 		if CLS_File.sWriteFile( wFile_path, wCLDataList, inRT=True )!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: Set_CLData: CLDataFile read failed: " + wFile_path )
 			return False	#失敗

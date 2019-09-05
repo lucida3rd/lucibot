@@ -4,9 +4,12 @@
 # るしぼっと4
 #   Class   ：ユーザ登録
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/31
+#   Update  ：2019/9/4
 #####################################################
 # Private Function:
+#   __regTrafficUser( self, inUsername ):
+#   __delTrafficUser( self, inUsername ):
+#   __setTrafficUser( self, inUserList ):
 #   __registUser( self, inFulluser, inMail, inPass ):
 #   __prn( self, inMsg ):
 #
@@ -14,10 +17,10 @@
 #   __init__(self):
 #   GetMastodon( self, inFulluser ):
 #   CreateMastodon( self, inFulluser ):
-#   Test( self, inFulluser ):
-#   Regist( self, inFulluser ):
-#   Update( self, inFulluser ):
-#   Delete( self, inFulluser ):
+#   Test( self, inFulluser=None ):
+#   Regist( self, inFulluser=None ):
+#   Update( self, inFulluser=None ):
+#   Delete( self, inFulluser=None ):
 #
 # Class Function(static):
 #   sRegistMastodon( cls, inFulluser, inMail, inPass ):
@@ -638,7 +641,8 @@ class CLS_Regist() :
 		wDBRes = wOBJ_DB.GetQueryStat()
 		if wDBRes['Result']!=True :
 			##失敗
-			wRes['Reason'] = "CLS_Regist : __regTrafficUser: Run Query is failed: " + wDBRes['Reason']
+##			wRes['Reason'] = "CLS_Regist : __regTrafficUser: Run Query is failed: " + wDBRes['Reason']
+			wRes['Reason'] = "CLS_Regist : __regTrafficUser: Run Query is failed: " + wDBRes['Reason'] + " query=" + wDBRes['Query']
 			wOBJ_DB.Close()
 			return wRes
 		
@@ -759,7 +763,8 @@ class CLS_Regist() :
 			wDBRes = wOBJ_DB.GetQueryStat()
 			if wDBRes['Result']!=True :
 				##失敗
-				wRes['Reason'] = "CLS_Regist : __delTrafficUser: Run Query is failed: " + wDBRes['Reason']
+##				wRes['Reason'] = "CLS_Regist : __delTrafficUser: Run Query is failed: " + wDBRes['Reason']
+				wRes['Reason'] = "CLS_Regist : __delTrafficUser: Run Query is failed: " + wDBRes['Reason'] + " query=" + wDBRes['Query']
 				wOBJ_DB.Close()
 				return wRes
 			

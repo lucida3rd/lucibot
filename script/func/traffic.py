@@ -4,15 +4,16 @@
 # るしぼっと4
 #   Class   ：トラヒック処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/31
+#   Update  ：2019/9/4
 #####################################################
 # Private Function:
-#   (none)
+#   __getTrafficPatt(self):
 #
 # Instance Function:
 #   __init__( self, inPath ):
 #   Countup(self):
-#   CountReset(self):
+#   Update(self):
+#   SendTraffic(self):
 #
 # Class Function(static):
 #   (none)
@@ -126,7 +127,8 @@ class CLS_Traffic():
 		wRes = wOBJ_DB.GetQueryStat()
 		if wRes['Result']!=True :
 			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: Run Query is failed: " + wRes['Reason'] + " domain=" + wDomain )
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: Run Query is failed: " + wRes['Reason'] + " domain=" + wDomain )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: Run Query is failed: " + wRes['Reason'] + " query=" + wRes['Query'] )
 			wOBJ_DB.Close()
 			return False
 		
@@ -248,7 +250,8 @@ class CLS_Traffic():
 		wRes = wOBJ_DB.GetQueryStat()
 		if wRes['Result']!=True :
 			##失敗
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Run Query is failed: " + wRes['Reason'] )
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Run Query is failed: " + wRes['Reason'] )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Run Query is failed: " + wRes['Reason'] + " query=" + wRes['Query'] )
 			wOBJ_DB.Close()
 			return False
 		

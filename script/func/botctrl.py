@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：bot制御(共通)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/4
 #####################################################
 # Private Function:
 #   __openLock( cls, inPath ):
@@ -193,6 +193,8 @@ class CLS_BotCtrl():
 		gVal.STR_TimeInfo['Week']     = wGetTime['Week']
 		gVal.STR_TimeInfo['Result']   = True	#有効
 		
+		wGetDate = wGetTime['TimeDate'].split(" ")
+		
 		#############################
 		# 時間が同じ＝少なくとも1時間経ってないか？
 		if w1HourTime[0]!="1900-01-01" :
@@ -201,10 +203,17 @@ class CLS_BotCtrl():
 				return True
 			else :
 				gVal.STR_TimeInfo['OneHour'] = True
+			
+			if w1HourTime[0] == wGetDate[0] :
+				gVal.STR_TimeInfo['OneDay'] = False
+				return True
+			else :
+				gVal.STR_TimeInfo['OneDay'] = True
 				
 		else :
 			##bot起動初回の場合は時間だけ保存する
 			gVal.STR_TimeInfo['OneHour'] = False
+			gVal.STR_TimeInfo['OneDay']  = False
 		
 		#############################
 		# 時間をセーブ

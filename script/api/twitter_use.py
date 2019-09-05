@@ -7,20 +7,54 @@
 #   Update  ：2019/8/31
 #####################################################
 # Private Function:
-#   __conn(self):
 #   __initIniStatus(self):
+#   __Get_Resp(self):
 #   __loadTwitter( self, inPath ):
 #   __checkTwitter(self):
+#   __NoConn( self, inPath ):
+#   __conn(self):
+#   __TwitterPing(self):
 #
 # Instance Function:
-#   __init__( self, inPath ):
+#   __init__( self, inPath=None, inGetNum=120, inNoConn=False ):
 #   GetInisStatus(self):
-#   CreateTwitter( self, inPath ):
+#   GetUsername(self):
+#   CreateTwitter( self, inDstPath, inSrcPath ):
+#   CnfTimeline( self, inPath ):
+#   SaveTwitter( self, inPath ):
+#
+# ◇Twitter接続・切断
 #   Connect( self, inPath=None ):
+#   
+# ◇タイムライン制御系
 #   Tweet( self, inTweet ):
+#   GetTL(self):
+#   GetLists(self):
 #
 # Class Function(static):
 #   (none)
+#
+#####################################################
+# 使い方：
+#  1.Twitterでトークンを取得する。
+#  2.CreateTwitter( inDstPath, inSrcPath )をコールして接続情報をセットする。
+#    inDstPath ..接続情報の元フォーマット(text)
+#    inDstPath ..接続情報のパス
+#
+#  ＜接続情報(text)の書式＞
+#----------------------
+#TwitterUser=
+#twCK=
+#twCS=
+#twAT=
+#twAS=
+#
+#Mode=home
+#List=
+#NoReply=on
+#Retweet=off
+#----------------------
+#  3.Connect( inPath=None )で接続する。
 #
 #####################################################
 import os
