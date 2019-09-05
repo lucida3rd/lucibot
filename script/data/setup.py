@@ -533,6 +533,8 @@ class CLS_Setup():
 					"count       INTEGER  DEFAULT 0," + \
 					"rat_count   INTEGER  DEFAULT -1," + \
 					"now_count   INTEGER  DEFAULT -1," + \
+					"rat_days    INTEGER  DEFAULT -1," + \
+					"now_days    INTEGER  DEFAULT 0," + \
 					" PRIMARY KEY ( domain ) ) ;"
 		
 		inOBJ_DB.RunQuery( wQuery )
@@ -578,7 +580,9 @@ class CLS_Setup():
 						"'" + wDomain + "'," + \
 						"0," + \
 						"-1," + \
-						"-1" + \
+						"-1," + \
+						"-1," + \
+						"0" + \
 						") ;"
 			wDBRes = wOBJ_DB.RunQuery( wQuery )
 			wDBRes = wOBJ_DB.GetQueryStat()

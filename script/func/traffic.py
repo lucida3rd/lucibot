@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トラヒック処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/4
+#   Update  ：2019/9/5
 #####################################################
 # Private Function:
 #   __getTrafficPatt(self):
@@ -127,7 +127,6 @@ class CLS_Traffic():
 		wRes = wOBJ_DB.GetQueryStat()
 		if wRes['Result']!=True :
 			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: Run Query is failed: " + wRes['Reason'] + " domain=" + wDomain )
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: Run Query is failed: " + wRes['Reason'] + " query=" + wRes['Query'] )
 			wOBJ_DB.Close()
 			return False
@@ -148,24 +147,13 @@ class CLS_Traffic():
 				## [1] ..count
 				## [2] ..rat_count
 				## [3] ..now_count
+				## [4] ..rat_days
+				## [5] ..now_days
 		
 		wCount    = int( wGetTap[1] )
-##		wRatCount = int( wGetTap[2] )
-##		wNowCount = int( wGetTap[3] )
-		
-##		#############################
-##		# 1時間経ってる周回か
-##		if gVal.STR_TimeInfo['OneHour']==True :
-##			wRatCount = wNowCount					#前の1時間カウント
-##			wNowCount = wCount + self.VAL_NowCount	#今1時間のカウント(Traffic送信用)
-##			wCount    = 0							#カウントリセット
-##			if gVal.FLG_Test_Mode==True :
-##				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: Update: 1時間経過検知", inView=True )
 		
 		#############################
 		# カウントアップ
-##		else:
-##			wCount += self.VAL_NowCount
 		wCount += self.VAL_NowCount
 		
 		#############################
@@ -243,14 +231,12 @@ class CLS_Traffic():
 		
 		#############################
 		# 全トラヒックのロード
-##		wQuery = "select * from TBL_TRAFFIC_DATA order by domain ;"
 		wQuery = "select * from TBL_TRAFFIC_DATA ;"
 		
 		wRes = wOBJ_DB.RunQuery( wQuery )
 		wRes = wOBJ_DB.GetQueryStat()
 		if wRes['Result']!=True :
 			##失敗
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Run Query is failed: " + wRes['Reason'] )
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Run Query is failed: " + wRes['Reason'] + " query=" + wRes['Query'] )
 			wOBJ_DB.Close()
 			return False
@@ -263,8 +249,6 @@ class CLS_Traffic():
 		
 		#############################
 		# カウント値の取り出しと、リセット
-##		wFLG_noHr = False	# 1個でもまだ1時間待ちでない
-##		wFLG_Over = False	# 1個でも待ち回数超えあり
 		wTraffic  = {}
 		wIndex    = 0
 		for wLineTap in wRes['Responce']['Data'] :
@@ -275,6 +259,10 @@ class CLS_Traffic():
 			wTraffic[wIndex].update({ "count"     : 0 })
 			wTraffic[wIndex].update({ "rat_count" : 0 })
 			wTraffic[wIndex].update({ "now_count" : 0 })
+			wTraffic[wIndex].update({ "rat_days"  : 0 })
+			wTraffic[wIndex].update({ "now_days"  : 0 })
+			wTraffic[wIndex].update({ "rat_wday"  : 0 })
+			wTraffic[wIndex].update({ "now_wday"  : 0 })
 			
 			##カウンタの取り出し
 			wGetTap = []
@@ -284,47 +272,36 @@ class CLS_Traffic():
 				## [1] ..count
 				## [2] ..rat_count
 				## [3] ..now_count
+				## [4] ..rat_days
+				## [5] ..now_days
 			
 			##領域へロード
 			wTraffic[wIndex].update({ "domain"    : wGetTap[0].strip() })
 			wTraffic[wIndex].update({ "count"     : int( wGetTap[1] ) })
 			wTraffic[wIndex].update({ "rat_count" : int( wGetTap[2] ) })
 			wTraffic[wIndex].update({ "now_count" : int( wGetTap[3] ) })
-			
-##			##対象ドメインの場合、待機チェック
-##			##  1個でも待ち回数超えたら送信する
-##			if wTraffic[wIndex]['domain'] in self.ARR_SendDomain :
-##				## 待機中
-##				if wTraffic[wIndex]['standby']>=0 :
-##					wTraffic[wIndex]['standby'] += 1
-##					if gVal.DEF_STR_TLNUM['maxTrafficStby']<=wTraffic[wIndex]['standby'] :
-##						wFLG_Over = True	# 待ち回数超え =送信確定
-##					
-##					wQuery = "update TBL_TRAFFIC_DATA set standby = " + str(wTraffic[wIndex]['standby']) + \
-##								" where domain = '" + wTraffic[wIndex]['domain'] + "' ;"
-##					
-##					wRes = wOBJ_DB.RunQuery( wQuery )
-##					wRes = wOBJ_DB.GetQueryStat()
-##					if wRes['Result']!=True :
-##						##失敗
-##						self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Traffic: SendTraffic: Standby counter is failed: " + \
-##															wRes['Reason'] + " domain=" + wTraffic[wIndex]['domain'] )
-##						wOBJ_DB.Close()
-##						return False
-##				else :
-##					##まだ1時間経ってない
-##					wFLG_noHr = True
+			wTraffic[wIndex].update({ "rat_days"  : int( wGetTap[4] ) })
+			wTraffic[wIndex].update({ "now_days"  : int( wGetTap[5] ) })
 			
 			##カウンタのリセットと、過去カウンタの記録（入れ替え）
 			wTraffic[wIndex]['rat_count'] = wTraffic[wIndex]['now_count']	# 1時間前
 			wTraffic[wIndex]['now_count'] = wTraffic[wIndex]['count']		# 現在(後ろで送信)
+			wTraffic[wIndex]['now_days'] += wTraffic[wIndex]['count']		# 1日に加算
 			wTraffic[wIndex]['count']     = 0
+			
+			### 1日経った =twitterに送信する
+			if gVal.STR_TimeInfo['OneDay']==True :
+				wTraffic[wIndex]['rat_wday'] = wTraffic[wIndex]['rat_days']
+				wTraffic[wIndex]['now_wday'] = wTraffic[wIndex]['now_days']
+				wTraffic[wIndex]['rat_days'] = wTraffic[wIndex]['now_days']
+				wTraffic[wIndex]['now_days'] = 0
 			
 			##DBを更新
 			wQuery = "update TBL_TRAFFIC_DATA set " + \
 					"count = " + str(wTraffic[wIndex]['count']) + ", " + \
 					"rat_count = " + str(wTraffic[wIndex]['rat_count']) + ", " + \
 					"now_count = " + str(wTraffic[wIndex]['now_count']) + " " + \
+
 					"where domain = '" + wTraffic[wIndex]['domain'] + "' ;"
 			
 			wRes = wOBJ_DB.RunQuery( wQuery )
@@ -366,19 +343,12 @@ class CLS_Traffic():
 		wCHR_Title = "Mastodon Traffic: " + wCHR_TimeDate[0] + " " + str(gVal.STR_TimeInfo['Hour']) + "時"
 		
 		wCHR_Body = ""
-##		wKeyList  = wTraffic.keys()
 		wKeyList  = wARR_SendTraffic.keys()
 		for wIndex in wKeyList :
-##			if wTraffic[wIndex]['domain'] not in self.ARR_SendDomain :
-##				continue	#送信対象ではない
-##			
-##			wCHR_Body = wCHR_Body + wTraffic[wIndex]['domain'] + ": " + str(wTraffic[wIndex]['now_count'])
 			wCHR_Body = wCHR_Body + wARR_SendTraffic[wIndex]['domain'] + ": " + str(wARR_SendTraffic[wIndex]['now_count'])
 			
-##			if wTraffic[wIndex]['rat_count']>=0 :
 			if wARR_SendTraffic[wIndex]['rat_count']>=0 :
 				##bot起動の最初の1時間は差を出さない
-##				wRateCount = wTraffic[wIndex]['now_count'] - wTraffic[wIndex]['rat_count']
 				wRateCount = wARR_SendTraffic[wIndex]['now_count'] - wARR_SendTraffic[wIndex]['rat_count']
 				wCHR_Body = wCHR_Body + "("
 				if wRateCount>0 :
@@ -402,8 +372,31 @@ class CLS_Traffic():
 			return True	#トラヒックは送信済
 		
 		#############################
+		# 1日経ってる周回か
+		if gVal.STR_TimeInfo['OneDay']==False :
+			return True	#トラヒックは送信済
+		
+		#############################
 		# ツイートの組み立て
-		wCHR_Tweet = wCHR_Title + '\n' + wCHR_Body
+		wCHR_Body = ""
+		wKeyList  = wARR_SendTraffic.keys()
+		for wIndex in wKeyList :
+			wCHR_Body = wCHR_Body + wARR_SendTraffic[wIndex]['domain'] + ": " + str(wARR_SendTraffic[wIndex]['now_count'])
+			
+			if wARR_SendTraffic[wIndex]['rat_wday']>=0 :
+				##bot起動の最初の1日は差を出さない
+				wRateCount = wARR_SendTraffic[wIndex]['now_days'] - wARR_SendTraffic[wIndex]['rat_wday']
+				wCHR_Body = wCHR_Body + "("
+				if wRateCount>0 :
+					wCHR_Body = wCHR_Body + "+"
+				wCHR_Body = wCHR_Body + str(wRateCount) + ")" + '\n'
+			else :
+				wCHR_Body = wCHR_Body + '\n'
+		
+		wCHR_Tweet = wCHR_Title + '\n' + wCHR_Body + "#" + gVal.STR_MasterConfig['TwitterTag']
+		if gVal.STR_MasterConfig['TwitterTag']!="" :
+			wCHR_Tweet = wCHR_Tweet + "#" + gVal.STR_MasterConfig['TwitterTag']
+		
 		wARR_Tweet = wCHR_Tweet.split('\n')	#チェック用の行にバラす
 		
 		#############################

@@ -6,6 +6,7 @@ mTootTag=[Sender]
 iActionTag=[action]
 prTag=[prtoot]
 TrafficTag=[traffic]
+TwitterTag=
 
 Twitter=off
 

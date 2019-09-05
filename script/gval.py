@@ -46,6 +46,7 @@ class gVal() :
 		"iActionTag"		: "[action]",				#アクション通知タグ
 		"prTag"				: "[prtoot]",				#PRトゥートタグ
 		"TrafficTag"		: "[traffic]",				#トラヒックトゥートタグ
+		"TwitterTag"		: "",						#Twitter用タグ
 		
 ##		"TwitterUser"	: "",						#twiterユーザ
 		"Twitter"		: "off",					#twiter連携
