@@ -4,7 +4,7 @@
 # public
 #   Class   ：mastodon API
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/13
+#   Update  ：2019/9/6
 #####################################################
 # Private Function:
 #   __initIniStatus(self):
@@ -260,6 +260,8 @@ class CLS_Mastodon_Use:
 		response = ""
 		try:
 			if redirect_uris is not None:
+				if isinstance(redirect_uris, (list, tuple)):
+					redirect_uris = "\n".join(list(redirect_uris))
 				request_data['redirect_uris'] = redirect_uris
 			else:
 				request_data['redirect_uris'] = 'urn:ietf:wg:oauth:2.0:oob'
@@ -274,7 +276,14 @@ class CLS_Mastodon_Use:
 				response = response.json()
 			
 		except Exception as e:
-			wRes['Reason']   = "CLS_Mastodon_Use：create_app：Could not complete request：" + str(e)
+##			wRes['Reason']   = "CLS_Mastodon_Use：create_app：Could not complete request：" + str(e)
+			#######
+###			wStr = "CLS_Mastodon_Use：create_app：Could not complete request：" + str(e) + \
+###					" base_url=" + api_base_url + " responce=" + str(response) + " session=" + str(session) + \
+###					" request_data=" + str(request_data)
+			wStr = "CLS_Mastodon_Use：create_app：Could not complete request：" + str(e) + " responce=" + str(response)
+			#######
+			wRes['Reason']   = wStr
 			wRes['Responce'] = response
 			return wRes
 		

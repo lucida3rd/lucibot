@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トラヒック処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/5
+#   Update  ：2019/9/8
 #####################################################
 # Private Function:
 #   __getTrafficPatt(self):
@@ -300,8 +300,9 @@ class CLS_Traffic():
 			wQuery = "update TBL_TRAFFIC_DATA set " + \
 					"count = " + str(wTraffic[wIndex]['count']) + ", " + \
 					"rat_count = " + str(wTraffic[wIndex]['rat_count']) + ", " + \
-					"now_count = " + str(wTraffic[wIndex]['now_count']) + " " + \
-
+					"now_count = " + str(wTraffic[wIndex]['now_count']) + ", " + \
+					"rat_days = " + str(wTraffic[wIndex]['rat_days']) + ", " + \
+					"now_days = " + str(wTraffic[wIndex]['now_days']) + " " + \
 					"where domain = '" + wTraffic[wIndex]['domain'] + "' ;"
 			
 			wRes = wOBJ_DB.RunQuery( wQuery )
@@ -381,11 +382,11 @@ class CLS_Traffic():
 		wCHR_Body = ""
 		wKeyList  = wARR_SendTraffic.keys()
 		for wIndex in wKeyList :
-			wCHR_Body = wCHR_Body + wARR_SendTraffic[wIndex]['domain'] + ": " + str(wARR_SendTraffic[wIndex]['now_count'])
+			wCHR_Body = wCHR_Body + wARR_SendTraffic[wIndex]['domain'] + ": " + str(wARR_SendTraffic[wIndex]['now_wday'])
 			
 			if wARR_SendTraffic[wIndex]['rat_wday']>=0 :
 				##bot起動の最初の1日は差を出さない
-				wRateCount = wARR_SendTraffic[wIndex]['now_days'] - wARR_SendTraffic[wIndex]['rat_wday']
+				wRateCount = wARR_SendTraffic[wIndex]['now_wday'] - wARR_SendTraffic[wIndex]['rat_wday']
 				wCHR_Body = wCHR_Body + "("
 				if wRateCount>0 :
 					wCHR_Body = wCHR_Body + "+"
@@ -393,17 +394,28 @@ class CLS_Traffic():
 			else :
 				wCHR_Body = wCHR_Body + '\n'
 		
-		wCHR_Tweet = wCHR_Title + '\n' + wCHR_Body + "#" + gVal.STR_MasterConfig['TwitterTag']
-		if gVal.STR_MasterConfig['TwitterTag']!="" :
-			wCHR_Tweet = wCHR_Tweet + "#" + gVal.STR_MasterConfig['TwitterTag']
+##		wCHR_Tweet = wCHR_Title + '\n' + wCHR_Body + "#" + gVal.STR_MasterConfig['TwitterTag']
+##		if gVal.STR_MasterConfig['TwitterTag']!="" :
+##			wCHR_Tweet = wCHR_Tweet + "#" + gVal.STR_MasterConfig['TwitterTag']
 		
+		wCHR_Tweet = wCHR_Title + '\n' + wCHR_Body
 		wARR_Tweet = wCHR_Tweet.split('\n')	#チェック用の行にバラす
+		
+		#############################
+		# タグを抜いた文字数を計算する
+		wTwitterTag = ""
+		if gVal.STR_MasterConfig['TwitterTag']=="" :
+			wMAX_Tweet = 140
+		else :
+			wTwitterTag = '\n' + "#" + gVal.STR_MasterConfig['TwitterTag']
+			wMAX_Tweet = 140 - len( wTwitterTag )
 		
 		#############################
 		# 文字数を140字に収める
 		#   最後尾のトラヒック情報(ドメイン別)を1つずつ削って収める
 		for wI in list( range(len(wARR_Tweet)) ) :
-			if len(wCHR_Tweet)<=140 :
+##			if len(wCHR_Tweet)<=140 :
+			if len(wCHR_Tweet)<=wMAX_Tweet :
 				break	#140字に収まっている
 			
 			##最後尾を削って文字列に直す
@@ -413,9 +425,11 @@ class CLS_Traffic():
 		#############################
 		# 1番目のドメインを最後尾に移動(Twitter上で目立たせる)
 		wARR_Tweet = wCHR_Tweet.split('\n')
-		wARR_Tweet.append( wARR_Tweet[1] )
-		del wARR_Tweet[1]
+		if len(wARR_Tweet)>=2 :
+			wARR_Tweet.append( wARR_Tweet[1] )
+			del wARR_Tweet[1]
 		wCHR_Tweet = '\n'.join(wARR_Tweet)
+		wCHR_Tweet = wCHR_Tweet + wTwitterTag	#タグを付ける
 		
 		#############################
 		# ツイートの送信

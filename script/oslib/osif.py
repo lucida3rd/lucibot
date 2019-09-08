@@ -4,7 +4,7 @@
 # public
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/31
+#   Update  ：2019/9/7
 #####################################################
 # Private Function:
 #   (none)
@@ -158,8 +158,10 @@ class CLS_OSIF() :
 		wRes = {
 			"Result"	: False,
 			"Beyond"	: False,
+			"Future"	: False,
 			"InputTime"	: "",
 			"NowTime"	: "",
+			"RateTime"	: "",
 			"RateSec"	: 0
 		}
 		
@@ -182,21 +184,31 @@ class CLS_OSIF() :
 		#############################
 		# タイムゾーンで時間補正
 		try:
-			wTD = datetime.strptime( wTD, "%Y-%m-%d %H:%M:%S") + timedelta( hours=inTimezone )
+##			wTD = datetime.strptime( wTD, "%Y-%m-%d %H:%M:%S") + timedelta( hours=inTimezone )
+			wTD = datetime.strptime( wTD, "%Y-%m-%d %H:%M:%S")
 		except:
 			return wRes	#失敗
+		if inTimezone!=-1 :
+			wTD = wTD + timedelta( hours=inTimezone )
 		
 		#############################
 		# 差を求める(秒差)
-		wRatetime = wNowTime['Object'] - wTD
-		wRatetime = wRatetime.total_seconds()
+##		wRateTime = wNowTime['Object'] - wTD
+		if wNowTime['Object']>=wTD :
+			wRateTime = wNowTime['Object'] - wTD
+		else :
+			wRateTime = wTD - wNowTime['Object']
+			wRes['Future'] = True	#未来時間
 		
-		if wRatetime > inThreshold :
+		wRateSec = wRateTime.total_seconds()
+		
+		if wRateSec > inThreshold :
 			wRes['Beyond'] = True	#差あり
 		
 		wRes['InputTime'] = wTD
 		wRes['NowTime']   = wNowTime['TimeDate']
-		wRes['RateSec']   = wRatetime
+		wRes['RateTime']  = wRateTime
+		wRes['RateSec']   = wRateSec
 		wRes['Result']    = True
 		return wRes
 

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/5
+#   Update  ：2019/9/8
 #####################################################
 # Private Function:
 #   (none)
@@ -278,9 +278,70 @@ class CLS_UserData() :
 		
 		#############################
 		# 対象ユーザか
-		for wLine in wTrafficUser :
-			if wLine==inUsername :
-				return True	#対象ユーザ
+##		for wLine in wTrafficUser :
+##			if wLine==inUsername :
+##				return True	#対象ユーザ
+		if inUsername in wTrafficUser :
+			return True	#対象外
+		
+		return False		#対象ではない
+
+
+
+#####################################################
+# ハード監視ユーザ チェック
+#####################################################
+	@classmethod
+	def sCheckHardUser( cls, inUsername ):
+		#############################
+		# ハード監視対象ユーザ
+		#   ・トラヒック監視ユーザの1番目か
+		#   ・1番目がMasuerUserの場合は2番目か
+		
+		#############################
+		# 名前の妥当性チェック
+		wResUser = cls.sUserCheck( inUsername )
+			##	"Result"	: False,
+			##	"User"		: "",
+			##	"Domain"	: "",
+			##	"Reason"	: "",
+			##	"Registed"	: False,
+		if wResUser['Result']!=True :
+			return False	#不正
+		
+		#############################
+		# 読み出し先初期化
+		wTrafficUser = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.DEF_STR_FILE['TrafficFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
+			return False	#失敗
+		
+		#############################
+		# 何番目かをIndexで取得する
+		wI = 0
+		wIndex = -1
+		for wUser in wTrafficUser :
+			if inUsername==wUser :
+				wIndex = wI
+				break
+			wI += 1
+		if wIndex==-1 :
+			return False	#トラヒックユーザではない
+		
+		#############################
+		# 1番目でSubUserの場合は確定
+		if wIndex==0 :
+			if gVal.STR_MasterConfig['MasterUser']!=wTrafficUser[0] :
+				return True	#確定
+		
+		#############################
+		# 2番目であれば確定
+		#   *この時点で1番目はMasterUserなので
+		if wIndex==1 :
+			return True	#確定
 		
 		return False		#対象ではない
 

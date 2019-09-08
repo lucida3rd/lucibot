@@ -4,7 +4,7 @@
 # public
 #   Class   ：ぽすぐれユーズ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/4
+#   Update  ：2019/9/6
 #####################################################
 # Private Function:
 #   __initIniStatus(self):
@@ -28,6 +28,7 @@
 #   Close(self):
 #   RunQuery( self, inQuery=None ):
 #   RunExist( self, inObjTable=None, inWhere=None ):
+#   RunCount( self, inObjTable=None ):
 #
 # Class Function(static):
 #   (none)
@@ -557,6 +558,53 @@ class CLS_PostgreSQL_Use():
 		self.QueryStat['Result'] = True
 		return True
 
+
+
+#####################################################
+# クエリ実行  レコード数
+#####################################################
+	def RunCount( self, inObjTable=None ):
+		#############################
+		# 状態初期化
+		self.__initQueryStat()
+		
+		#############################
+		# 実行前チェック
+		if inObjTable==None :
+			self.QueryStat['Reason'] = "CLS_PostgreSQL_Use: RunCount: None Object table"
+			return False
+		if self.IniStatus['Result']!=True :
+			self.QueryStat['Reason'] = "CLS_PostgreSQL_Use: RunCount: DB not connect"
+			return False
+		
+		#############################
+		# クエリ作成
+		wQuery = "select count(*) from " + \
+					inObjTable + \
+					";"
+		
+		#############################
+		# クエリ実行
+		with self.PostgreSQL_use.cursor() as wCur :
+			try:
+				#############################
+				# 本実行
+				self.QueryStat['Query'] = wQuery	#デバック用記録
+				wCur.execute( wQuery )
+				
+				#############################
+				# 結果を格納
+				wRes = wCur.fetchall()
+				self.QueryStat['Responce'] = wRes[0][0]
+			
+			except ValueError as err :
+				self.QueryStat['Reason'] = "CLS_PostgreSQL_Use: RunCount: Query error: " + err
+				return False
+		
+		#############################
+		# 正常
+		self.QueryStat['Result'] = True
+		return True
 
 
 
