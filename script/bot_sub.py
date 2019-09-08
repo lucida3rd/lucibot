@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/4
+#   Update  ：2019/9/7
 #####################################################
 # Private Function:
 #   (none)
@@ -29,6 +29,7 @@ from botctrl import CLS_BotCtrl
 from lookhtl import CLS_LookHTL
 from lookltl import CLS_LookLTL
 from lookrip import CLS_LookRIP
+from lookhard import CLS_LookHard
 from mylog import CLS_Mylog
 from traffic import CLS_Traffic
 from gval import gVal
@@ -170,6 +171,11 @@ class CLS_BOT_Sub() :
 		#############################
 		# RIP監視処理
 ##		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
+		
+		#############################
+		# ハード監視処理
+		if gVal.STR_MasterConfig['LookHard']=="on" :
+			wOBJ_LookHard = CLS_LookHard( parentObj=cls )
 		
 	#############################
 	# 後処理

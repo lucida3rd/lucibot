@@ -97,6 +97,7 @@ $ exit
 # pip3 install python-dateutil
 # pip3 install python-crontab
 # pip3 install psycopg2
+# php3 install pyOpenSSL
 
 　インストールしたライブラリがあるか確認します。
 # su - [ユーザ名]
