@@ -4,31 +4,25 @@
 # るしぼっと4
 #   Class   ：ワード収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/10
 #####################################################
 # Private Function:
 #   __selectMeCabDic(self):
-#   __deleteOldWord(self) :
-#   __getClazList(self) :
-#   __setClazList(self) :
-#   __getWordDic_Fmt(self) :
-#   __chgWordDic_Line( self, inKey ) :
+#   __analizeMeCab( self, inWords ):
 #
 # Instance Function:
 #   __init__( self, inPath ):
 #   GetWordCorrectStat(self):
 #   GetWordREM(self) :
-#   CheckWordREM( self, inWord ):
-#   GetWorddic(self) :
-#   SetWorddic(self) :
-#   Analize_MeCab( self, inWords ):
-#   WordStudy( self, inROW ):
+#   GetRandToot(self) :
+#   WordStudy( self, inCont ):
 #
 # Class Function(static):
 #   (none)
 #
 #####################################################
 import MeCab
+from postgresql_use import CLS_PostgreSQL_Use
 
 from osif import CLS_OSIF
 from filectrl import CLS_File
@@ -40,8 +34,8 @@ class CLS_WordCorr():
 	Obj_Parent = ""		#親クラス実体
 	OBJ_MeCab  = ""		#MeCAB実体
 	
-	STR_WordDic  = {}	#単語辞書
-	STR_ClazList = []	#品詞リスト
+##	STR_WordDic  = {}	#単語辞書
+##	STR_ClazList = []	#品詞リスト
 	
 	STR_Stat = {
 		"Cope"		: 0,		#今回の処理単語数
@@ -101,7 +95,7 @@ class CLS_WordCorr():
 		# ファイル読み込み
 		wFile_path = gVal.DEF_STR_FILE['WordREMFile']
 		if CLS_File.sReadFile( wFile_path, outLine=gVal.STR_WordREM )!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: GetWordREM: WordREM file read failed: " + wFile_path )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetWordREM: WordREM file read failed: " + wFile_path )
 			return False	#失敗
 		
 		return True			#成功
@@ -109,171 +103,119 @@ class CLS_WordCorr():
 
 
 #####################################################
-# 禁止ワードチェック
+# ランダムトゥート取得
 #####################################################
-	def CheckWordREM( self, inWord ):
+	def GetRandToot(self) :
+		wToot = ""
 		#############################
-		# 禁止ワードチェック
-		if len( gVal.STR_WordREM )<=0 :
-			return True		#禁止ワード未設定 orロード失敗だったら
-		
-		for wWordREM in gVal.STR_WordREM :
-			if inWord.find( wWordREM )>=0 :
-				return False	#禁止あり
-		
-		return True		#禁止なし
-
-
-
-#####################################################
-# 単語辞書データの読み込み(Master/Sub用)
-#####################################################
-	def GetWorddic(self) :
-		#############################
-		# 初期化
-		self.STR_WordDic = {}
-		wWork_WordDic    = []
+		# ワード収集が有効か
+		if gVal.STR_MasterConfig['WordStudy']!="on" :
+			return wToot	#無効
 		
 		#############################
-		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['WorddicFile']
-		if CLS_File.sReadFile( wFile_path, outLine=wWork_WordDic )!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetWorddic: Worddic file read failed: " + wFile_path )
-			return False	#失敗
+		# DB接続
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
+		wRes = wOBJ_DB.GetIniStatus()
+		if wRes['Result']!=True :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetRandToot: DB Connect test is failed: " + wRes['Reason'] )
+			wOBJ_DB.Close()
+			return wToot
 		
 		#############################
-		# データをユーザ情報に読み出す
-		try:
-			for wLine in wWork_WordDic :
-				wLine = wLine.split( gVal.DEF_DATA_BOUNDARY )	#分解
-				
-				wGet_WordDic = self.__getWordDic_Fmt()
-				wGet_WordDic['Word'] = wLine[0]
-				wGet_WordDic['Claz'] = wLine[1]
-				wGet_WordDic['Yomi'] = wLine[2]
-				
-				wGet_WordDic['Cla1'] = wLine[3]
-				wGet_WordDic['Cla2'] = wLine[4]
-				wGet_WordDic['Cla3'] = wLine[5]
-				wGet_WordDic['Ktyp'] = wLine[6]
-				wGet_WordDic['Kkat'] = wLine[7]
-				
-				wGet_WordDic['Lastupdate'] = wLine[8]
-				wGet_WordDic['Def']  = wLine[9]
-				
-				self.STR_WordDic.update({ wLine[0] : wGet_WordDic })
-		except ValueError as err :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetWorddic: Worddic exception: " + str(err) )
-			return False	#失敗
+		# 品詞パターンを取得
+		wQuery = "select claz from TBL_CLAZ_LIST order by random() limit 1" + \
+					";"
+		wDBRes = wOBJ_DB.RunQuery( wQuery )
+		wDBRes = wOBJ_DB.GetQueryStat()
+		if wDBRes['Result']!=True :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetRandToot: Run Query is failed (get TBL_CLAZ_LIST): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+			wOBJ_DB.Close()
+			return wToot
+		if len(wDBRes['Responce']['Data'])!=1 :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetRandToot: Run Query is failed (get TBL_CLAZ_LIST is not 1): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+			wOBJ_DB.Close()
+			return wToot
+		wSelClazList = wDBRes['Responce']['Data'][0][0]
+		wClazList    = wSelClazList.split(",")
 		
 		#############################
-		# 品詞リストの読み込み
-		self.__getClazList()
-		
-		#############################
-		# 辞書のうち古い単語は忘れる
-		self.__deleteOldWord()
-		return True
-
-	#####################################################
-	def __deleteOldWord(self) :
-		#############################
-		# 現在時刻を取得する
-		wTime = CLS_OSIF.sGetTime()
-		if wTime['Result']!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: __deleteOldWord: sGetTime failed" )
-			return
-		
-##		wStudyDay = gVal.STR_MasterConfig['studyDay']	#覚えておく日数
-		wStudyDay = gVal.DEF_STR_TLNUM['studyDay']	#覚えておく日数
-		#############################
-		# 辞書のうち古い単語を検索して消す
-		wKeylist = self.STR_WordDic.keys()
-		for wKey in list(wKeylist) :
-			if self.STR_WordDic[wKey]['Def'] != "-" :
-				continue	#消したくない単語はスキップ
+		# 最適化用にパターンにある品詞をまとめこむ。
+		# ついで収集用にまとめ領域を作る。
+		wRandDic = {}
+		wClazDic = {}
+		wIndex   = 0
+		for wClaz in wClazList :
+			wKeyList = list(wClazDic.keys())
+			if wClaz not in wKeyList :
+				wClazDic.update({ wClaz : 1 })
+			else :
+				wClazDic[wClaz] += 1
 			
-##			wRateDate = datetime.strptime( str(self.STR_WordDic[wKey]['Lastupdate']), "%Y-%m-%d %H:%M:%S" )
-##			wRatDay = wTime['TimeDate'] - wRateDate
-##			wRatDay = wRatDay.days	#日に変換
-##			if wStudyDay < ratday :
-###				self.Obj_Parent.OBJ_Mylog.Log( 'c', "期限切れ単語削除: " + self.STR_WordDic[wKey]['Word'] )
-##				self.STR_WordDic.pop( wKey )	#単語を削除
-##				self.STR_Stat['Delete'] += 1
+			wRandDic.update({ wIndex : "" })
+			wRandDic[wIndex] = {}
+			wRandDic[wIndex].update({ "claz" : wClaz })
+			wRandDic[wIndex].update({ "word" : "" })
+			wIndex += 1
 		
-			wThreshold = wStudyDay * (60 * 60 * 24)	#日数を秒に直す
-			wLag = CLS_OSIF.sTimeLag( str(self.STR_WordDic[wKey]['Lastupdate']), inThreshold=wThreshold )
-			if wLag['Result']!=True :
-				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: __deleteOldWord: sGetTime failed" )
+		#############################
+		# 品詞ごとにワードを収集する
+		wKeyList = list(wClazDic.keys())
+		for wKey in wKeyList :
+			wQuery = "select word from TBL_WORD_CORRECT where " + \
+						"claz = '" + wKey + "' order by random() limit " + str(wClazDic[wKey]) + \
+						";"
+			wDBRes = wOBJ_DB.RunQuery( wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetRandToot: Run Query is failed (get TBL_WORD_CORRECT is random select): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return wToot
 			
-			if wLag['Beyond']==True :
-				###期限切れ
-###				self.Obj_Parent.OBJ_Mylog.Log( 'c', "期限切れ単語削除: " + self.STR_WordDic[wKey]['Word'] )
-				self.STR_WordDic.pop( wKey )	#単語を削除
-				self.STR_Stat['Delete'] += 1
-		
-		return
-
-	#####################################################
-	def __getClazList(self) :
-		#############################
-		# 初期化
-		self.STR_ClazList = []
+			for wWord in wDBRes['Responce']['Data'] :
+				wRandList = wRandDic.keys()
+				wFLG_Hit  = False
+				for wRandKey in wRandList :
+					if wRandDic[wRandKey]['claz']==wKey :
+						wFLG_Hit = True
+						break
+				
+				if wFLG_Hit==True :
+					wRandDic[wRandKey]['word'] = wWord[0]
 		
 		#############################
-		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['ClazListFile']
-		if CLS_File.sReadFile( wFile_path, outLine=self.STR_ClazList )!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: __getClazList: ClazList file read failed: " + wFile_path )
-			return False	#失敗
+		# 使った品詞パターンを削除する
+		wQuery = "delete from TBL_CLAZ_LIST where " + \
+					"claz = '" + wSelClazList + "'" + \
+					";"
+		wDBRes = wOBJ_DB.RunQuery( wQuery )
+		wDBRes = wOBJ_DB.GetQueryStat()
+		if wDBRes['Result']!=True :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetRandToot: Run Query is failed (delete TBL_CLAZ_LIST): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+			wOBJ_DB.Close()
+			return wToot
 		
-		return True			#成功
+		#############################
+		# DB切断
+		wOBJ_DB.Close()
+		
+		#############################
+		# 文字列に組み立てる
+		wToot = ""
+		wRandList = wRandDic.keys()
+		for wRandKey in wRandList :
+			wToot = wToot + wRandDic[wRandKey]['word']
+		
+		return wToot	#成功
 
 
 
 #####################################################
-# 単語辞書データの書き込み(Master/Sub用)
-#####################################################
-	def SetWorddic(self) :
-		#############################
-		# 初期化
-		wWork_WordDic = []
-		
-		#############################
-		# データをユーザ情報に読み出す
-		wKeyList = self.STR_WordDic.keys()
-		for wKey in list(wKeyList) :
-			wLine = self.__chgWordDic_Line( wKey )
-			wWork_WordDic.append( wLine )
-		
-		#############################
-		# ファイル書き込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['WorddicFile']
-		if CLS_File.sWriteFile( wFile_path, wWork_WordDic, inRT=True )!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: GetWorddic: Worddic file write failed: " + wFile_path )
-			return False	#失敗
-		
-		#############################
-		# 品詞リストの書き込み
-		self.__setClazList()
-		
-		return True
-
-	#####################################################
-	def __setClazList(self) :
-		#############################
-		# ファイル書き込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['ClazListFile']
-		if CLS_File.sWriteFile( wFile_path, self.STR_ClazList, inRT=True )!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: __setClazList: Userinfo file write failed: " + wFile_path )
-			return False	#失敗
-		
-		return True
-
-
-
-#####################################################
-# 単語辞書型の取得
+# 文章解読 (単語に分解)
 #####################################################
 # 例：
 #		表形式
@@ -287,56 +229,15 @@ class CLS_WordCorr():
 #	[7]	ウチ		読み  *英語文字には要素が含まれない
 #	[8]	ウチ		発音  *英語文字には要素が含まれない
 #####################################################
-	def __getWordDic_Fmt(self) :
-		wWordDic = {}
-		wWordDic.update({ "Word"       : "" })
-		wWordDic.update({ "Claz"       : "" })
-		wWordDic.update({ "Yomi"       : "" })
-		
-		wWordDic.update({ "Cla1"       : "" })
-		wWordDic.update({ "Cla2"       : "" })
-		wWordDic.update({ "Cla3"       : "" })
-		wWordDic.update({ "Ktyp"       : "" })
-		wWordDic.update({ "Kkat"       : "" })
-		
-		wWordDic.update({ "Lastupdate" : "" })
-		wWordDic.update({ "Def"        : "" })
-		return wWordDic
-
-
-
-#####################################################
-# 単語辞書書き出し型への変換
-#####################################################
-	def __chgWordDic_Line( self, inKey ) :
-		wWordDic = ""
-		wWordDic = wWordDic + str(self.STR_WordDic[inKey]['Word']) + gVal.DEF_DATA_BOUNDARY
-		wWordDic = wWordDic + self.STR_WordDic[inKey]['Claz'] + gVal.DEF_DATA_BOUNDARY
-		wWordDic = wWordDic + self.STR_WordDic[inKey]['Yomi'] + gVal.DEF_DATA_BOUNDARY
-		
-		wWordDic = wWordDic + self.STR_WordDic[inKey]['Cla1'] + gVal.DEF_DATA_BOUNDARY
-		wWordDic = wWordDic + self.STR_WordDic[inKey]['Cla2'] + gVal.DEF_DATA_BOUNDARY
-		wWordDic = wWordDic + self.STR_WordDic[inKey]['Cla3'] + gVal.DEF_DATA_BOUNDARY
-		wWordDic = wWordDic + self.STR_WordDic[inKey]['Ktyp'] + gVal.DEF_DATA_BOUNDARY
-		wWordDic = wWordDic + self.STR_WordDic[inKey]['Kkat'] + gVal.DEF_DATA_BOUNDARY
-		
-		wWordDic = wWordDic + str(self.STR_WordDic[inKey]['Lastupdate']) + gVal.DEF_DATA_BOUNDARY
-		wWordDic = wWordDic + self.STR_WordDic[inKey]['Def']
-		return wWordDic
-
-
-
-#####################################################
-# 文章解読 (単語に分解)
-#####################################################
-	def Analize_MeCab( self, inWords ):
-		#############################
-		# HTMLタグの除去
-		wWord = CLS_OSIF.sDel_HTML( inWords )
-		
+	def __analizeMeCab( self, inWords ):
+##		#############################
+##		# HTMLタグの除去
+##		wWord = CLS_OSIF.sDel_HTML( inWords )
+##		
 		#############################
 		# MeCabで文章解読
-		wAnnalize = self.OBJ_MeCab.parse( wWord )
+##		wAnnalize = self.OBJ_MeCab.parse( wWord )
+		wAnnalize = self.OBJ_MeCab.parse( inWords )
 		
 		#############################
 		# まず単語別の解析毎に分ける
@@ -369,21 +270,21 @@ class CLS_WordCorr():
 			# 結果を辞書に詰め込む
 			wGetWords.update({ wIndex : "" })
 			wGetWords[wIndex] = {}
-			wGetWords[wIndex].update({ "Word" : wWord })
-			wGetWords[wIndex].update({ "Claz" : wYouso[0] })
+			wGetWords[wIndex].update({ "word" : wWord })
+			wGetWords[wIndex].update({ "claz" : wYouso[0] })
 			
-			wGetWords[wIndex].update({ "Cla1" : wYouso[1] })
-			wGetWords[wIndex].update({ "Cla2" : wYouso[2] })
-			wGetWords[wIndex].update({ "Cla3" : wYouso[3] })
-			wGetWords[wIndex].update({ "Ktyp" : wYouso[4] })
-			wGetWords[wIndex].update({ "Kkat" : wYouso[5] })
+			wGetWords[wIndex].update({ "cla1" : wYouso[1] })
+			wGetWords[wIndex].update({ "cla2" : wYouso[2] })
+			wGetWords[wIndex].update({ "cla3" : wYouso[3] })
+			wGetWords[wIndex].update({ "ktyp" : wYouso[4] })
+			wGetWords[wIndex].update({ "kkat" : wYouso[5] })
 			
 			#############################
 			# 英文に読み、発音が付かない対応
 			if len(wYouso) > 7 :
-				wGetWords[wIndex].update({ "Yomi" : wYouso[7] })
+				wGetWords[wIndex].update({ "yomi" : wYouso[7] })
 			else :	#index0-6
-				wGetWords[wIndex].update({ "Yomi" : "*" })
+				wGetWords[wIndex].update({ "yomi" : "*" })
 			
 			wIndex += 1
 		
@@ -399,140 +300,227 @@ class CLS_WordCorr():
 #####################################################
 # 単語学習
 #####################################################
-	def WordStudy( self, inROW ):
+###	def WordStudy( self, inCont, inCreateAt ):
+	def WordStudy( self, inCont ):
+		#############################
+		# 単語なし
+		if inCont=="" :
+			return False
+		
 		#############################
 		# ワード収集が有効か
-		if gVal.STR_Config['WordCorrect']!="on" :
+		if gVal.STR_MasterConfig['WordStudy']!="on" :
 			return False	#無効
 		
 		#############################
 		# 今回の学習数が上限か
-##		if self.STR_Stat['StudyNum'] >= gVal.STR_MasterConfig['studyNum'] :
 		if self.STR_Stat['StudyNum'] >= gVal.DEF_STR_TLNUM['studyNum'] :
 			return False	#今回は学習しない
 		
 		#############################
-		# 自分のトゥートか
-		wAccount  = inROW['account']
-		wFulluser = CLS_UserData.sGetFulluser( wAccount['username'], wAccount['url'] )
-		if wFulluser['Result']!=True :
-			###今のところ通らないルート
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: sGetFulluser failed: " + wFulluser['Reason'] )
-			return False	#失敗
+		# DB接続
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
+		wRes = wOBJ_DB.GetIniStatus()
+		if wRes['Result']!=True :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: DB Connect test is failed: " + wRes['Reason'] )
+			wOBJ_DB.Close()
+			return False
 		
-		if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
-			return False	#自分は学習しない
+		wVAL_Rate_WordNum = -1
+		#############################
+		# 1日1回、古いレコードを削除する
+		if gVal.STR_TimeInfo['OneDay']==True :
+			###現在のレコード数
+			wDBRes = wOBJ_DB.RunCount( "TBL_WORD_CORRECT" )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed: " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return False
+			wVAL_Rate_WordNum = wDBRes['Responce']
+			
+			###指定日付の抽出
+			wLag = gVal.DEF_STR_TLNUM['studyDay'] * 24 * 60 * 60
+			wLagTime = CLS_OSIF.sTimeLag( gVal.STR_TimeInfo['TimeDate'], inThreshold=wLag, inTimezone=-1 )
+			if wLagTime['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: sTimeLag is failed" )
+				wOBJ_DB.Close()
+				return False
+			
+			###単語テーブル
+			wQuery = "delete from TBL_WORD_CORRECT where lupdate < " + \
+					"timestamp '" + str(wLagTime['RateTime']) + "' " + \
+					";"
+			wDBRes = wOBJ_DB.RunQuery( wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed (Old TBL_WORD_CORRECT delete): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return False
+			
+			###品詞パターン テーブル
+			wQuery = "delete from TBL_CLAZ_LIST where lupdate < " + \
+					"timestamp '" + str(wLagTime['RateTime']) + "' " + \
+					";"
+			wDBRes = wOBJ_DB.RunQuery( wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed (Old TBL_CLAZ_LIST delete): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return False
+			
+			###削除後レコード数
+			wDBRes = wOBJ_DB.RunCount( "TBL_WORD_CORRECT" )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed: " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return False
+			wVAL_WordNum = wDBRes['Responce']
+			
+			###削除数
+			wVAL_Delete_WordNum = wVAL_Rate_WordNum - wVAL_WordNum
+			self.STR_Stat["Delete"] += wVAL_Delete_WordNum
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', "古い単語・品詞パターン削除: 対象=" + str(wLagTime['RateTime']) + " 以前" )
+		
+		#############################
+		# レコード数の抽出
+		if wVAL_Rate_WordNum==-1 :
+			###削除で結果出してない場合に処理する
+			wDBRes = wOBJ_DB.RunCount( "TBL_WORD_CORRECT" )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed: " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return False
+			
+			wVAL_WordNum = wDBRes['Responce']
 		
 		#############################
 		# 学習数が上限か
-##		wStudyMax = gVal.STR_MasterConfig['studyMax']
-		wStudyMax = gVal.DEF_STR_TLNUM['studyMax']
-		if wStudyMax <= len(self.STR_WordDic) :
+		if gVal.DEF_STR_TLNUM['studyMax'] <= wVAL_WordNum :
 			if self.STR_Stat['WordLimit']==False :
-				self.Obj_Parent.OBJ_Mylog.Log( 'b', "学習不能(単語登録数上限: " + str(wStudyMax) + "件)" )
+				self.Obj_Parent.OBJ_Mylog.Log( 'b', "学習不能(単語登録数上限: " + str(gVal.DEF_STR_TLNUM['studyMax']) + "件)" )
 				self.STR_Stat['WordLimit'] = True
-			
+			wOBJ_DB.Close()
 			return False	#上限
 		
 		#############################
 		# デコーダで解読 (出力は辞書型)
-		wGetWords = self.Analize_MeCab( inROW['content'] )
+		wGetWords = self.__analizeMeCab( inCont )
 		if len(wGetWords) == 0 :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: MeCab analize failed" )
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: MeCab analize result is zero, or failed" )
+			wOBJ_DB.Close()
 			return False	#失敗
 		
 		# ここまでで登録処理確定
 		#############################
-		self.STR_Stat['Cope'] += len(wGetWords)	#単語数を記録
+		self.STR_Stat['Cope'] += len( wGetWords )	#単語数を記録
 		
+##		#############################
+##		# トゥートから時間を取得
+##		wTime = CLS_OSIF.sGetTimeformat( inCreateAt )
+##		if wTime['Result']==True :
+##			wTime = wTime['TimeDate']
+##		else:
+##			wTime = None
+##		
 		#############################
-		# トゥートから時間を取得
-		wTime = CLS_OSIF.sGetTimeformat( inROW['created_at'] )
-		if wTime['Result']==True :
-			wTime = wTime['TimeDate']
-		else:
-			wTime = None
-		
+		# 解読した結果(単語)を判定しながら詰めていく
 		wKeylist  = wGetWords.keys()	#キーはIndex整数
-		wClazList = ""
+		wClazList = ""					#文書パターン
 		for wKey in wKeylist :
 			#############################
 			# 登録済みの単語か
-			if wGetWords[wKey]['Word'] in self.STR_WordDic :
-				if wTime != None :	#触れたので時刻を更新
-					self.STR_WordDic[ wGetWords[wKey]['Word'] ]['Lastupdate'] = wTime
+			wQuery = "word = '" + wGetWords[wKey]['word'] + "'"
+			wDBRes = wOBJ_DB.RunExist( "TBL_WORD_CORRECT", wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed (Word check): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return False
+			
+			if wDBRes['Responce']==True :
+				###登録済み
+				###  触れたので時刻を更新
+				wQuery = "update TBL_WORD_CORRECT set " + \
+						"lupdate = '"   + str(gVal.STR_TimeInfo['TimeDate']) + "' " + \
+						"where word = '" + wGetWords[wKey]['word'] + "' ;"
 				
-				wClazList = wClazList + wGetWords[wKey]['Claz'] + ","
+				wDBRes = wOBJ_DB.RunQuery( wQuery )
+				wDBRes = wOBJ_DB.GetQueryStat()
+				if wDBRes['Result']!=True :
+					##失敗
+					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed (Word check, time update): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+					wOBJ_DB.Close()
+					return False
+				
+				###品詞パターンは記録する
+				wClazList = wClazList + wGetWords[wKey]['claz'] + ","
 				continue	#登録済なのでスキップ
 			
 			#############################
-			# BOS/EOS
-			if wGetWords[wKey]['Claz'] == "BOS/EOS" :
+			# 除外する品詞か
+			#### BOS/EOS
+			if wGetWords[wKey]['claz'] == "BOS/EOS" :
 				continue
 			
-			#############################
-			# 意識不明な単語、パターンとして使えない単語
-			if (wGetWords[wKey]['Claz'] == "名詞" and wGetWords[wKey]['Yomi'] == "*" and wGetWords[wKey]['Cla1'] == "サ変接続" ) or \
-			   (wGetWords[wKey]['Claz'] == "名詞" and wGetWords[wKey]['Cla1'] == "数" ) or \
-			   wGetWords[wKey]['Claz'] == "記号" :
+			#### 意識不明な単語、パターンとして使えない単語
+			if (wGetWords[wKey]['claz'] == "名詞" and wGetWords[wKey]['yomi'] == "*" and wGetWords[wKey]['cla1'] == "サ変接続" ) or \
+			   (wGetWords[wKey]['claz'] == "名詞" and wGetWords[wKey]['cla1'] == "数" ) or \
+			   wGetWords[wKey]['claz'] == "記号" :
 				continue
 			
-			#############################
-			# 名詞かつ 3文字以内の半角英字
-			if (wGetWords[wKey]['Claz'] == "名詞" and wGetWords[wKey]['Cla1'] == "一般" ) or \
-			   (wGetWords[wKey]['Claz'] == "名詞" and wGetWords[wKey]['Cla1'] == "固有名詞" and wGetWords[wKey]['Cla2'] == "組織" ) :
-				wRes = CLS_OSIF.sRe_Search( r'^[a-zA-Z]+$', wGetWords[wKey]['Word'] )
+			#### 名詞かつ 3文字以内の半角英字
+			if (wGetWords[wKey]['claz'] == "名詞" and wGetWords[wKey]['cla1'] == "一般" ) or \
+			   (wGetWords[wKey]['claz'] == "名詞" and wGetWords[wKey]['cla1'] == "固有名詞" and wGetWords[wKey]['cla2'] == "組織" ) :
+				wRes = CLS_OSIF.sRe_Search( r'^[a-zA-Z]+$', wGetWords[wKey]['word'] )
 				if wRes:
-					if len(wGetWords[wKey]['Word'])<=3 :
+					if len(wGetWords[wKey]['word'])<=3 :
 						continue
 			
-			#############################
-			# 禁止ワードを含むか
-			if self.CheckWordREM( wGetWords[wKey]['Word'] )==False :
+			#### 禁止ワードを含むか
+##			if self.CheckWordREM( wGetWords[wKey]['word'] )==False :
+			if wGetWords[wKey]['word'] in gVal.STR_WordREM :
 				continue	#禁止あり
 			
-			#############################
-			# ループ中に辞書の登録数が最大か
-			#   最大なら一番上の1個を削除する
-			#   削除できなければ、登録せず終わる
-			if wStudyMax <= len( self.STR_WordDic ) :
-				wDel_Keylist = self.STR_WordDic.keys()
-				wFlg_Del = False
-				for wD_Key in list(wDel_Keylist) :
-					if self.STR_WordDic[wD_Key]['Def'] == "-" :
-						self.STR_WordDic.pop(wD_Key)
-						self.STR_Stat['Delete'] += 1
-						wFlg_Del = True
-						break
-				
-				if wFlg_Del == False :
-					if self.STR_Stat['WordLimit']==False :
-						self.Obj_Parent.OBJ_Mylog.Log( 'b', "学習不能(登録中上限超え: " + str(wStudyMax) + "件)" )
-						self.STR_Stat['WordLimit'] = True
-					
-					return False
+			###**ループ中に辞書の登録上限を超えても何もしない仕様(DBだしええかと)
 			
 			#############################
 			# 単語の登録
-			wWordKey = wGetWords[wKey]['Word']
-			self.STR_WordDic.update({ wWordKey : "" })
-			self.STR_WordDic[wWordKey] = {}
-			self.STR_WordDic[wWordKey].update({ "Word" : wWordKey })
-			self.STR_WordDic[wWordKey].update({ "Claz" : wGetWords[wKey]['Claz'] })
-			self.STR_WordDic[wWordKey].update({ "Yomi" : wGetWords[wKey]['Yomi'] })
+			wQuery = "insert into TBL_WORD_CORRECT values (" + \
+						"'" + wGetWords[wKey]['word'] + "'," + \
+						"'" + wGetWords[wKey]['claz'] + "'," + \
+						"'" + wGetWords[wKey]['yomi'] + "'," + \
+						"'" + wGetWords[wKey]['cla1'] + "'," + \
+						"'" + wGetWords[wKey]['cla2'] + "'," + \
+						"'" + wGetWords[wKey]['cla3'] + "'," + \
+						"'" + wGetWords[wKey]['ktyp'] + "'," + \
+						"'" + wGetWords[wKey]['kkat'] + "'," + \
+						"'" + str(gVal.STR_TimeInfo['TimeDate']) + "'," + \
+						"False " + \
+						") ;"
 			
-			self.STR_WordDic[wWordKey].update({ "Cla1" : wGetWords[wKey]['Cla1'] })
-			self.STR_WordDic[wWordKey].update({ "Cla2" : wGetWords[wKey]['Cla2'] })
-			self.STR_WordDic[wWordKey].update({ "Cla3" : wGetWords[wKey]['Cla3'] })
-			self.STR_WordDic[wWordKey].update({ "Ktyp" : wGetWords[wKey]['Ktyp'] })
-			self.STR_WordDic[wWordKey].update({ "Kkat" : wGetWords[wKey]['Kkat'] })
-			
-			self.STR_WordDic[wWordKey].update({ "Lastupdate" : wTime })
-			self.STR_WordDic[wWordKey].update({ "Def"  : "-" })
+			wDBRes = wOBJ_DB.RunQuery( wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed (Word regist): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return False
 			
 			self.STR_Stat['Regist'] += 1
 			
-			wClazList = wClazList + wGetWords[wKey]['Claz'] + ","
+			###品詞パターンは記録する
+			wClazList = wClazList + wGetWords[wKey]['claz'] + ","
 		
 		#############################
 		# 今回の学習回数更新
@@ -543,19 +531,42 @@ class CLS_WordCorr():
 		if wClazList!="" :
 			wClazList = wClazList[0:len(wClazList)-1]	#末尾の','を抜く
 			
-			# 同じパターンがなければ
-			if wClazList not in self.STR_ClazList :
-				#品詞リストの最大超えならランダムで1個減らす
-##				if len(self.STR_ClazList) >= gVal.STR_MasterConfig['clazListNum']:
-				if len(self.STR_ClazList) >= gVal.DEF_STR_TLNUM['clazListNum']:
-					wVal = CLS_OSIF.sGetRand( len(self.STR_ClazList) )
-					if wVal>=0 :
-						self.STR_ClazList.pop(wVal)
-				
-				#パターン追加
-				self.STR_ClazList.append( wClazList )
-				self.STR_Stat['ClazList'] += 1
+			###同じ品詞パターンがあるか
+			wQuery = "claz = '" + wClazList + "'"
+			wDBRes = wOBJ_DB.RunExist( "TBL_CLAZ_LIST", wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed (Claz check): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return False
+			
+			if wDBRes['Responce']==True :
+				###登録済みならここで終わる(正常)
+				wOBJ_DB.Close()
+				return True
+			
+			###登録なしなら、登録する
+			###  **ここで品詞パターンの登録上限を超えても何もしない仕様(DBだしええかと)
+			wQuery = "insert into TBL_CLAZ_LIST values (" + \
+						"'" + wClazList + "'," + \
+						"'" + str(gVal.STR_TimeInfo['TimeDate']) + "'," + \
+						"False " + \
+						") ;"
+			
+			wDBRes = wOBJ_DB.RunQuery( wQuery )
+			wDBRes = wOBJ_DB.GetQueryStat()
+			if wDBRes['Result']!=True :
+				##失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: Run Query is failed (Claz regist): " + wDBRes['Reason'] + " query=" + wDBRes['Query'] )
+				wOBJ_DB.Close()
+				return False
+			
+			self.STR_Stat['ClazList'] += 1
 		
+		#############################
+		# 正常終了
+		wOBJ_DB.Close()
 		return True
 
 

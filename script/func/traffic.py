@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トラヒック処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/8
+#   Update  ：2019/9/9
 #####################################################
 # Private Function:
 #   __getTrafficPatt(self):
@@ -379,6 +379,10 @@ class CLS_Traffic():
 		
 		#############################
 		# ツイートの組み立て
+		wCHR_TimeDate = gVal.STR_TimeInfo['TimeDate'].split(" ")
+##		wCHR_Title = "Mastodon Traffic: " + wCHR_TimeDate[0] + " " + str(gVal.STR_TimeInfo['Hour']) + "時"
+		wCHR_Title = "Mastodon Traffic: " + wCHR_TimeDate[0]
+		
 		wCHR_Body = ""
 		wKeyList  = wARR_SendTraffic.keys()
 		for wIndex in wKeyList :

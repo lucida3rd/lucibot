@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ情報収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/5
+#   Update  ：2019/9/10
 #####################################################
 # Private Function:
 #   (none)
@@ -83,36 +83,36 @@ class CLS_UserCorr():
 # ユーザ収集への追加
 #   辞書型で登録する
 #####################################################
-	def AddUser( self, inROW ) :
-		wAccount = inROW['account']
-		#############################
-		# ユーザ名の変換
-		wFulluser = CLS_UserData.sGetFulluser( wAccount['username'], wAccount['url'] )
-		if wFulluser['Result']!=True :
-			###今のところ通らないルート
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: AddUser: sGetFulluser failed: " + wFulluser['Reason'] )
-			return False	#スルー
+	def AddUser( self, inROW, inUser ) :
+##		wAccount = inROW['account']
+##		#############################
+##		# ユーザ名の変換
+##		wFulluser = CLS_UserData.sGetFulluser( wAccount['username'], wAccount['url'] )
+##		if wFulluser['Result']!=True :
+##			###今のところ通らないルート
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: AddUser: sGetFulluser failed: " + wFulluser['Reason'] )
+##			return False	#スルー
 		
 		#############################
 		# 除外トゥート
-		###自分
-		if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
-			return False		#スルーする
-		
-		###外人 (日本人限定=ON時)
-		if inROW['language']!="ja" and gVal.STR_MasterConfig["JPonly"]=="on" :
-			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_UserCorr: AddUser: 日本人以外を検出(登録除外): " + wFulluser['Fulluser'] )
-			return False		#スルーする
-		
-		###除外ドメイン
-		if wFulluser['Domain'] in gVal.STR_DomainREM :
-			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_UserCorr: AddUser: 除外ドメインを検出(登録除外): " + wFulluser['Fulluser'] )
-			return False		#スルーする
-		
+##		###自分
+##		if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
+##			return False		#スルーする
+##		
+##		###外人 (日本人限定=ON時)
+##		if inROW['language']!="ja" and gVal.STR_MasterConfig["JPonly"]=="on" :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_UserCorr: AddUser: 日本人以外を検出(登録除外): " + wFulluser['Fulluser'] )
+##			return False		#スルーする
+##		
+##		###除外ドメイン
+##		if wFulluser['Domain'] in gVal.STR_DomainREM :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_UserCorr: AddUser: 除外ドメインを検出(登録除外): " + wFulluser['Fulluser'] )
+##			return False		#スルーする
+##		
 		###今回関わったユーザ
-		if wFulluser['Fulluser'] in self.ARR_UpdateUser :
+		if inUser['Fulluser'] in self.ARR_UpdateUser :
 			return False		#スルーする
-		self.ARR_UpdateUser.append( wFulluser['Fulluser'] )
+		self.ARR_UpdateUser.append( inUser['Fulluser'] )
 		
 		# ここまでで登録処理確定
 		#############################
@@ -121,9 +121,9 @@ class CLS_UserCorr():
 		#############################
 		# セット用領域の作成
 		wUserData = {}
-		wUserData.update({ "id"       : wFulluser['Fulluser'] })
+		wUserData.update({ "id"       : inUser['Fulluser'] })
 		wUserData.update({ "username" : str( inROW['account']['display_name'] ) })
-		wUserData.update({ "domain"   : wFulluser['Domain'] })
+		wUserData.update({ "domain"   : inUser['Domain'] })
 		wUserData.update({ "status"   : "-" })
 		wUserData.update({ "followed" : False })
 		wUserData.update({ "locked"   : False })
@@ -139,7 +139,8 @@ class CLS_UserCorr():
 		#############################
 		# ステータスの設定
 		###鍵の有無
-		if wAccount['locked']==True :
+##		if wAccount['locked']==True :
+		if inROW['account']['locked']==True :
 			wUserData['locked'] = True
 		
 		###更新時間 (mastodon時間)
@@ -215,8 +216,10 @@ class CLS_UserCorr():
 ##			wUserData['id']       = wChgList[0]
 ##			wUserData['username'] = wChgList[1]
 ##			wUserData['domain']   = wChgList[2]
-			wUserData['status']   = wChgList[3]
-			wUserData['followed'] = wChgList[4]
+###			wUserData['status']   = wChgList[3]
+###			wUserData['followed'] = wChgList[4]
+			wUserData['status']   = wChgList[0][3]
+			wUserData['followed'] = wChgList[0][4]
 ##			wUserData['locked']   = wChgList[5]
 ##			wUserData['lupdate']  = wChgList[6]
 			
@@ -243,10 +246,10 @@ class CLS_UserCorr():
 		#############################
 		# 結果を記録
 		if wFLG_AddUser==True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_UserCorr: AddUser: ユーザ追加: " + wFulluser['Fulluser'] )
+##			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_UserCorr: AddUser: ユーザ追加: " + inUser['Fulluser'] )
 			self.STR_Stat['UserAdd'] += 1
 		else :
-			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_UserCorr: AddUser: ユーザ更新: " + wFulluser['Fulluser'] )
+##			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_UserCorr: AddUser: ユーザ更新: " + inUser['Fulluser'] )
 			self.STR_Stat['UserUpdate'] += 1
 		
 		return True

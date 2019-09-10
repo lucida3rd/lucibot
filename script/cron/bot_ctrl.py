@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ぼっと制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/18
+#   Update  ：2019/9/10
 #####################################################
 # Private Function:
 #   __start(self):
@@ -36,6 +36,7 @@ class CLS_Bot_Ctrl() :
 	UserList = {}
 	WaitRestart = []
 	FLG_AllStop = False
+	FLG_On      = False
 
 #####################################################
 # 初期化
@@ -213,6 +214,49 @@ class CLS_Bot_Ctrl() :
 
 
 #####################################################
+# 全ぼっと起動
+#####################################################
+	def __allRun(self):
+		#############################
+		# フラグの確認
+		if self.FLG_On==True :
+			###ありえない
+			wStr = "CLS_Bot_Ctrl: __allStop: __allRun flag contradiction" + '\n'
+			wStr = wStr + "フラグをリセットしました。再度やり直してください。[RT]"
+			CLS_OSIF.sInp( wStr )
+			self.FLG_On = False
+			return
+		
+		#############################
+		# 起動中のbotがあるか
+		# あれば停止していく
+		wKeylist = self.UserList.keys()
+		for wUser in wKeylist :
+			#############################
+			# 種別の設定
+			wKind = self.__getKind( wUser )
+			
+			#############################
+			# ジョブの登録
+			wRes = self.OBJ_Job.Put( wKind, wUser )
+			if wRes['Result']!=True :
+				###失敗
+				wStr = "cronの登録が失敗しました。 User:" + wUser + " Reason: " + wRes['Reason']
+				CLS_OSIF.sPrn( wStr )
+				continue
+		
+		self.WaitRestart = []
+		
+		#############################
+		# 処理結果
+		wStr = "全botを起動しました。[RT]"
+		CLS_OSIF.sInp( wStr )
+		self.FLG_AllStop = False
+		return
+
+
+
+#####################################################
 # 再開
 #####################################################
 	def __reStart(self):
@@ -291,6 +335,11 @@ class CLS_Bot_Ctrl() :
 		elif inCommand=="\\as" :
 			self.__allStop()
 		
+		#############################
+		# 全起動
+		elif inCommand=="\\ar" :
+			self.__allRun()
+		
 		return
 
 
@@ -328,6 +377,7 @@ class CLS_Bot_Ctrl() :
 		# 内容
 		#   crontabにユーザが登録されていれば *ON
 		#   crontabにユーザが未登録なら        OFF
+		self.FLG_On = False
 		wKeylist = self.UserList.keys()
 		for wUser in wKeylist :
 			wFlg_Online = False
@@ -338,6 +388,7 @@ class CLS_Bot_Ctrl() :
 			if wFlg_Online==True :
 				self.UserList[wUser] = True
 				wStat = "*ON "
+				self.FLG_On = True
 			else:
 				self.UserList[wUser] = False
 				wStat = " OFF"
@@ -346,10 +397,19 @@ class CLS_Bot_Ctrl() :
 		
 		#############################
 		# コマンド見本
-		if self.FLG_AllStop==False :
-			wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 起動 / [\\s] 停止 / [\\as] 全停止" + '\n'
-		else:
-			wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 再開" + '\n'
+##		if self.FLG_AllStop==False :
+##			wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 起動 / [\\s] 停止 / [\\as] 全停止" + '\n'
+##		else:
+##			wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 再開" + '\n'
+		if self.FLG_On==True :
+			if self.FLG_AllStop==False :
+				wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 起動 / [\\s] 停止 / [\\as] 全停止" + '\n'
+			else :
+				wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 再開" + '\n'
+		
+		else :
+			###どこも起動してない場合
+			wStr = wStr + "コマンド= [\\q] 終了 / [\\r] 再開 / [\\ar] 全起動" + '\n'
 		
 		#############################
 		# 出力

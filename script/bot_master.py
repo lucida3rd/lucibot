@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理(Master)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/5
+#   Update  ：2019/9/10
 #####################################################
 # Private Function:
 #   (none)
@@ -32,6 +32,7 @@ from lookltl import CLS_LookLTL
 from lookrip import CLS_LookRIP
 from circletoot import CLS_CircleToot
 from follow import CLS_Follow
+from randtoot import CLS_RandToot
 from mylog import CLS_Mylog
 from traffic import CLS_Traffic
 from usercorr import CLS_UserCorr
@@ -123,11 +124,12 @@ class CLS_BOT_Master() :
 ##			cls.OBJ_Mylog.Log( 'a', "CLS_BOT_Master: GetDomainREM failure" )
 		cls.OBJ_UserCorr.GetDomainREM()
 		
-##		#############################
-##		# 禁止ワード読み込み
+		#############################
+		# 禁止ワード読み込み
 ##		if cls.OBJ_WordCorr.GetWordREM()!=True :
 ##			wStr = "CLS_BOT_Sub: GetWordREM failure"
 ##			cls.OBJ_Mylog.Log( 'a', wStr )
+		cls.OBJ_WordCorr.GetWordREM()
 		
 		#############################
 		# mastodonクラス生成
@@ -190,6 +192,11 @@ class CLS_BOT_Master() :
 		#############################
 		# RIP監視処理
 ##		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
+		
+		#############################
+		# ランダムトゥート処理
+		if gVal.STR_MasterConfig['RandToot']=="on" :
+			wOBJ_RandToot = CLS_RandToot( parentObj=cls )
 		
 		#############################
 		# 周期トゥート処理

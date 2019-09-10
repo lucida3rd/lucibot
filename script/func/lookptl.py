@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：PTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/5
+#   Update  ：2019/9/6
 #####################################################
 # Private Function:
 #   __run(self):
@@ -150,10 +150,13 @@ class CLS_LookPTL():
 		wStr = wStr + "WordOp=" + str(self.STR_Cope['Now_Word']) + '\n'
 ##		wStr = wStr + " UserCorr=" + str(self.STR_Cope['UserCorr']) + '\n'
 		wStr = wStr + "UserCorr=[Cope:" + str(wSTR_User['Cope']) + " Add:" + str(wSTR_User['UserAdd']) + " Update:" + str(wSTR_User['UserUpdate']) + "]"
-
-##		wStr = wStr + "WordCorr=[Cope:" + str(wSTR_Word['Cope']) + " Regist:" + str(wSTR_Word['Regist']) + " Delete:" + str(wSTR_Word['Delete'])
-##		wStr = wStr + " ClazList:" + str(wSTR_Word['ClazList']) + "]"
-
+		
+		###ワード収集有効時はログを出す
+		if gVal.STR_MasterConfig['WordStudy']=="on" :
+			wSTR_Word = self.Obj_Parent.OBJ_WordCorr.GetWordCorrectStat()	#収集状況の取得
+			wStr = wStr + '\n' + "WordCorr=[Cope:" + str(wSTR_Word['Cope']) + " Regist:" + str(wSTR_Word['Regist']) + " Delete:" + str(wSTR_Word['Delete'])
+			wStr = wStr + " ClazList:" + str(wSTR_Word['ClazList']) + "]"
+		
 		if gVal.FLG_Test_Mode==False :
 			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
 		else:
@@ -168,42 +171,57 @@ class CLS_LookPTL():
 #####################################################
 	def __cope( self, inROW ) :
 		#############################
-		#ユーザ収集ファイルに記録
-		#  ・新規  ：追加
-		#  ・追加済：更新
-##		if self.Obj_Parent.OBJ_UserCorr.AddUser( inROW )==True :
-##			self.STR_Cope['UserCorr'] += 1
-		self.Obj_Parent.OBJ_UserCorr.AddUser( inROW )
-		
-##		#############################
-##		#単語学習
-##		if gVal.STR_Config['WordCorrect'] == "on" :
-##			self.Obj_Parent.OBJ_WordCorr.WordStudy( inROW )
-		
-
-
-
-		
-		#############################
-		#パターン反応
-		###トゥートからHTMLタグを除去
-		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
-		
-		###ユーザ名の変換
+		# ユーザ名の変換
 		wFulluser = CLS_UserData.sGetFulluser( inROW['account']['username'], inROW['account']['url'] )
 		if wFulluser['Result']!=True :
 			###今のところ通らないルート
 			return False
 		
 		#############################
-		#除外トゥート
-		###リプライ（先頭に@付きトゥート）
-		if wCont.find('@') == 0 :
-			return
+		# トゥートからHTMLタグを除去
+		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
 		
-		###自分(このbot)のトゥート
-		if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
-			return
+		#############################
+		# 収集判定(一括)
+		if self.__copeCorr( wFulluser, inROW['language'], wCont )!=True :
+			return	### 除外
+		
+		#############################
+		#ユーザ収集ファイルに記録
+		#  ・新規  ：追加
+		#  ・追加済：更新
+##		if self.Obj_Parent.OBJ_UserCorr.AddUser( inROW )==True :
+##			self.STR_Cope['UserCorr'] += 1
+##		self.Obj_Parent.OBJ_UserCorr.AddUser( inROW )
+		self.Obj_Parent.OBJ_UserCorr.AddUser( inROW, wFulluser )
+		
+		#############################
+		#単語学習
+##		if gVal.STR_MasterConfig['WordStudy'] == "on" :
+##			self.Obj_Parent.OBJ_WordCorr.WordStudy( inROW )
+##		self.Obj_Parent.OBJ_WordCorr.WordStudy( wCont, inROW['created_at'] )
+		self.Obj_Parent.OBJ_WordCorr.WordStudy( wCont )
+		
+##		#############################
+##		#パターン反応
+##		###トゥートからHTMLタグを除去
+##		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
+##		
+##		###ユーザ名の変換
+##		wFulluser = CLS_UserData.sGetFulluser( inROW['account']['username'], inROW['account']['url'] )
+##		if wFulluser['Result']!=True :
+##			###今のところ通らないルート
+##			return False
+##		
+##		#############################
+##		#除外トゥート
+##		###リプライ（先頭に@付きトゥート）
+##		if wCont.find('@') == 0 :
+##			return
+##		
+##		###自分(このbot)のトゥート
+##		if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
+##			return
 		
 		#############################
 		# フォロワー状態
@@ -262,8 +280,9 @@ class CLS_LookPTL():
 			
 			#############################
 			#解析：エアリプ
-			if self.ARR_AnapTL[wKey]['Kind']=="a" and gVal.STR_MasterConfig['PTL_ARip']=="on" and \
-			   wFLG_Follower==True :
+##			if self.ARR_AnapTL[wKey]['Kind']=="a" and gVal.STR_MasterConfig['PTL_ARip']=="on" and \
+##			   wFLG_Follower==True :
+			if self.ARR_AnapTL[wKey]['Kind']=="a" and gVal.STR_MasterConfig['PTL_ARip']=="on" :
 				###マッチチェック
 				wRes = CLS_OSIF.sRe_Search( self.ARR_AnapTL[wKey]['Pattern'], wCont )
 				if not wRes :
@@ -302,6 +321,28 @@ class CLS_LookPTL():
 			return True		#パターンマッチ
 		
 		return False		#アンマッチ
+
+	#####################################################
+	def __copeCorr( self, inUser, inLang, inCont ):
+		#############################
+		# 除外トゥート
+		###自分
+		if inUser['Fulluser'] == self.Obj_Parent.CHR_Account :
+			return False
+		
+		###外人 (日本人限定=ON時)
+		if inLang!="ja" and gVal.STR_MasterConfig["JPonly"]=="on" :
+			return False
+		
+		###除外ドメイン
+		if inUser['Domain'] in gVal.STR_DomainREM :
+			return False
+		
+		###リプライ（先頭に@付きトゥート）
+		if inCont.find('@') == 0 :
+			return False
+		
+		return True
 
 
 

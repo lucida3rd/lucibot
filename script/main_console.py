@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/2
+#   Update  ：2019/9/10
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -160,12 +160,14 @@ class CLS_Main_Console() :
 	#####################################################
 		#############################
 		# システム情報の表示
-		if inCommand=="-v" :
+##		if inCommand=="-v" :
+		if inCommand=="\\v" :
 			cls().sView_Sysinfo()
 			wFlg = True
 		#############################
 		# Master環境情報の表示
-		elif inCommand=="-vm" :
+##		elif inCommand=="-vm" :
+		elif inCommand=="\\vm" :
 			wCLS_work = CLS_Config()
 			wCLS_work.MasterConfig_Disp()
 			wFlg = True
@@ -173,19 +175,22 @@ class CLS_Main_Console() :
 	#####################################################
 		#############################
 		# Master環境情報の表示・操作
-		elif inCommand=="-c" :
+##		elif inCommand=="-c" :
+		elif inCommand=="\\c" :
 			wCLS_work = CLS_Config()
 			wCLS_work.CnfMasterConfig()
 			wFlg = True
 		#############################
 		# MasterUserの変更
-		elif inCommand=="-cm" :
+##		elif inCommand=="-cm" :
+		elif inCommand=="\\cm" :
 			wCLS_work = CLS_Config()
 			wCLS_work.CnfMasterUser()
 			wFlg = True
 		#############################
 		# AdminUserの変更
-		elif inCommand=="-ca" :
+##		elif inCommand=="-ca" :
+		elif inCommand=="\\ca" :
 			wCLS_work = CLS_Config()
 			wCLS_work.CnfAdminUser()
 			wFlg = True
@@ -193,34 +198,39 @@ class CLS_Main_Console() :
 	#####################################################
 		#############################
 		# ユーザ登録 一覧表示
-		elif inCommand=="-u" :
+##		elif inCommand=="-u" :
+		elif inCommand=="\\u" :
 			wCLS_work = CLS_UserData()
 			wCLS_work.ViewUserList()
 			wFlg = True
 		
 		#############################
 		# ユーザ登録 登録
-		elif inCommand=="-ur" :
+##		elif inCommand=="-ur" :
+		elif inCommand=="\\ur" :
 			wCLS_work = CLS_Regist()
 			wCLS_work.Regist()
 			wFlg = True
 		
 		#############################
 		# ユーザ登録 再登録
-		elif inCommand=="-uu" :
+##		elif inCommand=="-uu" :
+		elif inCommand=="\\uu" :
 			wCLS_work = CLS_Regist()
 			wCLS_work.Update()
 			wFlg = True
 		
 		#############################
 		# ユーザ登録 削除
-		elif inCommand=="-ud" :
+##		elif inCommand=="-ud" :
+		elif inCommand=="\\ud" :
 			wCLS_work = CLS_Regist()
 			wCLS_work.Delete()
 			wFlg = True
 		#############################
 		# User環境情報の表示・操作
-		elif inCommand=="-uc" :
+##		elif inCommand=="-uc" :
+		elif inCommand=="\\uc" :
 			wCLS_work = CLS_Config()
 			wCLS_work.CnfUserConfig()
 			wFlg = True
@@ -228,21 +238,24 @@ class CLS_Main_Console() :
 	#####################################################
 		#############################
 		# 手動トゥートモード
-		elif inCommand=="-t" :
+##		elif inCommand=="-t" :
+		elif inCommand=="\\t" :
 			wCLS_work = CLS_Toot()
 			wCLS_work.ManualToot()
 			wFlg = True
 		
 		#############################
 		# 同報配信トゥートモード
-		elif inCommand=="-tm" :
+##		elif inCommand=="-tm" :
+		elif inCommand=="\\tm" :
 			wCLS_work = CLS_Toot()
 			wCLS_work.MulticastToot()
 			wFlg = True
 		
 		#############################
 		# Twitterモード
-		elif inCommand=="-tw" :
+##		elif inCommand=="-tw" :
+		elif inCommand=="\\tw" :
 			wCLS_work = CLS_Toot()
 			wCLS_work.ManualTweet()
 			wFlg = True
@@ -250,14 +263,16 @@ class CLS_Main_Console() :
 	#####################################################
 		#############################
 		# 通信テスト
-		elif inCommand=="-test" :
+##		elif inCommand=="-test" :
+		elif inCommand=="\\test" :
 			wCLS_work = CLS_Regist()
 			wCLS_work.Test()
 			wFlg = True
 		
 		#############################
 		# DBエディタ
-		elif inCommand=="-vdb" :
+##		elif inCommand=="-vdb" :
+		elif inCommand=="\\vdb" :
 			wCLS_work = CLS_DBedit()
 			wCLS_work.View()
 			wFlg = True
@@ -265,13 +280,15 @@ class CLS_Main_Console() :
 	#####################################################
 		#############################
 		# master運用操作
-		elif inCommand=="-run" :
+##		elif inCommand=="-run" :
+		elif inCommand=="\\run" :
 			wCLS_work = CLS_Bot_Ctrl()
 			wCLS_work.Console()
 			wFlg = True
 		#############################
 		# Twitter連携
-		elif inCommand=="-ct" :
+##		elif inCommand=="-ct" :
+		elif inCommand=="\\ct" :
 			wCLS_Twitter = CLS_Twitter_Use()
 			wCLS_Twitter.CreateTwitter( gVal.DEF_STR_FILE['Twitter_File'], gVal.DEF_STR_FILE['defTwitter_File'] )
 			wCLS_work = CLS_Config()
