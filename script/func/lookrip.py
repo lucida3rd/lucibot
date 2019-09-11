@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/10
+#   Update  ：2019/9/11
 #####################################################
 # Private Function:
 #   __run(self):
@@ -250,7 +250,7 @@ class CLS_LookRIP():
 		#############################
 		# 種別：めんしょん
 		elif inROW['type']=="mention" :
-			self.__copeRandomReply( inROW )
+			self.__copeRIP( inROW )
 		
 		return
 
@@ -426,7 +426,8 @@ class CLS_LookRIP():
 					##アンマッチ
 					continue
 				###実行
-				if self.WordStudy( inROW, self.ARR_AnapTL[wKey]['Pattern'] )!=True :
+###				if self.WordStudy( inROW, self.ARR_AnapTL[wKey]['Pattern'] )!=True :
+				if self.WordStudy( inROW, wRes )!=True :
 					break
 				wFLG_Hit = True
 				break
@@ -1211,21 +1212,24 @@ class CLS_LookRIP():
 #####################################################
 # ワード学習
 #####################################################
-	def WordStudy( self, inROW, inPattern ):
+##	def WordStudy( self, inROW, inPattern ):
+	def WordStudy( self, inROW, inSearchAns ):
 		#############################
 		# 登録単語を取り出す
-		wResReplace = CLS_OSIF.sRe_Replace( inPattern, inROW['content'], "" )
-		###	"Result"	: False,
-		###	"Match"		: False,
-		###	"After"		: None
-		if wResReplace['Result']!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: WordStudy: sRe_Replace is failed: content=" + str( inROW['content'] ) )
-			return False
-		if wResReplace['Match']!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: WordStudy: Unmatch words: content=" + str( inROW['content'] ) )
-			return False
+##		wResReplace = CLS_OSIF.sRe_Replace( inPattern, inROW['content'], "" )
+##		###	"Result"	: False,
+##		###	"Match"		: False,
+##		###	"After"		: None
+##		if wResReplace['Result']!=True :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: WordStudy: sRe_Replace is failed: content=" + str( inROW['content'] ) )
+##			return False
+##		if wResReplace['Match']!=True :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: WordStudy: Unmatch words: content=" + str( inROW['content'] ) )
+##			return False
+##		wCont = wResReplace['After']
+		wIndex = inSearchAns.start()
+		wCont = inROW['content'][wIndex+4:]
 		
-		wCont = wResReplace['After']
 		#############################
 		# 学習する
 		wRes = self.Obj_Parent.OBJ_WordCorr.WordStudy( wCont )
@@ -1235,6 +1239,8 @@ class CLS_LookRIP():
 			if wCHR_Line=="" :
 				###候補がみつからない
 				return False
+			
+			wCHR_Line = wCHR_Line + '\n' + "学習した文章: " + wCont
 			wVisibility = inROW['visibility']
 		else :
 			###学習失敗
