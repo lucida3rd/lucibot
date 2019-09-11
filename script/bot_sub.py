@@ -165,8 +165,8 @@ class CLS_BOT_Sub() :
 		
 		#############################
 		# HTL監視処理
-##		if gVal.STR_MasterConfig['HTL_Boost']=="on" :
-##			wOBJ_LookHTL = CLS_LookHTL( parentObj=cls )
+		if gVal.STR_MasterConfig['HTL_Boost']=="on" :
+			wOBJ_LookHTL = CLS_LookHTL( parentObj=cls )
 		
 		#############################
 		# RIP監視処理

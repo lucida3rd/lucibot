@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/5
+#   Update  ：2019/9/11
 #####################################################
 # Private Function:
 #   __run(self):
@@ -103,10 +103,6 @@ class CLS_LookHTL():
 		# TLチェック
 		self.ARR_UpdateTL = []
 		for wROW in self.ARR_NewTL :
-###			wR = "----------------------" + '\n'
-###			wR = wR + str(wROW) + '\n'
-###			CLS_OSIF.sPrn( str(wR) )
-			
 			#############################
 			# チェックするので新過去TLに保管
 			self.ARR_UpdateTL.append( wROW['id'] )
@@ -156,45 +152,25 @@ class CLS_LookHTL():
 # 新トゥートへの対応
 #####################################################
 	def __cope( self, inROW ) :
-###		wHitPatt = []
-		
-		#公開トゥート以外は除外
-		if inROW['visibility']!="public" :
-			self.STR_Cope['Outrange'] += 1
-			return
-		
-		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
-		#リプライは除外（先頭に@付きトゥート）
-		if wCont.find('@') == 0 :
-			self.STR_Cope['Outrange'] += 1
-			return
-		
-		#通知は除外
-##		if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
-		if wCont.find( gVal.STR_MasterConfig['iActionTag'] ) >= 0 :
-			self.STR_Cope['Outrange'] += 1
-			return
-		
-		#ブーストトゥートは除外
-		if inROW['reblog']!=None :
-			self.STR_Cope['Outrange'] += 1
-			return
-		
 		#############################
-		# 相手ユーザ名
+		# ユーザ名の変換
 		wFulluser = CLS_UserData.sGetFulluser( inROW['account']['username'], inROW['account']['url'] )
 		if wFulluser['Result']!=True :
-			self.STR_Cope['Invalid'] += 1
-			return
-		wFulluser = wFulluser['Fulluser']
-		#自分ならスキップ
-		if wFulluser == self.Obj_Parent.CHR_Account :
-			self.STR_Cope['Invalid'] += 1
-			return
+			###今のところ通らないルート
+			return False
+		
+		#############################
+		# トゥートからHTMLタグを除去
+		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
+		
+		#############################
+		# 収集判定(一括)
+		if self.__copeCorr( wFulluser, inROW, wCont )!=True :
+			self.STR_Cope['Outrange'] += 1
+			return	### 除外
 		
 		#############################
 		# トゥートの時間 (変換＆差)
-##		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
 		wReaRIPmin = gVal.DEF_STR_TLNUM['reaRIPmin'] * 60	#秒に変換
 		wGetLag = CLS_OSIF.sTimeLag( str(inROW['created_at']), inThreshold=wReaRIPmin )
 		if wGetLag['Result']!=True :
@@ -205,75 +181,210 @@ class CLS_LookHTL():
 			return	#反応時間外
 		wGetTime = str(wGetLag['InputTime'])
 		
-		wKeylist  = self.ARR_AnapTL.keys()
 		#############################
 		#解析種類の判定
-		for wKey in wKeylist :
-			wKind = self.ARR_AnapTL[wKey]['Kind']
-			
+		wKeyList = self.ARR_AnapTL.keys()
+		for wKey in wKeyList :
 			#############################
-			#解析：ブースト
-			if wKind == 'h' :
-###				#############################
-###				#既に同じ処理をしたか
-###				if CLS_UserData.sChkHitPatt( wHitPatt, wKind )==True :
-###					continue	#既に同じ処理した
-				
-				#############################
-				#自分が指定ユーザか
+			# 解析：指定ブースト
+			if self.ARR_AnapTL[wKey]['Kind']=="h" :
+				### 自分が指定ユーザか
 				if self.ARR_AnapTL[wKey]['Fulluser']!="" :
 					if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
 						continue
-				
-				#############################
-				#無指定の場合、登録ユーザか(第三者避け)
+				### 無指定の場合、登録ユーザか(第三者避け)
 				else :
 					wUserList = CLS_UserData.sGetUserList()
-					if wFulluser not in wUserList :
+					if wFulluser['Fulluser'] not in wUserList :
 						continue
 				
-				#############################
-				#パターンマッチ
+				### マッチチェック
 				wPatt = "#" + self.ARR_AnapTL[wKey]['Tag']
-				wMatch = CLS_OSIF.sRe_Search( wPatt, wCont )
-				if wMatch :
-					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
-					if wRes['Result']!=True :
-						self.STR_Cope['Invalid'] += 1
-						return	#失敗
-					
-					self.STR_Cope["Now_Boot"] += 1
-###					wHitPatt.append( wKind )
-					break	# 1つの実行で止めておく
-		
+				wRes = CLS_OSIF.sRe_Search( wPatt, wCont )
+				if not wRes :
+					##アンマッチ
+					continue
+				### 実行
+				if self.Boost( inROW['id'] )!=True :
+					self.STR_Cope['Invalid'] += 1
+					break
+				self.STR_Cope["Now_Boot"] += 1
+				break
+			
 			#############################
-			#解析：指定フルブースト
-			if wKind == 'p' :
+			# 解析：指定フルブースト
+			if self.ARR_AnapTL[wKey]['Kind']=="p" :
+				### 自分が指定ユーザではない
+				if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
+					continue	#指定ではない
+				
+				#対象のブーストユーザか
+				if self.ARR_AnapTL[wKey]['Tag']!=wFulluser :
+					continue	#指定ではない
+				
+				### 実行
+				if self.Boost( inROW['id'] )!=True :
+					self.STR_Cope['Invalid'] += 1
+					break
+				self.STR_Cope["Now_Boot"] += 1
+				break
+		
+		return
+
+	#####################################################
+	def __copeCorr( self, inUser, inROW, inCont ):
+		#############################
+		# 除外トゥート
+		### 自分
+		if inUser['Fulluser'] == self.Obj_Parent.CHR_Account :
+			return False
+		
+		### 公開トゥート以外
+		if inROW['visibility']!="public" :
+			return False
+		
+		### ブーストトゥートは除外
+		if inROW['reblog']!=None :
+			return False
+		
+		### リプライは除外（先頭に@付きトゥート）
+		if inCont.find('@') == 0 :
+			return False
+		
+		### 通知類は除外
+		wRes_1 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], inCont )
+		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], inCont )
+		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    inCont )
+		wRes_4 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], inCont )
+		if wRes_1 or wRes_2 or wRes_3 or wRes_4 :
+			return False
+		
+		return True
+
+
+
+#####################################################
+# 新トゥートへの対応
+#####################################################
+#	def __cope( self, inROW ) :
+###		wHitPatt = []
+#		
+#		#公開トゥート以外は除外
+#		if inROW['visibility']!="public" :
+#			self.STR_Cope['Outrange'] += 1
+#			return
+#		
+#		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
+#		#リプライは除外（先頭に@付きトゥート）
+#		if wCont.find('@') == 0 :
+#			self.STR_Cope['Outrange'] += 1
+#			return
+#		
+#		#通知は除外
+##		if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
+#		if wCont.find( gVal.STR_MasterConfig['iActionTag'] ) >= 0 :
+#			self.STR_Cope['Outrange'] += 1
+#			return
+#		
+#		#ブーストトゥートは除外
+#		if inROW['reblog']!=None :
+#			self.STR_Cope['Outrange'] += 1
+#			return
+#		
+#		#############################
+#		# 相手ユーザ名
+#		wFulluser = CLS_UserData.sGetFulluser( inROW['account']['username'], inROW['account']['url'] )
+#		if wFulluser['Result']!=True :
+#			self.STR_Cope['Invalid'] += 1
+#			return
+#		wFulluser = wFulluser['Fulluser']
+#		#自分ならスキップ
+#		if wFulluser == self.Obj_Parent.CHR_Account :
+#			self.STR_Cope['Invalid'] += 1
+#			return
+#		
+#		#############################
+#		# トゥートの時間 (変換＆差)
+###		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
+#		wReaRIPmin = gVal.DEF_STR_TLNUM['reaRIPmin'] * 60	#秒に変換
+#		wGetLag = CLS_OSIF.sTimeLag( str(inROW['created_at']), inThreshold=wReaRIPmin )
+#		if wGetLag['Result']!=True :
+#			self.STR_Cope['Invalid'] += 1
+#			return
+#		if wGetLag['Beyond']==True :
+#			self.STR_Cope['OffTime'] += 1
+#			return	#反応時間外
+#		wGetTime = str(wGetLag['InputTime'])
+#		
+#		wKeylist  = self.ARR_AnapTL.keys()
+#		#############################
+#		#解析種類の判定
+#		for wKey in wKeylist :
+#			wKind = self.ARR_AnapTL[wKey]['Kind']
+#			
+#			#############################
+#			#解析：ブースト
+#			if wKind == 'h' :
+####				#############################
+####				#既に同じ処理をしたか
+###				if CLS_UserData.sChkHitPatt( wHitPatt, wKind )==True :
+###					continue	#既に同じ処理した
+#				
+#				#############################
+#				#自分が指定ユーザか
+#				if self.ARR_AnapTL[wKey]['Fulluser']!="" :
+#					if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
+#						continue
+#				
+#				#############################
+#				#無指定の場合、登録ユーザか(第三者避け)
+#				else :
+#					wUserList = CLS_UserData.sGetUserList()
+#					if wFulluser not in wUserList :
+#						continue
+#				
+#				#############################
+#				#パターンマッチ
+#				wPatt = "#" + self.ARR_AnapTL[wKey]['Tag']
+#				wMatch = CLS_OSIF.sRe_Search( wPatt, wCont )
+#				if wMatch :
+#					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
+#					if wRes['Result']!=True :
+#						self.STR_Cope['Invalid'] += 1
+#						return	#失敗
+#					
+#					self.STR_Cope["Now_Boot"] += 1
+###					wHitPatt.append( wKind )
+#					break	# 1つの実行で止めておく
+#		
+#			#############################
+#			#解析：指定フルブースト
+#			if wKind == 'p' :
 ###				#############################
 ###				#既に同じ処理をしたか
 ###				if CLS_UserData.sChkHitPatt( wHitPatt, wKind )==True :
 ###					continue	#既に同じ処理した
-				
-				#############################
-				#自分が指定ユーザではない
-				if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
-					continue	#指定ではない
-				
-				#############################
-				#対象のブーストユーザか
-				if self.ARR_AnapTL[wKey]['Tag']==wFulluser :
-					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
-					if wRes['Result']!=True :
-						self.STR_Cope['Invalid'] += 1
-						return	#失敗
-					
-					self.STR_Cope["Now_Boot"] += 1
+#				
+#				#############################
+#				#自分が指定ユーザではない
+#				if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
+#					continue	#指定ではない
+#				
+#				#############################
+#				#対象のブーストユーザか
+#				if self.ARR_AnapTL[wKey]['Tag']==wFulluser :
+#					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
+#					if wRes['Result']!=True :
+#						self.STR_Cope['Invalid'] += 1
+#						return	#失敗
+#					
+#					self.STR_Cope["Now_Boot"] += 1
 ###					wHitPatt.append( wKind )
-					break	# 1つの実行で止めておく
-		
-		return
-
-
+#					break	# 1つの実行で止めておく
+#		
+#		return
+#
+#
 
 #####################################################
 # HTL取得
@@ -281,7 +392,6 @@ class CLS_LookHTL():
 	def Get_HTL(self):
 		self.ARR_NewTL = []
 		wNext_Id = None
-##		wMax_Toots = gVal.STR_Config["getHTLnum"]
 		wMax_Toots = gVal.DEF_STR_TLNUM["getHTLnum"]
 		while (len(self.ARR_NewTL) < wMax_Toots ):
 			#############################
@@ -395,6 +505,21 @@ class CLS_LookHTL():
 		if len(self.ARR_AnapTL)==0 :
 			self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_LookHTL: Get_Anap: HTLBoostFile in none pattern: " + wFile_path )
 			return False	#パターンなし
+		
+		return True
+
+
+
+#####################################################
+# ブースト
+#####################################################
+	def Boost( self, inID ) :
+		#############################
+		#ブースト
+		wRes = self.Obj_Parent.OBJ_MyDon.Boost( id=inID )
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHTL: Boost: Mastodon error: " + wRes['Reason'] )
+			return False
 		
 		return True
 

@@ -200,8 +200,8 @@ class CLS_BOT_Master() :
 		
 		#############################
 		# 周期トゥート処理
-#		if gVal.STR_MasterConfig['CircleToot']=="on" :
-#			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
+		if gVal.STR_MasterConfig['CircleToot']=="on" :
+			wOBJ_CircleToot = CLS_CircleToot( parentObj=cls )
 		
 		#############################
 		# フォロー・フォロワー情報の更新
