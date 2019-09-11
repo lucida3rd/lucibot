@@ -4,7 +4,7 @@
 # public
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/7
+#   Update  ：2019/9/11
 #####################################################
 # Private Function:
 #   (none)
@@ -29,6 +29,7 @@
 #   sDel_HTML( cls, inCont ):
 #   sChkREMString( cls, inStr, inSpace=True ):
 #   sRe_Search( cls, inPatt, inCont ):
+#   sRe_Replace( cls, inPatt, inCont, inReplace ):
 #   sGetRand( cls, inValue ):
 #
 #####################################################
@@ -373,6 +374,10 @@ class CLS_OSIF() :
 
 #####################################################
 # 文字列からパターン検索
+#   wRes.group()  正規表現にマッチした文字列を返す。
+#   wRes.start()  マッチの開始位置を返す。
+#   wRes.end()    マッチの終了位置を返す。
+#   wRes.span()   マッチの位置 (start, end) を含むタプルを返す。
 #####################################################
 	@classmethod
 	def sRe_Search( cls, inPatt, inCont ):
@@ -381,6 +386,32 @@ class CLS_OSIF() :
 		except:
 			return False
 		
+		return wRes
+
+
+
+#####################################################
+# 文字列からパターン置換
+#####################################################
+	@classmethod
+	def sRe_Replace( cls, inPatt, inCont, inReplace ):
+		wRes = {
+			"Result"	: False,
+			"Match"		: False,
+			"After"		: None
+		}
+		
+		if inCont=="" :
+			return wRes
+		
+		wRes['Match'] = cls.sRe_Search( inPatt, inCont )
+		
+		try:
+			wRes['After'] = inCont.replace( inPatt, inReplace )
+		except:
+			return wRes
+		
+		wRes['Result'] = True
 		return wRes
 
 

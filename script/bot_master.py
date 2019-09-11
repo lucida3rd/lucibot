@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理(Master)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/10
+#   Update  ：2019/9/11
 #####################################################
 # Private Function:
 #   (none)
@@ -191,7 +191,7 @@ class CLS_BOT_Master() :
 		
 		#############################
 		# RIP監視処理
-##		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
+		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
 		
 		#############################
 		# ランダムトゥート処理

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/7
+#   Update  ：2019/9/11
 #####################################################
 
 #####################################################
@@ -196,6 +196,9 @@ class gVal() :
 		"Toot_path"				: DEF_MASTERCONFIG + "toot/",
 		"CLTootFile"			: DEF_MASTERCONFIG + "toot/ctoot.txt",
 		"PatternPTLFile"		: DEF_MASTERCONFIG + "toot/pptl.txt",
+		"PatternRIPFile"		: DEF_MASTERCONFIG + "toot/reply.txt",
+		"OtherRIPFile"			: DEF_MASTERCONFIG + "toot/reply_others.txt",
+		"StudyRIPFile"			: DEF_MASTERCONFIG + "toot/reply_study.txt",
 
 		"HTLBoostFile"			: DEF_MASTERCONFIG + "toot/hboost.txt",
 		"TrafficTootFile"		: DEF_MASTERCONFIG + "toot/traffic.txt",
@@ -231,7 +234,7 @@ class gVal() :
 		"Rate_LTLFile"			: "data/rltl.txt",
 		"Rate_PTLFile"			: "data/rptl.txt",
 		"Rate_RipFile"			: "data/rreply.txt",
-		"Rate_FavFile"			: "data/rfav.txt",
+##		"Rate_FavFile"			: "data/rfav.txt",
 		"IndLim_File"			: "data/indlim.txt",
 		"FollowListFile"		: "data/follow.txt",
 		"FollowerListFile"		: "data/follower.txt",

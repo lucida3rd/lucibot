@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ情報収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/10
+#   Update  ：2019/9/11
 #####################################################
 # Private Function:
 #   (none)
@@ -119,10 +119,25 @@ class CLS_UserCorr():
 		self.STR_Stat['Cope'] += 1
 		
 		#############################
+		# postgreSQL対策で ' 文字を消す
+		wResReplace = CLS_OSIF.sRe_Replace( "'", str( inROW['account']['display_name'] ), "''" )
+		###	"Result"	: False,
+		###	"Match"		: False,
+		###	"After"		: None
+		if wResReplace['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: AddUser: sRe_Replace is failed: display_name=" + str( inROW['account']['display_name'] ) )
+			return False
+		if wResReplace['Match']==True :
+			wDisplay_Name = wResReplace['After']
+		else :
+			wDisplay_Name = str( inROW['account']['display_name'] )
+		
+		#############################
 		# セット用領域の作成
 		wUserData = {}
 		wUserData.update({ "id"       : inUser['Fulluser'] })
-		wUserData.update({ "username" : str( inROW['account']['display_name'] ) })
+###		wUserData.update({ "username" : str( inROW['account']['display_name'] ) })
+		wUserData.update({ "username" : wDisplay_Name })
 		wUserData.update({ "domain"   : inUser['Domain'] })
 		wUserData.update({ "status"   : "-" })
 		wUserData.update({ "followed" : False })

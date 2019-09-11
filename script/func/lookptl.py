@@ -4,12 +4,11 @@
 # るしぼっと4
 #   Class   ：PTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/6
+#   Update  ：2019/9/11
 #####################################################
 # Private Function:
 #   __run(self):
 #   __cope( self, inROW ) :
-#   __copeCheck( self, inMode, inPatt, inCont ):
 #   __get_Rip( self, inFilename ):
 #
 # Instance Function:
@@ -311,17 +310,17 @@ class CLS_LookPTL():
 		
 		return
 
-	#####################################################
-	def __copeCheck( self, inMode, inPatt, inCont ):
-		#############################
-		# パターンチェック
-		wRes = CLS_OSIF.sRe_Search( inPatt, inCont )
-		if wRes :
-			wARRpat.appent( inMode )	#次は同じモードのチェックはやらない
-			return True		#パターンマッチ
-		
-		return False		#アンマッチ
-
+##	#####################################################
+##	def __copeCheck( self, inMode, inPatt, inCont ):
+##		#############################
+##		# パターンチェック
+##		wRes = CLS_OSIF.sRe_Search( inPatt, inCont )
+##		if wRes :
+##			wARRpat.appent( inMode )	#次は同じモードのチェックはやらない
+##			return True		#パターンマッチ
+##		
+##		return False		#アンマッチ
+##
 	#####################################################
 	def __copeCorr( self, inUser, inLang, inCont ):
 		#############################
@@ -548,11 +547,7 @@ class CLS_LookPTL():
 		
 		return True
 
-
-
-#####################################################
-# リプ候補選択
-#####################################################
+	#####################################################
 	def __get_Rip( self, inFilename ):
 		#############################
 		# 読み出し先初期化

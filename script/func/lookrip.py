@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/10
 #####################################################
 # Private Function:
 #   __run(self):
@@ -39,19 +39,20 @@ class CLS_LookRIP():
 	CHR_LogName  = "RIP監視"
 	Obj_Parent   = ""		#親クラス実体
 
-###	ARR_NewTL    = []		#mastodon TL(mastodon API)
-
-	ARR_AnapTL   = []		#TL解析パターン
+	ARR_NewTL    = {}		#mastodon TL(mastodon API)
+	ARR_AnapTL   = {}		#TL解析パターン
 	ARR_RateTL   = []		#過去TL(id)
 	ARR_UpdateTL = []		#新・過去TL(id)
+	
+	ARR_NowFavID = []		#今周処理したふぁぼID
 
-	ARR_RateFV   = []		#過去ふぁぼ(ふぁぼ対象id)
-	ARR_UpdateFV = []		#新・過去ふぁぼ(ふぁぼid,時間)
-
-	ARR_NewFavo   = {}		#ふぁぼ or ぶーすと
-	ARR_NewFollow = {}		#ふぉろー
-	ARR_NewRip    = {}		#リプライ
-	ARR_Reind     = {}		#再通知
+##	ARR_RateFV   = []		#過去ふぁぼ(ふぁぼ対象id)
+##	ARR_UpdateFV = []		#新・過去ふぁぼ(ふぁぼid,時間)
+##
+##	ARR_NewFavo   = {}		#ふぁぼ or ぶーすと
+##	ARR_NewFollow = {}		#ふぉろー
+##	ARR_NewRip    = {}		#リプライ
+##	ARR_Reind     = {}		#再通知
 
 	STR_Cope = {			#処理カウンタ
 		"Ind_Cope"	 : 0,		#今回受信した通知数
@@ -74,13 +75,14 @@ class CLS_LookRIP():
 		"TimeDate"		: ""	#カウント開始時間
 	}
 	
+	
+	
 	VAL_ReaRIPmin = 0
 	VAL_indLimmin = 0
 	FLG_indLim = False
 	
 	DEF_TITLE_INFORMATION  = "[Info]"
 	DEF_TITLE_NEW_FOLLOWER = "[New Follower]"
-	
 
 #####################################################
 # Init
@@ -93,12 +95,10 @@ class CLS_LookRIP():
 		
 		#############################
 		# 反応リプライ時間範囲の算出(分→秒へ)
-##		self.VAL_ReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
-		self.VAL_ReaRIPmin = gVal.reaRIPmin['reaRIPmin'] * 60	#秒に変換
+		self.VAL_ReaRIPmin = gVal.DEF_STR_TLNUM['reaRIPmin'] * 60	#秒に変換
 		
 		#############################
 		# 通知制限時間の算出(分→秒へ)
-##		self.VAL_indLimmin = gVal.STR_Config['indLimmin'] * 60	#秒に変換
 		self.VAL_indLimmin = gVal.DEF_STR_TLNUM['indLimmin'] * 60	#秒に変換
 		
 		self.Obj_Parent = parentObj
@@ -116,6 +116,12 @@ class CLS_LookRIP():
 		self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
 		
 		#############################
+		# TL解析パターン読み込み
+		if self.Get_Anap()!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Pattern RIP read failed" )
+			return
+		
+		#############################
 		# 通知制限の読み込み
 		wRes = self.Get_Indlim()
 		if wRes!=True :
@@ -129,124 +135,61 @@ class CLS_LookRIP():
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Riply read failed: " + wRes['Reason'] )
 			return
 		
-		#############################
-		# TL解析パターン読み込み
-		###LTLでは実装しない
-		
-		#############################
-		# 過去ふぁぼの読み込み
-		wRes = self.Get_RateFV()
-		if wRes!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get_RateFV failed" )
-			return
-		
+##		#############################
+##		# 過去ふぁぼの読み込み
+##		wRes = self.Get_RateFV()
+##		if wRes!=True :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get_RateFV failed" )
+##			return
+##		
 		#############################
 		# 過去RIPの読み込み
 		wRes = self.Get_RateRIP()
 		if wRes!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get_RateRIP failed" )
 			return
-		
-		#############################
-		# 現時刻の取得
-		wTime = CLS_OSIF.sGetTime()
-		if wTime['Result']!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get time failed" )
-			return
-		
-		wTime = str(wTime['TimeDate'])
+##		if len(self.ARR_RateTL)==0 and len(self.ARR_NewTL)>0 :
+##			self.Init_RateRIP()
+##			if gVal.FLG_Test_Mode==False :
+##				self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " RIP過去TL初期化" )
+##			else :
+##				self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " RIP過去TL初期化", inView=True )
+##			return
 		
 		#############################
 		# TLチェック
 		self.ARR_UpdateTL = []
-		
-		#############################
-		# ふぁぼ、ぶーすとチェック
-##		if gVal.STR_Config['IND_Favo']=="on" :
-		if gVal.STR_MasterConfig['IND_Favo']=="on" :
-			wKeylist = self.ARR_NewFavo.keys()
-			for wKey in wKeylist :
-				#############################
-				# チェックするので新過去ふぁぼに保管
-				wSetFV = self.ARR_NewFavo[wKey]['status_id'] + "," + wTime
-				self.ARR_UpdateFV.append( wSetFV )
-				
-				#############################
-				# 過去チェックしたトゥートか
-				if self.ARR_NewFavo[wKey]['status_id'] in self.ARR_RateFV :
-					continue
-				
-				#############################
-				# 通知制限か
-				if self.Check_Indlim( self.ARR_NewFavo[wKey]['created_at'] )==False :
-					continue
-				
-				#############################
-				# 新トゥートへの対応
-				self.__copeFavo( self.ARR_NewFavo[wKey] )
-				self.STR_Cope["Now_Cope"] += 1
+##		for wROW in self.ARR_NewTL :
+		wKeyList = self.ARR_NewTL.keys()
+		for wKey in wKeyList :
+			wROW = self.ARR_NewTL[wKey]
+			#############################
+			# チェックするので新過去TLに保管
+			self.ARR_UpdateTL.append( wROW['id'] )
 			
-			wKeylist = self.ARR_Reind.keys()
-			for wKey in wKeylist :
-				#############################
-				# チェックするので新過去ふぁぼに保管
-				wSetFV = self.ARR_Reind[wKey]['status_id'] + "," + wTime
-				self.ARR_UpdateFV.append( wSetFV )
-				
-				#############################
-				# 過去チェックしたトゥートか
-				if self.ARR_Reind[wKey]['status_id'] in self.ARR_RateFV :
+			#############################
+			# 過去チェックしたトゥートか
+			#   であればスキップする
+			wFlg_Rate = False
+			for wRow_Rate in self.ARR_RateTL :
+				if str(wRow_Rate) == str(wROW['id']) :
+					wFlg_Rate = True
+					break
+			
+			if wFlg_Rate == True :
+				continue
+			
+			#############################
+			# ふぁぼ、ブースト、再通知の場合
+			#   通知制限か
+			if wROW['type']=="favourite" or wROW['type']=="reblog" or wROW['type']=="reind" :
+				if self.Check_Indlim( wROW['created_at'] )==False :
 					continue
-				
-				#############################
-				# 通知制限か
-				if self.Check_Indlim( self.ARR_Reind[wKey]['created_at'] )==False :
-					continue
-				
-				#############################
-				# 再通知への対応
-				self.__copeReind( self.ARR_Reind[wKey] )
-				self.STR_Cope["Now_Cope"] += 1
-		
-		#############################
-		# ふぉろーチェック
-##		if gVal.STR_Config['IND_Follow']=="on" :
-		if gVal.STR_MasterConfig['IND_Follow']=="on" :
-			wKeylist = self.ARR_NewFollow.keys()
-			for wKey in wKeylist :
-				#############################
-				# チェックするので新過去TLに保管
-				self.ARR_UpdateTL.append( self.ARR_NewFollow[wKey]['id'] )
-				
-				#############################
-				# 過去チェックしたトゥートか
-				if self.ARR_NewFollow[wKey]['id'] in self.ARR_RateTL :
-					continue
-				
-				#############################
-				# 新トゥートへの対応
-				self.__copeFollow( self.ARR_NewFollow[wKey] )
-				self.STR_Cope["Now_Cope"] += 1
-		
-		#############################
-		# リプライチェック
-##		if gVal.STR_Config['RIP_Favo']=="on" :
-		if gVal.STR_MasterConfig['RIP_Favo']=="on" :
-			wKeylist = self.ARR_NewRip.keys()
-			for wKey in wKeylist :
-				#############################
-				# チェックするので新過去TLに保管
-				self.ARR_UpdateTL.append( self.ARR_NewRip[wKey]['id'] )
-				
-				#############################
-				# 過去チェックしたトゥートか
-				if self.ARR_NewRip[wKey]['id'] in self.ARR_RateTL :
-					continue
-				
-				#############################
-				# 新トゥートへの対応
-				self.__copeRIP( self.ARR_NewRip[wKey] )
-				self.STR_Cope["Now_Cope"] += 1
+			
+			#############################
+			# 新トゥートへの対応
+			self.__cope( wROW )
+			self.STR_Cope["Now_Cope"] += 1
 		
 		#############################
 		# 通知制限の保存
@@ -255,19 +198,19 @@ class CLS_LookRIP():
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_Indlim failed" )
 ###			return
 		
-		#############################
-		# 新・過去ふぁぼ保存
-		wRes = self.Set_RateFV()
-		if wRes!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateFV failed" )
-###			return
-		
+##		#############################
+##		# 新・過去ふぁぼ保存
+##		wRes = self.Set_RateFV()
+##		if wRes!=True :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateFV failed" )
+##			return
+##		
 		#############################
 		# 新・過去RIP保存
 		wRes = self.Set_RateRIP()
 		if wRes!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateRIP failed" )
-###			return
+			return
 		
 		#############################
 		# 処理結果ログ
@@ -275,6 +218,7 @@ class CLS_LookRIP():
 		wStr = wStr + "Ind=[Cope:" + str(self.STR_Cope['Ind_Cope']) + " On:" + str(self.STR_Cope['Ind_On']) + " Off:" + str(self.STR_Cope['Ind_Off'])
 		wStr = wStr + " Invalid:" + str(self.STR_Cope['Ind_Inv']) + " Failed:" + str(self.STR_Cope['Ind_Fail']) + "]"
 		wStr = wStr + " Favo=" + str(self.STR_Cope['Now_Favo']) + " Follow=" + str(self.STR_Cope['Now_Follow']) + " Reind=" + str(self.STR_Cope['Now_Reind'])
+
 		if gVal.FLG_Test_Mode==False :
 			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
 		else:
@@ -285,121 +229,85 @@ class CLS_LookRIP():
 
 
 #####################################################
+# 新トゥートへの対応
+#####################################################
+	def __cope( self, inROW ) :
+		#############################
+		# 種別：ふぁぼ or ブースト
+		if inROW['type']=="favourite" or inROW['type']=="reblog" :
+			self.__copeFavo( inROW )
+		
+		#############################
+		# 種別：再通知
+		elif inROW['type']=="reind" :
+			self.__copeReind( inROW )
+		
+		#############################
+		# 種別：フォロー
+		elif inROW['type']=="follow" :
+			self.__copeFollow( inROW )
+		
+		#############################
+		# 種別：めんしょん
+		elif inROW['type']=="mention" :
+			self.__copeRandomReply( inROW )
+		
+		return
+
+
+
+#####################################################
 # 新ふぁぼ、ぶーすと通知への対応
 #####################################################
 	def __copeFavo( self, inROW ) :
 		#############################
-		# 自アカウント情報
-		wAccount = self.Obj_Parent.CHR_Account.split("@")
+		# ユーザ名の変換
+		wFulluser = CLS_UserData.sUserCheck( self.Obj_Parent.CHR_Account )
+		if wFulluser['Result']!=True :
+			###今のところ通らないルート
+			return False
+		wDomain = wFulluser['Domain']
 		
 		#############################
 		# ファボられたトゥートURL
-		wToot_Url = "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
-		
-		#############################
-		# spoiler_textが設定されていたら、そちらで通知を出す
-		if inROW['spoiler_text'] != "" :
-			wCont = inROW['spoiler_text']
+		wToot_Url = "https://" + wDomain + gVal.DEF_TOOT_SUBURL + inROW['status_id']
 		
 		#############################
 		# トゥートが140字超えの場合、切り払う
-		else :
-			if len(inROW['content'])>140 :
-				wCont = inROW['content'][0:139] + "(以下略)"
-			else:
-				wCont = inROW['content']
+		if len(inROW['content'])>140 :
+			wCHR_Body = inROW['content'][0:139] + "(以下略)"
+		else:
+			wCHR_Body = inROW['content']
+		
+		#############################
+		# CW付きの場合
+		if inROW['spoiler_text'] != "" :
+			wCHR_Body = inROW['spoiler_text'] + '\n' + wCHR_Body
 		
 		#############################
 		# 画像(サムネ)があればURLを付ける
-##		for wMediaURL in inROW['media_attachments'] :
-##			wCont = wCont + " " + wMediaURL
 		if len( inROW['media_attachments'] )>0 :
-			wCont = wCont + "【画像あり】"
+			wCHR_Body = wCHR_Body + "【画像あり】"
 		
-		#############################
-		# トゥートの組み立て
-		
-		#############################
-		# CWトゥートで送信
-##		if gVal.STR_Config['IND_Favo_CW']=="on" :
 		#############################
 		# タイトルの組み立て
-		wSpoText = self.DEF_TITLE_INFORMATION + "注目されたトゥート"
+		wCHR_Title = "[注目されたトゥート]"
 		
 		#############################
 		# トゥートの組み立て
-		wToot = "以下のトゥートが注目されました。:" + '\n'
-##		wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
-		wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iActionTag'] + '\n'
-		wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
-		
-		#############################
-		# 管理者がいれば通知する
-		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-			wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+		wCHR_Toot = "以下のトゥートが注目されました。:" + '\n'
+		wCHR_Toot = wCHR_Toot + wCHR_Body + '\n' + wToot_Url + '\n' + "#" + gVal.STR_MasterConfig['iActionTag']
 		
 		#############################
 		# トゥートの送信
-		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, spoiler_text=wSpoText, visibility=inROW['visibility'] )
-		
-##		#############################
-##		# ノーマルのトゥートで送信
-##		else :
-##			#############################
-##			# トゥートの組み立て
-##			wToot = self.DEF_TITLE_INFORMATION + " 以下のトゥートが注目されました。:" + '\n'
-##			wToot = wToot + wCont + " " + gVal.STR_MasterConfig['iFavoTag'] + '\n'
-##			wToot = wToot + "https://" + wAccount[1] + gVal.DEF_TOOT_SUBURL + inROW['status_id']
-##			
-##			#############################
-##			# 管理者がいれば通知する
-##			if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-##				wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
-##			
-##			#############################
-##			# トゥートの送信
-##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
-		
-		#############################
-		# 結果判定
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, spoiler_text=wCHR_Title, visibility=inROW['visibility'] )
 		if wRes['Result']!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeFavo: Mastodon error: " + wRes['Reason'] )
-			return
+			return False
 		
 		self.STR_Ind['Count'] += 1	#通知制限カウント
 		self.STR_Cope['Now_Favo'] += 1
-		return
-
-
-
-#####################################################
-# 新ふぉろー通知への対応
-#####################################################
-	def __copeFollow( self, inROW ) :
-		#############################
-		# 自アカウント情報
-		wAccount = self.Obj_Parent.CHR_Account.split("@")
-		
-		#############################
-		# トゥートの組み立て
-		wToot = self.DEF_TITLE_NEW_FOLLOWER + " " + inROW['display_name'] + " (" + inROW['Fulluser'] + ") さんにフォローされました。"
-##		wToot = wToot + " " + gVal.STR_MasterConfig['iFavoTag']
-		wToot = wToot + " " + gVal.STR_MasterConfig['iActionTag']
-		
-		#############################
-		# 管理者がいれば通知する
-		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-			wToot = wToot + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
-		
-		#############################
-		# トゥートの送信
-		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
-		if wRes['Result']!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeFollow: Mastodon error: " + wRes['Reason'] )
-			return
-		
-		self.STR_Cope['Now_Follow'] += 1
-		return
+		return True
 
 
 
@@ -408,35 +316,47 @@ class CLS_LookRIP():
 #####################################################
 	def __copeReind( self, inROW ) :
 		#############################
-		# トゥートの組み立て
+		# タイトルの組み立て
+		wCHR_Title = inROW['spoiler_text']
 		
 		#############################
-		# CWトゥートで送信
-##		if gVal.STR_Config['IND_Favo_CW']=="on" :
-		wSpoText = inROW['spoiler_text']
-		wToot    = inROW['content']
+		# トゥートの組み立て
+		wCHR_Toot = inROW['content']
 		
 		#############################
 		# トゥートの送信
-		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, spoiler_text=wSpoText, visibility=inROW['visibility'] )
-		
-##		#############################
-##		# ノーマルのトゥートで送信
-##		else :
-##			wToot = inROW['content']
-##			
-##			#############################
-##			# トゥートの送信
-##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility=inROW['visibility'] )
-		
-		#############################
-		# 結果判定
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, spoiler_text=wCHR_Title, visibility=inROW['visibility'] )
 		if wRes['Result']!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeReind: Mastodon error: " + wRes['Reason'] )
-			return
+			return False
 		
 		self.STR_Ind['Count'] += 1	#通知制限カウント
 		self.STR_Cope['Now_Reind'] += 1
+		return True
+
+
+
+#####################################################
+# 新ふぉろー通知への対応
+#####################################################
+	def __copeFollow( self, inROW ) :
+		#############################
+		# タイトルの組み立て
+		wCHR_Title = self.DEF_TITLE_NEW_FOLLOWER
+		
+		#############################
+		# トゥートの組み立て
+		wCHR_Toot = self.DEF_TITLE_NEW_FOLLOWER + " " + inROW['display_name'] + " (" + inROW['Fulluser'] + ") さんにフォローされました。"
+		wCHR_Toot = wCHR_Toot + '\n' + "#" + gVal.STR_MasterConfig['iActionTag']
+		
+		#############################
+		# トゥートの送信
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, spoiler_text=wCHR_Title, visibility="public" )
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeFollow: Mastodon error: " + wRes['Reason'] )
+			return False
+		
+		self.STR_Cope['Now_Follow'] += 1
 		return
 
 
@@ -446,25 +366,90 @@ class CLS_LookRIP():
 #####################################################
 	def __copeRIP( self, inROW ) :
 		#############################
-		# directかprivateリプライの場合はニコる
-		if inROW['visibility']=="direct" or \
-		   inROW['visibility']=="private" :
-##		   ( inROW['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" ) :
-			wRes = self.Obj_Parent.OBJ_MyDon.Favo( inROW['status_id'] )
-			if wRes['Result']!=True :
-				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeRIP: Favo error: " + wRes['Reason'] )
-				return
+		# Masterの場合、ランダムリプライ動作をおこなう
+		if gVal.STR_MasterConfig['MasterUser']==self.Obj_Parent.CHR_Account :
+			if self.__copeRandomReply( inROW )!=True :
+				self.STR_Cope['Ind_Fail'] += 1
+				return False
 		
 		#############################
-		# public、unlistedの場合はブーストする
+		# Subの場合、リプライブースト動作をおこなう
+		#   public、unlisted =>ブースト
+		#   private、direct  =>ニコる
 		else :
-			wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['status_id'] )
-			if wRes['Result']!=True :
-				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeRIP: Boost error: " + wRes['Reason'] )
-				return
+			if inROW['visibility']=="public" or inROW['visibility']=="unlisted" :
+				wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['status_id'] )
+				if wRes['Result']!=True :
+					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeRIP: Mastodon error(Boost): " + wRes['Reason'] )
+					return False
+			else :
+				wRes = self.Obj_Parent.OBJ_MyDon.Favo( inROW['status_id'] )
+				if wRes['Result']!=True :
+					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __copeRIP: Mastodon error(Favo): " + wRes['Reason'] )
+					return False
 		
 		self.STR_Cope['Now_Rip'] += 1
-		return
+		return True
+
+
+
+#####################################################
+# ランダムリプライ *Master機能
+#####################################################
+	def __copeRandomReply( self, inROW ) :
+		
+		wFLG_Hit = False
+		#############################
+		#解析種類の判定
+		wKeyList = self.ARR_AnapTL.keys()
+		for wKey in wKeyList :
+			#############################
+			# 解析：通常（指定リプライ）
+			if self.ARR_AnapTL[wKey]['Kind']=="r" :
+				###マッチチェック
+				wRes = CLS_OSIF.sRe_Search( self.ARR_AnapTL[wKey]['Pattern'], inROW['content'] )
+				if not wRes :
+					##アンマッチ
+					continue
+				###実行
+				if self.NormalRipry( self.ARR_AnapTL[wKey]['File'], inROW )!=True :
+					break
+				wFLG_Hit = True
+				break
+			
+			#############################
+			# 解析：ワード学習
+			if self.ARR_AnapTL[wKey]['Kind']=="_sys_study" :
+				###マッチチェック
+				wRes = CLS_OSIF.sRe_Search( self.ARR_AnapTL[wKey]['Pattern'], inROW['content'] )
+				if not wRes :
+					##アンマッチ
+					continue
+				###実行
+				if self.WordStudy( inROW, self.ARR_AnapTL[wKey]['Pattern'] )!=True :
+					break
+				wFLG_Hit = True
+				break
+		
+		#############################
+		# パターンHitしない場合
+		# 収集ワードからランダム返信する
+		if wFLG_Hit==False :
+			#############################
+			# 学習機能が有効なら、収集ワードでリプライを返す
+			if gVal.STR_MasterConfig['WordStudy']=="on" :
+				if self.WordReply( inROW )!=True :
+					return False
+			
+			#############################
+			# 学習機能が無効なら、固定リプライを返す
+			else :
+				if self.OtherReply( inROW )!=True :
+					return False
+		
+		#############################
+		# 正常
+		return True
 
 
 
@@ -472,15 +457,14 @@ class CLS_LookRIP():
 # RIP取得
 #####################################################
 	def Get_RIP(self):
-###		self.ARR_NewTL = []
-		self.ARR_NewFavo   = {}		#ふぁぼ
-		self.ARR_NewReblog = {}		#ぶーすと
-		self.ARR_NewFollow = {}		#ふぉろー
-		self.ARR_NewRip    = {}		#リプライ
+		self.ARR_NewTL = {}
+##		self.ARR_NewFavo   = {}		#ふぁぼ
+##		self.ARR_NewReblog = {}		#ぶーすと
+##		self.ARR_NewFollow = {}		#ふぉろー
+##		self.ARR_NewRip    = {}		#リプライ
 		
 		wGet_TootList = []
 		wNext_Id = None
-##		wMax_Toots = gVal.STR_Config["getRIPnum"]
 		wMax_Toots = gVal.DEF_STR_TLNUM["getRIPnum"]
 		while (len(wGet_TootList) < wMax_Toots ):
 			#############################
@@ -521,7 +505,8 @@ class CLS_LookRIP():
 		
 		#############################
 		# type別に取り込み先を振り分け
-		wFavID = []
+###		wFavID = []
+		self.ARR_NowFavID = []
 		for wToot in wGet_TootList :
 			self.STR_Cope['Ind_Cope'] += 1
 			
@@ -546,110 +531,18 @@ class CLS_LookRIP():
 			
 			#############################
 			# ふぁぼ or ぶーすと
-			if ( wToot['type']=="favourite" or wToot['type']=="reblog" ) \
-			  and gVal.STR_MasterConfig['IND_Favo']=="on" :
-##			  and gVal.STR_Config['IND_Favo']=="on" :
-				### タグなしcontents
-				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
-				wInde = wCont.find( "[Admin]" )
-				if wInde>=0 :
-					wCont = wCont[0:wInde]
-				
-				### @ 入り(リプライ)のふぁぼ、ブーストは通知しない
-				if wCont.find("@") >= 0 :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-##				### directの場合、通知しない
-##				if wToot['status']['visibility']=="direct" :
-##					self.STR_Cope['Ind_Inv'] += 1
-##					continue
-##				### privateの場合、configで有効でなければ通知しない
-##				if wToot['status']['visibility']=="private" and gVal.STR_Config['IND_Favo_Unl']!="on" :
-##					self.STR_Cope['Ind_Inv'] += 1
-##					continue
-				### public以外の場合、通知しない
-				if wToot['status']['visibility']!="public" :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-				### ユーザ登録されていたら通知しない
-				wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
-				if wUserChk['Result']!=True or wUserChk['Registed']==True :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-				
-				### 通知のふぁぼ、ぶーすとか
-##				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
-				if wCont.find( gVal.STR_MasterConfig['iActionTag'] ) >= 0 :
-					### ふぉろー通知のふぁぼ、ぶーすとは通知しない
-					if wCont.find( self.DEF_TITLE_NEW_FOLLOWER ) == 0 :
-						self.STR_Cope['Ind_Inv'] += 1
-						continue
-					
-					### 通知の再通知
-					### 通知元のトゥートidを抜き出す
-					wID = self.__getIndiTootID( wCont )
-					if wID==-1 :
-						self.STR_Cope['Ind_Inv'] += 1
-						continue
-					
-##					CLS_OSIF.sPrn( "xxx1: " + wID )
-					### この周では既に通知を出してるid
-					if wID in wFavID :
-						self.STR_Cope['Ind_Inv'] += 1
-						continue
-					
-					wFavID.append( wID )	#被り防止
-					self.__setReindRIP( self.ARR_Reind, wFulluser['Fulluser'], wGetTime, wToot, wID )
-					self.STR_Cope['Ind_On'] += 1
-					continue
-				
-				wID = str(wToot['status']['id'])
-				### この周では既に通知を出してるid
-				if wID in wFavID :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-				
-				wFavID.append( wID )	#被り防止
-				self.__setNewRIP( self.ARR_NewFavo, wFulluser['Fulluser'], wGetTime, wToot )
-				self.STR_Cope['Ind_On'] += 1
+			if wToot['type']=="favourite" or wToot['type']=="reblog" :
+				self.__getRIP_FavBoost( wToot, wFulluser['Fulluser'], wGetTime )
 			
 			#############################
 			# ふぉろー
-##			elif wToot['type']=="follow" and gVal.STR_Config['IND_Follow']=="on" :
-			elif wToot['type']=="follow" and gVal.STR_MasterConfig['IND_Follow']=="on" :
-				### ユーザ登録されていたら通知しない
-				wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
-				if wUserChk['Result']!=True or wUserChk['Registed']==True :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-				
-				self.__setNewRIP( self.ARR_NewFollow, wFulluser['Fulluser'], wGetTime, wToot )
-				self.STR_Cope['Ind_On'] += 1
+			elif wToot['type']=="follow" :
+				self.__getRIP_Follow( wToot, wFulluser['Fulluser'], wGetTime )
 			
 			#############################
 			# めんしょん
-##			elif wToot['type']=="mention" and gVal.STR_Config['RIP_Favo']=="on" :
-			elif wToot['type']=="mention" and gVal.STR_MasterConfig['RIP_Favo']=="on" :
-				### 通知付きのめんしょんは反応しない(=adminへの通知)
-				wCont = CLS_OSIF.sDel_HTML( wToot['status']['content'] )
-##				if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
-				if wCont.find( gVal.STR_MasterConfig['iActionTag'] ) >= 0 :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-				
-				### PRトゥートには反応しない(=adminへの通知)
-				if wCont.find( gVal.STR_MasterConfig['prTag'] ) >= 0 :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-				
-				### ユーザ登録されていたら反応しない(恥ずかしい)
-				wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
-				if wUserChk['Result']!=True or wUserChk['Registed']==True :
-					self.STR_Cope['Ind_Inv'] += 1
-					continue
-				
-				self.__setNewRIP( self.ARR_NewRip, wFulluser['Fulluser'], wGetTime, wToot )
-				self.STR_Cope['Ind_On'] += 1
+			elif wToot['type']=="mention" :
+				self.__getRIP_Mention( wToot, wFulluser['Fulluser'], wGetTime )
 			
 			#############################
 			# その他(あるの？)
@@ -659,77 +552,272 @@ class CLS_LookRIP():
 		return wRes
 
 	#####################################################
+	# ふぁぼorブースト => ふぁぼ通知
+	def __getRIP_FavBoost( self, inROW, inFulluser, inTime ):
+		#############################
+		# 除外判定
+		### Masterか(=完全スルー)
+		if gVal.STR_MasterConfig['MasterUser']==self.Obj_Parent.CHR_Account :
+			return
+		
+		### ふぁぼ通知が有効か
+		if gVal.STR_MasterConfig['IND_Favo']!="on" :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		### statusなし
+		if "status" not in inROW :
+##			self.STR_Cope['Ind_Inv'] += 1
+			self.STR_Cope['Ind_Fail'] += 1
+			return
+		
+		### directの場合
+		if inROW['status']['visibility']=="direct" :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		### ユーザ登録されていた
+		wUserChk = CLS_UserData.sUserCheck( inFulluser )
+		if wUserChk['Result']!=True or wUserChk['Registed']==True :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		wCont = CLS_OSIF.sDel_HTML( inROW['status']['content'] )
+		### @ 入り(リプライ)のふぁぼ、ブースト
+###		if CLS_OSIF.sRe_Search( "@", wCont )==0 :
+		wRes = CLS_OSIF.sRe_Search( "@", wCont )
+		if wRes :
+			if wRes.start()==0 :
+				self.STR_Cope['Ind_Inv'] += 1
+				return
+		
+		### タグ付き(アクション通知以外)
+##		if CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )>=0 or + \
+##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )>=0 or + \
+##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )>=0 :
+		wRes_1 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )
+		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )
+		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )
+		if wRes_1 or wRes_2 or wRes_3 :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		#############################
+		# アクション通知への反応 =>再通知
+##		if CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )>=0 :
+		wRes = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )
+		if wRes :
+			### public以外の場合
+			if inROW['status']['visibility']!="public" :
+				self.STR_Cope['Ind_Inv'] += 1
+				return
+			
+			###フォロー通知は除外
+##			if CLS_OSIF.sRe_Search( self.DEF_TITLE_NEW_FOLLOWER, wCont )>=0 :
+			wRes = CLS_OSIF.sRe_Search( self.DEF_TITLE_NEW_FOLLOWER, wCont )
+			if wRes :
+				self.STR_Cope['Ind_Inv'] += 1
+				return
+			
+			### 通知元のトゥートidを抜き出す
+			wID = self.__getRIP_IndiTootID( wCont )
+			if wID==-1 :
+				self.STR_Cope['Ind_Inv'] += 1
+				return
+			
+			### この周では既に通知済みのID
+			wID = str( inROW['id'] )
+			if wID in self.ARR_NowFavID :
+				self.STR_Cope['Ind_Inv'] += 1
+				return
+			self.ARR_NowFavID.append( wID )
+			
+			self.__getRIP_SetReindRIP( inROW, inFulluser, inTime, wID )
+			self.STR_Cope['Ind_On'] += 1
+			return
+		
+		#############################
+		# アクション通知を出す
+		### この周では既に通知済みのID
+		wID = str( inROW['id'] )
+		if wID in self.ARR_NowFavID :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		self.ARR_NowFavID.append( wID )
+		
+		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
+		self.STR_Cope['Ind_On'] += 1
+		return
+
+##	CLS_OSIF.sPrn( "xxx1: " + wID )
+
+	#####################################################
+	# フォロー => フォロー通知
+	def __getRIP_Follow( self, inROW, inFulluser, inTime ):
+		#############################
+		# 除外判定
+		### Masterか(=完全スルー)
+		if gVal.STR_MasterConfig['MasterUser']==self.Obj_Parent.CHR_Account :
+			return
+		
+		### フォロー通知が有効か
+		if gVal.STR_MasterConfig['IND_Follow']!="on" :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		### ユーザ登録されていた
+		wUserChk = CLS_UserData.sUserCheck( inFulluser )
+		if wUserChk['Result']!=True or wUserChk['Registed']==True :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		#############################
+		# アクション通知を出す
+		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
+		self.STR_Cope['Ind_On'] += 1
+		return
+
+	#####################################################
+	# めんしょん
+	def __getRIP_Mention( self, inROW, inFulluser, inTime ):
+		#############################
+		# 除外判定
+		###  Subの場合、リプライブーストが有効か
+		if gVal.STR_MasterConfig['MasterUser']!=self.Obj_Parent.CHR_Account and \
+		   gVal.STR_MasterConfig['RIP_Favo']!="on" :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		### statusなし
+		if "status" not in inROW :
+##			self.STR_Cope['Ind_Inv'] += 1
+			self.STR_Cope['Ind_Fail'] += 1
+			return
+		
+##		### directの場合
+##		if inROW['status']['visibility']=="direct" :
+##			self.STR_Cope['Ind_Inv'] += 1
+##			return
+##		
+##		### ユーザ登録されていた
+##		wUserChk = CLS_UserData.sUserCheck( wFulluser['Fulluser'] )
+##		if wUserChk['Result']!=True or wUserChk['Registed']==True :
+##			self.STR_Cope['Ind_Inv'] += 1
+##			return
+##		
+		wCont = CLS_OSIF.sDel_HTML( inROW['status']['content'] )
+		### タグ付き(アクション通知以外)
+##		if CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )>=0 or + \
+##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )>=0 or + \
+##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )>=0 or + \
+##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )>=0 :
+		wRes_1 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )
+		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )
+		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )
+		wRes_4 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )
+		if wRes_1 or wRes_2 or wRes_3 or wRes_4 :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		#############################
+		# アクション通知を出す
+		### この周では既に通知済みのID
+		wID = str( inROW['id'] )
+		if wID in self.ARR_NowFavID :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		self.ARR_NowFavID.append( wID )
+		
+		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
+		self.STR_Cope['Ind_On'] += 1
+		return
+
+	#####################################################
 	# 辞書に追加
-	def __setNewRIP( self, outARRrip, inFulluser, inTime, inToot ):
+	def __getRIP_SetNewRIP( self, inROW, inFulluser, inTime ):
 		#############################
 		# 辞書の枠生成
-		wIndex = len( outARRrip )
-		outARRrip.update({ wIndex : "" })
-		outARRrip[wIndex] = {}
+		wIndex = self.__getRIP_CreateData()
 		
 		#############################
 		# 相手、時間、通知id
-		outARRrip[wIndex].update({ "id"           : str( inToot['id'] ) })
-		outARRrip[wIndex].update({ "Fulluser"     : inFulluser })
-		outARRrip[wIndex].update({ "display_name" : inToot['account']['display_name'] })
-		outARRrip[wIndex].update({ "Timedate"     : inTime })
-		outARRrip[wIndex].update({ "visibility"   : "public" })
-		outARRrip[wIndex].update({ "created_at"   : inToot['created_at'] })
-		
-		#############################
-		# 公開範囲
-		if "status" in inToot :
-			outARRrip[wIndex]['visibility'] = inToot['status']['visibility']
+		self.ARR_NewTL[wIndex]['type'] = inROW['type']
+		self.ARR_NewTL[wIndex]['id']   = str( inROW['id'] )
+		self.ARR_NewTL[wIndex]['Fulluser']   = inFulluser
+		self.ARR_NewTL[wIndex]['display_name'] = inROW['account']['display_name']
+		self.ARR_NewTL[wIndex]['Timedate']   = inTime
+		self.ARR_NewTL[wIndex]['created_at'] = inROW['created_at']
 		
 		#############################
 		# トゥートid、コメント
 		#   ふぁぼ、ぶーすと、りぷらいの時
-		outARRrip[wIndex].update({ "status_id" : None })
-		outARRrip[wIndex].update({ "content"   : None })
-		outARRrip[wIndex].update({ "spoiler_text"      : None })
-		outARRrip[wIndex].update({ "media_attachments" : [] })
-		
-		if "status" in inToot :
-			outARRrip[wIndex]['status_id'] = str(inToot['status']['id'])
-			outARRrip[wIndex]['content']   = CLS_OSIF.sDel_HTML( inToot['status']['content'] )
-			outARRrip[wIndex]['spoiler_text'] = CLS_OSIF.sDel_HTML( inToot['status']['spoiler_text'] )
-			if "media_attachments" in inToot['status'] :
-				for wMedia in inToot['status']['media_attachments'] :
-					outARRrip[wIndex]['media_attachments'].append( wMedia['preview_url'] )
+		### statusなし
+		if "status" in inROW :
+			self.ARR_NewTL[wIndex]['visibility'] = inROW['status']['visibility']
+			
+			self.ARR_NewTL[wIndex]['status_id'] = str(inROW['status']['id'])
+			self.ARR_NewTL[wIndex]['content']   = CLS_OSIF.sDel_HTML( inROW['status']['content'] )
+			self.ARR_NewTL[wIndex]['spoiler_text'] = CLS_OSIF.sDel_HTML( inROW['status']['spoiler_text'] )
+			
+			### 画像付き
+			self.ARR_NewTL[wIndex]['media_attachments'] = []
+			if "media_attachments" in inROW['status'] :
+				for wMedia in inROW['status']['media_attachments'] :
+					self.ARR_NewTL[wIndex]['media_attachments'].append( wMedia['preview_url'] )
 		
 		return
 
 	#####################################################
 	# 辞書に追加 (通知の再通知)
-	def __setReindRIP( self, outARRrip, inFulluser, inTime, inToot, inStatusID ):
+	def __getRIP_SetReindRIP( self, inROW, inFulluser, inTime, inStatusID ):
 		#############################
 		# 辞書の枠生成
-		wIndex = len( outARRrip )
-		outARRrip.update({ wIndex : "" })
-		outARRrip[wIndex] = {}
-		
-		wCont = inToot['status']['content']
-		wCont = wCont.replace( "</span></a></p><p>[Admin] <span class=\"h-card\">", '\n'+"[Admin] " )
-		wCont = wCont.replace( "<br />", '\n' )
-		wCont = CLS_OSIF.sDel_HTML( wCont )
+		wIndex = self.__getRIP_CreateData()
 		
 		#############################
 		# 相手、時間、通知id
-		outARRrip[wIndex].update({ "id"           : str( inToot['id'] ) })
-		outARRrip[wIndex].update({ "Fulluser"     : inFulluser })
-		outARRrip[wIndex].update({ "display_name" : inToot['account']['display_name'] })
-		outARRrip[wIndex].update({ "Timedate"     : inTime })
-		outARRrip[wIndex].update({ "visibility"   : inToot['status']['visibility'] })
-		outARRrip[wIndex].update({ "created_at"   : inToot['created_at'] })
-		outARRrip[wIndex].update({ "status_id" : str( inStatusID ) })
-		outARRrip[wIndex].update({ "content"   : wCont })
-		outARRrip[wIndex].update({ "spoiler_text"      : CLS_OSIF.sDel_HTML( inToot['status']['spoiler_text'] ) })
-		outARRrip[wIndex].update({ "media_attachments" : [] })
+		self.ARR_NewTL[wIndex]['type'] = "reind"	##アレンジtype
+		self.ARR_NewTL[wIndex]['id']   = str( inROW['id'] )
+		self.ARR_NewTL[wIndex]['Fulluser']   = inFulluser
+		self.ARR_NewTL[wIndex]['display_name'] = inROW['account']['display_name']
+		self.ARR_NewTL[wIndex]['Timedate']   = inTime
+		self.ARR_NewTL[wIndex]['visibility'] = inROW['status']['visibility']
+		self.ARR_NewTL[wIndex]['created_at'] = inROW['created_at']
+		self.ARR_NewTL[wIndex]['status_id']  = str( inStatusID )
+		self.ARR_NewTL[wIndex]['content']    = CLS_OSIF.sDel_HTML( inROW['status']['content'] )
+		self.ARR_NewTL[wIndex]['spoiler_text'] = CLS_OSIF.sDel_HTML( inROW['status']['spoiler_text'] )
+		self.ARR_NewTL[wIndex]['media_attachments'] = []
 		return
 
 	#####################################################
+	# 辞書枠の生成
+	def __getRIP_CreateData(self):
+		#############################
+		# インデックスの取得
+		wKeyList = self.ARR_NewTL.keys()
+		wIndex = len( wKeyList )
+		
+		#############################
+		# 辞書の枠生成(第1層)
+		self.ARR_NewTL.update({ wIndex : "" })
+		self.ARR_NewTL[wIndex] = {}
+		self.ARR_NewTL[wIndex].update({ "type"			: "" })
+		self.ARR_NewTL[wIndex].update({ "id"			: "" })
+		self.ARR_NewTL[wIndex].update({ "Fulluser"		: "" })
+		self.ARR_NewTL[wIndex].update({ "display_name"	: "" })
+		self.ARR_NewTL[wIndex].update({ "Timedate"		: "" })
+		self.ARR_NewTL[wIndex].update({ "visibility"	: "" })
+		self.ARR_NewTL[wIndex].update({ "created_at"	: "" })
+		self.ARR_NewTL[wIndex].update({ "status_id"		: "" })
+		self.ARR_NewTL[wIndex].update({ "content"		: "" })
+		self.ARR_NewTL[wIndex].update({ "spoiler_text"	: "" })
+		self.ARR_NewTL[wIndex].update({ "media_attachments" : [] })
+		return wIndex
+
+	#####################################################
 	# 通知元のidを返す
-	def __getIndiTootID( self, inToot ):
+###	def __getIndiTootID( self, inToot ):
+	def __getRIP_IndiTootID( self, inToot ):
 		#############################
 		# URLの検索キー
 		wAccount = self.Obj_Parent.CHR_Account.split("@")
@@ -750,42 +838,42 @@ class CLS_LookRIP():
 #####################################################
 # 過去ふぁぼ取得・保存
 #####################################################
-	def Get_RateFV(self):
-		#############################
-		# 読み出し先初期化
-		wRateList = []
-		
-		#############################
-		# ファイル読み込み
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_FavFile']
-		if CLS_File.sReadFile( wFile_path, outLine=wRateList )!=True :
-			return False	#失敗
-		
-		#############################
-		# 過去ふぁぼの作成
-		# 反応時間内のidを詰め込む
-		self.ARR_RateFV = []
-		for wLine in wRateList :
-			wFavData = wLine.split(",")
-			wGetLag  = CLS_OSIF.sTimeLag( wFavData[1], inThreshold=self.VAL_ReaRIPmin )
-			if wGetLag['Result']!=True :
-				continue
-			if wGetLag['Beyond']==True :
-				continue	#反応時間外
-			
-			self.ARR_RateFV.append( wFavData[0] )
-		
-		return True			#成功
-
-	#####################################################
-	def Set_RateFV(self):
-		#############################
-		# ファイル書き込み (改行つき)
-		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_FavFile']
-		if CLS_File.sWriteFile( wFile_path, self.ARR_UpdateFV, inRT=True )!=True :
-			return False	#失敗
-		
-		return True			#成功
+#	def Get_RateFV(self):
+#		#############################
+#		# 読み出し先初期化
+#		wRateList = []
+#		
+#		#############################
+#		# ファイル読み込み
+#		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_FavFile']
+#		if CLS_File.sReadFile( wFile_path, outLine=wRateList )!=True :
+#			return False	#失敗
+#		
+#		#############################
+#		# 過去ふぁぼの作成
+#		# 反応時間内のidを詰め込む
+#		self.ARR_RateFV = []
+#		for wLine in wRateList :
+#			wFavData = wLine.split(",")
+#			wGetLag  = CLS_OSIF.sTimeLag( wFavData[1], inThreshold=self.VAL_ReaRIPmin )
+#			if wGetLag['Result']!=True :
+#				continue
+#			if wGetLag['Beyond']==True :
+#				continue	#反応時間外
+#			
+#			self.ARR_RateFV.append( wFavData[0] )
+#		
+#		return True			#成功
+#
+#	#####################################################
+#	def Set_RateFV(self):
+#		#############################
+#		# ファイル書き込み (改行つき)
+#		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_FavFile']
+#		if CLS_File.sWriteFile( wFile_path, self.ARR_UpdateFV, inRT=True )!=True :
+#			return False	#失敗
+#		
+#		return True			#成功
 
 
 
@@ -813,6 +901,59 @@ class CLS_LookRIP():
 		if CLS_File.sWriteFile( wFile_path, self.ARR_UpdateTL, inRT=True )!=True :
 			return False	#失敗
 		
+		return True			#成功
+
+##	#####################################################
+##	def Init_RateRIP(self):
+##		#############################
+##		# IDを詰め込む
+##		self.ARR_UpdateTL = []
+##		wKeyList = self.ARR_NewTL.keys()
+##		for wKey in wKeyList :
+##			self.ARR_UpdateTL.append( self.ARR_NewTL[wKey]['id'] )
+##		
+##		#############################
+##		# ファイル書き込み (改行つき)
+##		self.Set_RateRIP()
+##		return
+
+
+
+#####################################################
+# TL解析パターン読み出し
+#####################################################
+	def Get_Anap(self):
+		#############################
+		# 読み出し先初期化
+		self.ARR_AnapTL = {}
+		wAnapList = []	#解析パターンファイル
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.DEF_STR_FILE['PatternRIPFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wAnapList )!=True :
+			return False	#失敗
+		
+		#############################
+		# データ枠の作成
+		wIndex = 0
+		for wLine in wAnapList :
+			wLine = wLine.split( gVal.DEF_DATA_BOUNDARY )
+			if len(wLine)==2 :
+				wLine.append("")	#ダミー
+			if len(wLine)!=3 :
+				continue	#フォーマットになってない
+			if wLine[0].find("#")==0 :
+				continue	#コメントアウト
+			
+			self.ARR_AnapTL.update({ wIndex : "" })
+			self.ARR_AnapTL[wIndex] = {}
+			self.ARR_AnapTL[wIndex].update({ "Kind"    : wLine[0] })
+			self.ARR_AnapTL[wIndex].update({ "Pattern" : wLine[1] })
+			self.ARR_AnapTL[wIndex].update({ "File"    : wLine[2] })
+			wIndex += 1
+		
+		###なしでもOKとする
 		return True			#成功
 
 
@@ -890,14 +1031,12 @@ class CLS_LookRIP():
 		
 		#############################
 		# 回数チェック
-##		if self.STR_Ind['Count']<gVal.STR_Config['indLimcnt'] :
 		if self.STR_Ind['Count']<gVal.DEF_STR_TLNUM['indLimcnt'] :
 			if self.STR_Ind['Count']==0 :	#最初にカウント開始した時間をメモる
 				self.STR_Ind['TimeDate'] = str(inCreateAt)
 			return True		#制限なし
 		
 		# 規制中
-##		elif self.STR_Ind['Count']>gVal.STR_Config['indLimcnt'] :
 		elif self.STR_Ind['Count']>gVal.DEF_STR_TLNUM['indLimcnt'] :
 			self.STR_Ind['Count'] += 1	#カウントはする
 			self.FLG_indLim = True
@@ -907,18 +1046,239 @@ class CLS_LookRIP():
 		# 制限開始
 		####  self.STR_Ind['Count'] == gVal.STR_Config['indLimcnt']
 		self.STR_Ind['Count'] += 1	#カウントはする
-###		self.STR_Ind['TimeDate'] = str(inCreateAt)
 		self.FLG_indLim = True
 		self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_LookRIP: Check_Indlim: 通知制限 [開始]" )
 		
 		#############################
 		# 管理者がいれば通知する
 		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-##			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.STR_Config['indLimmin']) + "分"
 			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.DEF_STR_TLNUM['indLimmin']) + "分"
 			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility="direct" )
 		
 		return False	#制限
+
+
+
+#####################################################
+# 指定リプライ返信
+#####################################################
+	def NormalRipry( self, inFilename, inROW ):
+		#############################
+		# 候補を取得
+		wARR_Line = self.__get_Rip(inFilename)
+		
+		#############################
+		if len(wARR_Line)==0 :
+			###候補がみつからない
+			return False
+		# [0]..Kine
+		# [1]..Toot
+		
+		#############################
+		#トゥートの組み立て
+		wCHR_Toot = "@" + inROW['Fulluser'] + " " + wARR_Line[1]
+		
+		#############################
+		#トゥート
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=inROW['visibility'] )
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: NormalRipry: Mastodon error: " + wRes['Reason'] )
+			return False
+		
+		return True
+
+	#####################################################
+	def __get_Rip( self, inFilename ):
+		#############################
+		# 読み出し先初期化
+		wARR_Load = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.DEF_STR_FILE['Toot_path'] + inFilename
+		if CLS_File.sReadFile( wFile_path, outLine=wARR_Load )!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __get_Rip: File read is failure: " + wFile_path )
+			return []
+		if len(wARR_Load)==0 :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __get_Rip: The file is empty: " + wFile_path )
+			return []
+		
+		#############################
+		# 候補一覧を取得する
+		wARR_RipKouho = []
+		for wLine in wARR_Load :
+			###文字がない行
+			if len(wLine)==0 :
+				continue
+			###コメントアウト
+			if wLine.find("#")==0 :
+				continue
+			###フォーマット
+			wLine = wLine.split( gVal.DEF_DATA_BOUNDARY )
+			if len(wLine)!=2 :
+				continue
+			wARR_RipKouho.append( wLine )
+		
+		if len(wARR_RipKouho)==0 :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __get_Rip: Riply kouho is zero" )
+			return []
+		
+		#############################
+		# 乱数の取得
+		wRand = CLS_OSIF.sGetRand( len(wARR_RipKouho) )
+		if wRand<0 :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __get_Rip: sGetRand error: " + str(wRand) )
+			return []
+		
+		#############################
+		# リプを出力
+		wLine = wARR_RipKouho[wRand]
+		return wLine
+
+
+
+#####################################################
+# 固定リプライ返信
+#####################################################
+	def OtherReply( self, inROW ):
+		#############################
+		# 候補を取得
+		wCHR_Line = self.__get_RipOther( gVal.DEF_STR_FILE['OtherRIPFile'] )
+		
+		#############################
+		if wCHR_Line=="" :
+			###候補がみつからない
+			return False
+		
+		#############################
+		#トゥートの組み立て
+		wCHR_Toot = "@" + inROW['Fulluser'] + " " + wCHR_Line
+		
+		#############################
+		#トゥート
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=inROW['visibility'] )
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: OtherReply: Mastodon error: " + wRes['Reason'] )
+			return False
+		
+		return True
+
+	#####################################################
+	def __get_RipOther( self, inFilepath ):
+		#############################
+		# 読み出し先初期化
+		wARR_Load = []
+		
+		#############################
+		# ファイル読み込み
+		if CLS_File.sReadFile( inFilepath, outLine=wARR_Load )!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __get_RipOther: File read is failure: " + wFile_path )
+			return []
+		if len(wARR_Load)==0 :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __get_RipOther: The file is empty: " + wFile_path )
+			return ""
+		
+		#############################
+		# 候補一覧を取得する
+		wARR_RipKouho = []
+		for wLine in wARR_Load :
+			###文字がない行
+			if len(wLine)==0 :
+				continue
+			###コメントアウト
+			if wLine.find("#")==0 :
+				continue
+			wARR_RipKouho.append( wLine )
+		
+		if len(wARR_RipKouho)==0 :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __get_RipOther: Riply kouho is zero" )
+			return ""
+		
+		#############################
+		# 乱数の取得
+		wRand = CLS_OSIF.sGetRand( len(wARR_RipKouho) )
+		if wRand<0 :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __get_RipOther: sGetRand error: " + str(wRand) )
+			return ""
+		
+		#############################
+		# リプを出力
+		wLine = wARR_RipKouho[wRand]
+		return wLine
+
+
+
+#####################################################
+# ワード学習
+#####################################################
+	def WordStudy( self, inROW, inPattern ):
+		#############################
+		# 登録単語を取り出す
+		wResReplace = CLS_OSIF.sRe_Replace( inPattern, inROW['content'], "" )
+		###	"Result"	: False,
+		###	"Match"		: False,
+		###	"After"		: None
+		if wResReplace['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: WordStudy: sRe_Replace is failed: content=" + str( inROW['content'] ) )
+			return False
+		if wResReplace['Match']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: WordStudy: Unmatch words: content=" + str( inROW['content'] ) )
+			return False
+		
+		wCont = wResReplace['After']
+		#############################
+		# 学習する
+		wRes = self.Obj_Parent.OBJ_WordCorr.WordStudy( wCont )
+		if wRes==True :
+			###学習成功
+			wCHR_Line = self.__get_RipOther( gVal.DEF_STR_FILE['StudyRIPFile'] )
+			if wCHR_Line=="" :
+				###候補がみつからない
+				return False
+			wVisibility = inROW['visibility']
+		else :
+			###学習失敗
+			wCHR_Line = "この単語は学習できませんでした。: " + wCont
+			wVisibility = "direct"
+		
+		#############################
+		#トゥートの組み立て
+		wCHR_Toot = "@" + inROW['Fulluser'] + " " + wCHR_Line
+		
+		#############################
+		#トゥート
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=wVisibility )
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: WordStudy: Mastodon error: " + wRes['Reason'] )
+			return False
+		
+		return True
+
+
+
+#####################################################
+# ワードリプライ
+#####################################################
+	def WordReply( self, inROW ):
+		#############################
+		# 候補を取得
+		wCHR_Line = self.Obj_Parent.OBJ_WordCorr.GetRandToot()
+		if wCHR_Line=="" :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: WordReply: GetRandToot is failed" )
+			return False
+		
+		#############################
+		#トゥートの組み立て
+		wCHR_Toot = "@" + inROW['Fulluser'] + " " + wCHR_Line
+		
+		#############################
+		#トゥート
+		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=inROW['visibility'] )
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: WordReply: Mastodon error: " + wRes['Reason'] )
+			return False
+		
+		return True
 
 
 
