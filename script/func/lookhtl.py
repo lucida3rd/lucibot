@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/12
+#   Update  ：2019/9/13
 #####################################################
 # Private Function:
 #   __run(self):
@@ -219,7 +219,11 @@ class CLS_LookHTL():
 			#############################
 			# 解析：指定ブースト
 			if self.ARR_AnapTL[wKey]['Kind']=="h" :
-				### 自分が指定ユーザか
+				### 自分のトゥートか
+				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
+					continue	#自分
+				
+				### 自分が指定ユーザではない
 				if self.ARR_AnapTL[wKey]['Fulluser']!="" :
 					if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
 						continue
@@ -245,6 +249,10 @@ class CLS_LookHTL():
 			#############################
 			# 解析：指定フルブースト
 			if self.ARR_AnapTL[wKey]['Kind']=="p" :
+				### 自分のトゥートか
+				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
+					continue	#自分
+				
 				### 自分が指定ユーザではない
 				if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
 					continue	#指定ではない
@@ -266,9 +274,9 @@ class CLS_LookHTL():
 	def __copeCorr( self, inUser, inROW, inCont ):
 		#############################
 		# 除外トゥート
-		### 自分
-		if inUser['Fulluser'] == self.Obj_Parent.CHR_Account :
-			return False
+##		### 自分
+##		if inUser['Fulluser'] == self.Obj_Parent.CHR_Account :
+##			return False
 		
 		### 公開トゥート以外
 		if inROW['visibility']!="public" :
@@ -287,7 +295,9 @@ class CLS_LookHTL():
 		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], inCont )
 		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    inCont )
 		wRes_4 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], inCont )
-		if wRes_1 or wRes_2 or wRes_3 or wRes_4 :
+		wRes_5 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['SystemTag'], inCont )
+##		if wRes_1 or wRes_2 or wRes_3 or wRes_4 :
+		if wRes_1 or wRes_2 or wRes_3 or wRes_4 or wRes_5 :
 			return False
 		
 		return True

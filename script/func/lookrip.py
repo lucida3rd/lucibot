@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/12
+#   Update  ：2019/9/13
 #####################################################
 # Private Function:
 #   __run(self):
@@ -717,7 +717,9 @@ class CLS_LookRIP():
 		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )
 		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )
 		wRes_4 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )
-		if wRes_1 or wRes_2 or wRes_3 or wRes_4 :
+		wRes_5 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['SystemTag'], wCont )
+##		if wRes_1 or wRes_2 or wRes_3 or wRes_4 :
+		if wRes_1 or wRes_2 or wRes_3 or wRes_4 or wRes_5 :
 			self.STR_Cope['Ind_Inv'] += 1
 			return
 		
@@ -1054,8 +1056,16 @@ class CLS_LookRIP():
 		#############################
 		# 管理者がいれば通知する
 		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.DEF_STR_TLNUM['indLimmin']) + "分"
-			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility="direct" )
+##			wToot = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "[info] 通知制限開始: " + str(gVal.DEF_STR_TLNUM['indLimmin']) + "分"
+##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility="direct" )
+			wCHR_Title = "[通知制限開始]"
+			wCHR_Toot  = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "制限時間: " + str(gVal.DEF_STR_TLNUM['indLimmin']) + "分"
+			wCHR_Toot  = wCHR_Toot + '\n' + gVal.STR_MasterConfig['SystemTag']
+			
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, spoiler_text=wCHR_Title, visibility="direct" )
+			if wRes['Result']!=True :
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: Check_Indlim: Mastodon error: " + wRes['Reason'] )
+				return False
 		
 		return False	#制限
 

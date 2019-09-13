@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/12
+#   Update  ：2019/9/13
 #####################################################
 
 #####################################################
@@ -47,6 +47,7 @@ class gVal() :
 		"prTag"				: "[prtoot]",				#PRトゥートタグ
 		"TrafficTag"		: "[traffic]",				#トラヒックトゥートタグ
 		"TwitterTag"		: "",						#Twitter用タグ
+		"SystemTag"			: "[system]",				#システム監視トゥートタグ
 		
 ##		"TwitterUser"	: "",						#twiterユーザ
 		"Twitter"		: "off",					#twiter連携

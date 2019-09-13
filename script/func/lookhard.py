@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ハード監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/12
+#   Update  ：2019/9/13
 #####################################################
 # Private Function:
 #   __run(self):
@@ -163,7 +163,8 @@ class CLS_LookHard:
 		#トゥートの組み立て
 		wCHR_Toot = "@" + gVal.STR_MasterConfig['AdminUser'] + " [SSL証明書期限通知]" + '\n'
 		wCHR_Toot = wCHR_Toot + wCHR_Body + '\n'
-		wCHR_Toot = wCHR_Toot + "期限日：" + '\n' + wCertInfo['After']
+##		wCHR_Toot = wCHR_Toot + "期限日：" + '\n' + wCertInfo['After']
+		wCHR_Toot = wCHR_Toot + "期限日：" + '\n' + wCertInfo['After'] + '\n' + gVal.STR_MasterConfig['SystemTag']
 		
 		#############################
 		#トゥート
@@ -252,7 +253,10 @@ class CLS_LookHard:
 		wCHR_Toot = wCHR_Toot + "総容量：" + str(wSwap['total']) + " .MB" + '\n'
 		wCHR_Toot = wCHR_Toot + "使用中：" + str(wSwap['used']) + " .MB" + '\n'
 		wCHR_Toot = wCHR_Toot + "未使用：" + str(wSwap['free']) + " .MB" + '\n'
-		wCHR_Toot = wCHR_Toot + "使用率：" + str(wSwap['percent']) + " %"
+##		wCHR_Toot = wCHR_Toot + "使用率：" + str(wSwap['percent']) + " %"
+		wCHR_Toot = wCHR_Toot + "使用率：" + str(wSwap['percent']) + " %" + '\n'
+		
+		wCHR_Toot = wCHR_Toot + gVal.STR_MasterConfig['SystemTag']
 		
 		#############################
 		#トゥート

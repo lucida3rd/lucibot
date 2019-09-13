@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：環境設定処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/5
+#   Update  ：2019/9/13
 #####################################################
 # Private Function:
 #   __cnfMasterConfig_SelectDisp(self):
@@ -52,6 +52,7 @@ class CLS_Config() :
 		"prTag"			: False,
 		"TrafficTag"	: False,
 		"TwitterTag"	: False,
+		"SystemTag"		: False,
 		
 ##		"TwitterUser"	: False,
 ##		"Twitter"		: True,

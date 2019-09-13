@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：PTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/11
+#   Update  ：2019/9/13
 #####################################################
 # Private Function:
 #   __run(self):
@@ -606,7 +606,8 @@ class CLS_LookPTL():
 		wCHR_Toot = "@" + gVal.STR_MasterConfig['AdminUser'] + " [ワード監視通知]" + '\n'
 		wCHR_Toot = wCHR_Toot + "対象者："   + '\n' + inFulluser + '\n'
 		wCHR_Toot = wCHR_Toot + "パターン：" + '\n' + inPatt + '\n'
-		wCHR_Toot = wCHR_Toot + "トゥートURI：" + '\n' + inUri
+##		wCHR_Toot = wCHR_Toot + "トゥートURI：" + '\n' + inUri
+		wCHR_Toot = wCHR_Toot + "トゥートURI：" + '\n' + inUri + '\n' + gVal.STR_MasterConfig['SystemTag']
 		
 		#############################
 		#トゥート
