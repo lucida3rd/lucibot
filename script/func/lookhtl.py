@@ -43,7 +43,7 @@ class CLS_LookHTL():
 		"Now_Twitter"	: 0,	#今ブーストした数
 		
 		"OffTime"		: 0,	#時間外で未処理
-		"Outrange"		: 0,	#範囲外
+##		"Outrange"		: 0,	#範囲外
 		"Invalid"		: 0,	#その他の除外
 		"dummy"			: 0		#(未使用)
 	}
@@ -138,7 +138,7 @@ class CLS_LookHTL():
 		wStr = wStr + " Boost=" + str(self.STR_Cope['Now_Boot'])
 		wStr = wStr + " Twitter=" + str(self.STR_Cope['Now_Twitter'])
 		wStr = wStr + " OffTime=" + str(self.STR_Cope['OffTime'])
-		wStr = wStr + " Outrange=" + str(self.STR_Cope['Outrange'])
+##		wStr = wStr + " Outrange=" + str(self.STR_Cope['Outrange'])
 		wStr = wStr + " Invalid=" + str(self.STR_Cope['Invalid'])
 
 		if gVal.FLG_Test_Mode==False :
@@ -165,11 +165,11 @@ class CLS_LookHTL():
 		# トゥートからHTMLタグを除去
 		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
 		
-		#############################
-		# 収集判定(一括)
-		if self.__copeCorr( wFulluser, inROW, wCont )!=True :
-			self.STR_Cope['Outrange'] += 1
-			return	### 除外
+##		#############################
+##		# 収集判定(一括)
+##		if self.__copeCorr( wFulluser, inROW, wCont )!=True :
+##			self.STR_Cope['Outrange'] += 1
+##			return	### 除外
 		
 		#############################
 		# トゥートの時間 (変換＆差)
@@ -219,9 +219,12 @@ class CLS_LookHTL():
 			#############################
 			# 解析：指定ブースト
 			if self.ARR_AnapTL[wKey]['Kind']=="h" :
-				### 自分のトゥートか
-				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
-					continue	#自分
+##				### 自分のトゥートか
+##				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
+##					continue	#自分
+				### 収集判定(一括)
+				if self.__copeCorr( wFulluser, inROW, wCont )!=True :
+					continue	# 除外
 				
 				### 自分が指定ユーザではない
 				if self.ARR_AnapTL[wKey]['Fulluser']!="" :
@@ -249,9 +252,12 @@ class CLS_LookHTL():
 			#############################
 			# 解析：指定フルブースト
 			if self.ARR_AnapTL[wKey]['Kind']=="p" :
-				### 自分のトゥートか
-				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
-					continue	#自分
+##				### 自分のトゥートか
+##				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
+##					continue	#自分
+				### 収集判定(一括)
+				if self.__copeCorr( wFulluser, inROW, wCont )!=True :
+					continue	# 除外
 				
 				### 自分が指定ユーザではない
 				if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
@@ -274,9 +280,9 @@ class CLS_LookHTL():
 	def __copeCorr( self, inUser, inROW, inCont ):
 		#############################
 		# 除外トゥート
-##		### 自分
-##		if inUser['Fulluser'] == self.Obj_Parent.CHR_Account :
-##			return False
+		### 自分
+		if inUser['Fulluser'] == self.Obj_Parent.CHR_Account :
+			return False
 		
 		### 公開トゥート以外
 		if inROW['visibility']!="public" :
