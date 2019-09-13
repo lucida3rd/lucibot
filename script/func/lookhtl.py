@@ -165,11 +165,11 @@ class CLS_LookHTL():
 		# トゥートからHTMLタグを除去
 		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
 		
-##		#############################
-##		# 収集判定(一括)
-##		if self.__copeCorr( wFulluser, inROW, wCont )!=True :
+		#############################
+		# 収集判定(一括)
+		if self.__copeCorr( wFulluser, inROW, wCont )!=True :
 ##			self.STR_Cope['Outrange'] += 1
-##			return	### 除外
+			return	### 除外
 		
 		#############################
 		# トゥートの時間 (変換＆差)
@@ -219,12 +219,12 @@ class CLS_LookHTL():
 			#############################
 			# 解析：指定ブースト
 			if self.ARR_AnapTL[wKey]['Kind']=="h" :
-##				### 自分のトゥートか
-##				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
-##					continue	#自分
-				### 収集判定(一括)
-				if self.__copeCorr( wFulluser, inROW, wCont )!=True :
-					continue	# 除外
+				### 自分のトゥートか
+				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
+					continue	#自分
+##				### 収集判定(一括)
+##				if self.__copeCorr( wFulluser, inROW, wCont )!=True :
+##					continue	# 除外
 				
 				### 自分が指定ユーザではない
 				if self.ARR_AnapTL[wKey]['Fulluser']!="" :
@@ -252,12 +252,12 @@ class CLS_LookHTL():
 			#############################
 			# 解析：指定フルブースト
 			if self.ARR_AnapTL[wKey]['Kind']=="p" :
-##				### 自分のトゥートか
-##				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
-##					continue	#自分
-				### 収集判定(一括)
-				if self.__copeCorr( wFulluser, inROW, wCont )!=True :
-					continue	# 除外
+				### 自分のトゥートか
+				if wFulluser['Fulluser'] == self.Obj_Parent.CHR_Account :
+					continue	#自分
+##				### 収集判定(一括)
+##				if self.__copeCorr( wFulluser, inROW, wCont )!=True :
+##					continue	# 除外
 				
 				### 自分が指定ユーザではない
 				if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
@@ -280,12 +280,12 @@ class CLS_LookHTL():
 	def __copeCorr( self, inUser, inROW, inCont ):
 		#############################
 		# 除外トゥート
-		### 自分
-		if inUser['Fulluser'] == self.Obj_Parent.CHR_Account :
-			return False
+##		### 自分
+##		if inUser['Fulluser'] == self.Obj_Parent.CHR_Account :
+##			return False
 		
-		### 公開トゥート以外
-		if inROW['visibility']!="public" :
+		### 公開トゥート、未収載トゥート以外
+		if inROW['visibility']!="public" and inROW['visibility']!="unlisted" :
 			return False
 		
 		### ブーストトゥートは除外

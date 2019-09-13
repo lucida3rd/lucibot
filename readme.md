@@ -1,7 +1,7 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4  
 ::BotDate= 2019/9/13  
-::Version= 4.0.15.0  
+::Version= 4.0.15.3  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
 
@@ -320,6 +320,7 @@ botがリプライを受信した際、設定したワードを見つけると�
 ホームTLのうち、特定のパターン（タグ）を見つけた時にブーストする機能です。フォロワー向けの通知機能となります。  
 例えば、リモートの自分のトゥートをフォロワーに自動ブーストさせたい時に使える機能です。  
 （この場合リモートの自分をフォローしておく必要があります）  
+twitterが有効の場合は、twitterに転送することもできます。  
 公開トゥート、未収載トゥートが対象です。  
 　機能有効：HTL_Boost=on  
 　　ホームブーストファイル：toot/hboost.txt  
