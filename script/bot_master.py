@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理(Master)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/11
+#   Update  ：2019/9/13
 #####################################################
 # Private Function:
 #   (none)
@@ -180,6 +180,11 @@ class CLS_BOT_Master() :
 		#############################
 		# フォロー・フォロワー情報の取得
 		cls.OBJ_Follow.Get_FollowLists()
+		
+		#############################
+		# 自動フォロー処理
+#		if gVal.STR_MasterConfig['AutoFollow']=="on" :
+#			cls.OBJ_Follow.RunAutoFollow()
 		
 		#############################
 		# LTL監視処理

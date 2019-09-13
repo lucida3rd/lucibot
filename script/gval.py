@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/11
+#   Update  ：2019/9/12
 #####################################################
 
 #####################################################
@@ -124,9 +124,9 @@ class gVal() :
 # Timeline調整数
 ###	STR_TLnum = {
 	DEF_STR_TLNUM = {
-		"getPTLnum"			: 120,						#PublicTL取得数
-		"getHTLnum"			: 120,						#HomeTL取得数
-		"getLTLnum"			: 120,						#LocalTL取得数
+		"getPTLnum"			: 40,						#PublicTL取得数
+		"getHTLnum"			: 40,						#HomeTL取得数
+		"getLTLnum"			: 40,						#LocalTL取得数
 		
 		"getFollowTLnum"	: 120,						#フォロー一覧取得数
 		"getFollowerTLnum"	: 120,						#フォロワー一覧取得数
@@ -135,8 +135,8 @@ class gVal() :
 		"getRandRange"		: 1000,						#トゥート頻度 乱数幅
 		
 		"studyNum"			: 10,						#学習範囲（トゥート数）
-		"studyMax"			: 10000,					#最大学習単語数
-		"studyDay"			: 14,						#単語を覚えておく日数
+		"studyMax"			: 50000,					#最大学習単語数
+		"studyDay"			: 7,						#単語を覚えておく日数
 		"clazListNum"		: 500,						#品詞リスト登録数
 
 		"getRIPnum"			: 120,						#リプライ取得数
@@ -150,8 +150,9 @@ class gVal() :
 		
 		"indSSLday"			: 10,						#SSL証明切れ通知を出す日数
 		
-		"RefRemoveDays"		: 14,						#未リフォローによる、自動リムーブまでの日数
+##		"RefRemoveDays"		: 14,						#未リフォローによる、自動リムーブまでの日数
 		"AutoRemoveDays"	: 30,						#未活動時、自動リムーブまでの日数
+		"FollowNum"			: 10,						# 1周で処理するフォロー管理ユーザ数
 		
 		"getTwitTLnum"		: 120,						#TwitterのTL取得数
 		"(dummy)"			: ""

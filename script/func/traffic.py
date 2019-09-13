@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トラヒック処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/9
+#   Update  ：2019/9/12
 #####################################################
 # Private Function:
 #   __getTrafficPatt(self):
@@ -460,7 +460,7 @@ class CLS_Traffic():
 		self.CHR_SendRange  = self.DEF_SENDRANGE
 		self.ARR_SendDomain = []
 		wSendDomain = []	#解析パターンファイル
-		wFLG_Range  = False
+##		wFLG_Range  = False
 		
 		#############################
 		# ファイル読み込み
@@ -491,9 +491,9 @@ class CLS_Traffic():
 			if wLine[0]=="d" :
 				self.ARR_SendDomain.append( wLine[1] )
 		
-		if wFLG_Range==False :
-			###デフォルトだと指定あるのでいちお入れる
-			self.Obj_Parent.OBJ_Mylog.Log( 'c', "__getTrafficPatt: トラヒック送信の公開範囲なし(内部設定=" + self.DEF_SENDRANGE + ")" )
+##		if wFLG_Range==False :
+##			###デフォルトだと指定あるのでいちお入れる
+##			self.Obj_Parent.OBJ_Mylog.Log( 'c', "__getTrafficPatt: トラヒック送信の公開範囲なし(内部設定=" + self.DEF_SENDRANGE + ")" )
 		
 		return True
 

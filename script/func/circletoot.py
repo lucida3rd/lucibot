@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：周期トゥート処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/4
+#   Update  ：2019/9/12
 #####################################################
 # Private Function:
 #   __run(self):
@@ -213,11 +213,13 @@ class CLS_CircleToot():
 		for wLine in wToot :
 			wSetToot = wSetToot + wLine + '\n'
 		
-		wSetToot = wSetToot + " " + gVal.STR_MasterConfig['prTag']
-		
-		# 管理者がいれば通知する
-		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
-			wSetToot = wSetToot + '\n' + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+##		wSetToot = wSetToot + " " + gVal.STR_MasterConfig['prTag']
+##		
+##		# 管理者がいれば通知する
+##		if gVal.STR_MasterConfig['AdminUser']!="" and gVal.STR_MasterConfig['AdminUser']!=self.Obj_Parent.CHR_Account:
+##			wSetToot = wSetToot + '\n' + '\n' + "[Admin] @" + gVal.STR_MasterConfig['AdminUser']
+##		
+		wSetToot = wSetToot + '\n' + "#" + gVal.STR_MasterConfig['prTag']
 		
 		if len(wSetToot)>500 :
 			wRes['Reason'] = "CLS_CircleToot: __sendToot: Create toot is over length"

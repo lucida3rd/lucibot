@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ワード収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/11
+#   Update  ：2019/9/13
 #####################################################
 # Private Function:
 #   __selectMeCabDic(self):
@@ -349,7 +349,8 @@ class CLS_WordCorr():
 			
 			###指定日付の抽出
 			wLag = gVal.DEF_STR_TLNUM['studyDay'] * 24 * 60 * 60
-			wLagTime = CLS_OSIF.sTimeLag( gVal.STR_TimeInfo['TimeDate'], inThreshold=wLag, inTimezone=-1 )
+##			wLagTime = CLS_OSIF.sTimeLag( gVal.STR_TimeInfo['TimeDate'], inThreshold=wLag, inTimezone=-1 )
+			wLagTime = CLS_OSIF.sTimeLag( inThreshold=wLag, inTimezone=-1 )
 			if wLagTime['Result']!=True :
 				##失敗
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_WordCorr: WordStudy: sTimeLag is failed" )

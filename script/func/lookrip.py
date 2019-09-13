@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/11
+#   Update  ：2019/9/12
 #####################################################
 # Private Function:
 #   __run(self):
@@ -346,7 +346,8 @@ class CLS_LookRIP():
 		
 		#############################
 		# トゥートの組み立て
-		wCHR_Toot = self.DEF_TITLE_NEW_FOLLOWER + " " + inROW['display_name'] + " (" + inROW['Fulluser'] + ") さんにフォローされました。"
+###		wCHR_Toot = self.DEF_TITLE_NEW_FOLLOWER + " " + inROW['display_name'] + " (" + inROW['Fulluser'] + ") さんにフォローされました。"
+		wCHR_Toot = inROW['display_name'] + " (" + inROW['Fulluser'] + ") さんにフォローされました。"
 		wCHR_Toot = wCHR_Toot + '\n' + "#" + gVal.STR_MasterConfig['iActionTag']
 		
 		#############################

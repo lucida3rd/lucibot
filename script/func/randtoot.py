@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ランダムトゥート
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/10
+#   Update  ：2019/9/12
 #####################################################
 # Private Function:
 #   __selectMeCabDic(self):
@@ -41,6 +41,9 @@ class CLS_RandToot():
 ##		"UserCorr"	: 0,		#ユーザ収集
 ##		"dummy"     : 0	#(未使用)
 ##	}
+
+#	DEF_TOOTRANGE = "public"
+	DEF_TOOTRANGE = "unlisted"
 
 #####################################################
 # Init
@@ -79,7 +82,8 @@ class CLS_RandToot():
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_RandToot: __run: GetRandToot is failed" )
 				return
 			
-			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility="public" )
+##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility="public" )
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=self.DEF_TOOTRANGE )
 			if wRes['Result']!=True :
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_RandToot: __run: Mastodon error: " + wRes['Reason'] )
 				return

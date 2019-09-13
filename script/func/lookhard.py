@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ハード監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/8
+#   Update  ：2019/9/12
 #####################################################
 # Private Function:
 #   __run(self):
@@ -35,6 +35,8 @@ class CLS_LookHard:
 #####################################################
 	CHR_LogName  = "ハード監視"
 	Obj_Parent   = ""		#親クラス実体
+	
+	STR_Info = {}
 
 #####################################################
 # Init
@@ -47,6 +49,11 @@ class CLS_LookHard:
 		
 		self.Obj_Parent = parentObj
 		self.__run()	#処理開始
+		
+		self.STR_Info = {
+			"Result"	: False,
+			"Reason"	: ""
+		}
 		return
 
 
@@ -84,6 +91,16 @@ class CLS_LookHard:
 		#############################
 		# ハード情報
 		self.Hard_Info()
+		
+		self.STR_Info['Result'] = True
+		#############################
+		# 処理結果ログ
+		wStr = self.CHR_LogName + " 結果: 結果=" + str(self.STR_Info['Result'])
+
+		if gVal.FLG_Test_Mode==False :
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
+		else:
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr, True )
 		
 		return
 
@@ -130,9 +147,11 @@ class CLS_LookHard:
 		#############################
 		# 期限切れ通知判定
 		wCHR_Body = None
-		if wLag['Future']==True and gVal.DEF_STR_TLNUM['indSSLday']>=wLag['RateTime'].days :
+##		if wLag['Future']==True and gVal.DEF_STR_TLNUM['indSSLday']>=wLag['RateTime'].days :
+		if wLag['Future']==True and gVal.DEF_STR_TLNUM['indSSLday']>=wLag['RateDay'] :
 			##まだ余裕がある
-			wCHR_Body = "サーバ[" + wFulluser['Domain'] + "] のSSL証明書期限切れまであと " + str(wLag['RateTime'].days) + "日です。"
+##			wCHR_Body = "サーバ[" + wFulluser['Domain'] + "] のSSL証明書期限切れまであと " + str(wLag['RateTime'].days) + "日です。"
+			wCHR_Body = "サーバ[" + wFulluser['Domain'] + "] のSSL証明書期限切れまであと " + str(wLag['RateDay']) + "日です。"
 ##		else :
 ##			##期限切れ(てか送信すらできないと思う)
 ##			wCHR_Body = "サーバ[" + wFulluser['Domain'] + "] のSSL証明書の期限が切れました。"
@@ -152,6 +171,14 @@ class CLS_LookHard:
 		if wRes['Result']!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHard: SSL_Info: Mastodon error: " + wRes['Reason'] )
 			return False
+		
+		#############################
+		# メモ
+		self.STR_Info.update({ "SSL_Info" : {} })
+		self.STR_Info['SSL_Info'].update({ "UpdateTD"	: wCertInfo['Befour'] })
+		self.STR_Info['SSL_Info'].update({ "RateTD"		: wCertInfo['After'] })
+##		self.STR_Info['SSL_Info'].update({ "RateDay"	: str(wLag['RateTime'].days) })
+		self.STR_Info['SSL_Info'].update({ "RateDay"	: str(wLag['RateDay']) })
 		
 		return True
 
@@ -263,6 +290,14 @@ class CLS_LookHard:
 		except ValueError as err :
 			return wHardInfo
 		
+		#############################
+		# メモ
+		self.STR_Info.update({ "CPU_Info" : {} })
+		self.STR_Info['CPU_Info'].update({ "iowait"		: wHardInfo['iowait'] })
+		self.STR_Info['CPU_Info'].update({ "irq"		: wHardInfo['irq'] })
+		self.STR_Info['CPU_Info'].update({ "softirq"	: wHardInfo['softirq'] })
+		self.STR_Info['CPU_Info'].update({ "steal"		: wHardInfo['steal'] })
+		
 		wHardInfo['Result'] = True
 		return wHardInfo
 
@@ -292,6 +327,14 @@ class CLS_LookHard:
 			wHardInfo['percent'] = float(wARR_Info.percent)
 		except ValueError as err :
 			return wHardInfo
+		
+		#############################
+		# メモ
+		self.STR_Info.update({ "Memory_Info" : {} })
+		self.STR_Info['Memory_Info'].update({ "total"	: wHardInfo['total'] })
+		self.STR_Info['Memory_Info'].update({ "used"	: wHardInfo['used'] })
+		self.STR_Info['Memory_Info'].update({ "free"	: wHardInfo['free'] })
+		self.STR_Info['Memory_Info'].update({ "percent"	: wHardInfo['percent'] })
 		
 		wHardInfo['Result'] = True
 		return wHardInfo
@@ -323,6 +366,14 @@ class CLS_LookHard:
 		except ValueError as err :
 			return wHardInfo
 		
+		#############################
+		# メモ
+		self.STR_Info.update({ "Swap_Info" : {} })
+		self.STR_Info['Swap_Info'].update({ "total"		: wHardInfo['total'] })
+		self.STR_Info['Swap_Info'].update({ "used"		: wHardInfo['used'] })
+		self.STR_Info['Swap_Info'].update({ "free"		: wHardInfo['free'] })
+		self.STR_Info['Swap_Info'].update({ "percent"	: wHardInfo['percent'] })
+		
 		wHardInfo['Result'] = True
 		return wHardInfo
 
@@ -352,6 +403,14 @@ class CLS_LookHard:
 			wHardInfo['percent'] = float(wARR_Info.percent)
 		except ValueError as err :
 			return wHardInfo
+		
+		#############################
+		# メモ
+		self.STR_Info.update({ "SSD_Info" : {} })
+		self.STR_Info['SSD_Info'].update({ "total"		: wHardInfo['total'] })
+		self.STR_Info['SSD_Info'].update({ "used"		: wHardInfo['used'] })
+		self.STR_Info['SSD_Info'].update({ "free"		: wHardInfo['free'] })
+		self.STR_Info['SSD_Info'].update({ "percent"	: wHardInfo['percent'] })
 		
 		wHardInfo['Result'] = True
 		return wHardInfo
@@ -388,6 +447,14 @@ class CLS_LookHard:
 			wHardInfo['RunDays'] = wRuntime / 24	#稼働日数
 		except ValueError as err :
 			return wHardInfo
+		
+		#############################
+		# メモ
+		self.STR_Info.update({ "Runtime_Info" : {} })
+		self.STR_Info['Runtime_Info'].update({ "NowTD"		: wHardInfo['NowTD'] })
+		self.STR_Info['Runtime_Info'].update({ "BootTD"		: wHardInfo['BootTD'] })
+		self.STR_Info['Runtime_Info'].update({ "Runtime"	: wHardInfo['Runtime'] })
+		self.STR_Info['Runtime_Info'].update({ "RunDays"	: wHardInfo['RunDays'] })
 		
 		wHardInfo['Result'] = True
 		return wHardInfo

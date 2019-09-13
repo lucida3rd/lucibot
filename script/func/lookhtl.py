@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/11
+#   Update  ：2019/9/12
 #####################################################
 # Private Function:
 #   __run(self):
@@ -37,14 +37,15 @@ class CLS_LookHTL():
 	ARR_RateTL   = []		#過去TL(id)
 	ARR_UpdateTL = []		#新・過去TL(id)
 
-	STR_Cope = {			#処理カウンタ
-		"Now_Cope"  : 0,		#処理した新トゥート数
-		"Now_Boot"  : 0,		#今ブーストした数
+	STR_Cope = {				#処理カウンタ
+		"Now_Cope"		: 0,	#処理した新トゥート数
+		"Now_Boot"		: 0,	#今ブーストした数
+		"Now_Twitter"	: 0,	#今ブーストした数
 		
-		"OffTime"   : 0,		#時間外で未処理
-		"Outrange"  : 0,		#範囲外
-		"Invalid"   : 0,		#その他の除外
-		"dummy"     : 0	#(未使用)
+		"OffTime"		: 0,	#時間外で未処理
+		"Outrange"		: 0,	#範囲外
+		"Invalid"		: 0,	#その他の除外
+		"dummy"			: 0		#(未使用)
 	}
 
 
@@ -135,6 +136,7 @@ class CLS_LookHTL():
 		# 処理結果ログ
 		wStr = self.CHR_LogName + " 結果: 新Toot=" + str(self.STR_Cope['Now_Cope'])
 		wStr = wStr + " Boost=" + str(self.STR_Cope['Now_Boot'])
+		wStr = wStr + " Twitter=" + str(self.STR_Cope['Now_Twitter'])
 		wStr = wStr + " OffTime=" + str(self.STR_Cope['OffTime'])
 		wStr = wStr + " Outrange=" + str(self.STR_Cope['Outrange'])
 		wStr = wStr + " Invalid=" + str(self.STR_Cope['Invalid'])
@@ -185,6 +187,35 @@ class CLS_LookHTL():
 		#解析種類の判定
 		wKeyList = self.ARR_AnapTL.keys()
 		for wKey in wKeyList :
+			#############################
+			# 解析：ついったー転送
+			if self.ARR_AnapTL[wKey]['Kind']=="t" and gVal.STR_MasterConfig['Twitter']=="on" :
+				### ハード監視ユーザか
+				if CLS_UserData.sCheckHardUser( self.Obj_Parent.CHR_Account )!=True :
+					continue
+				
+				### 自分が指定ユーザか
+				if self.ARR_AnapTL[wKey]['Fulluser']!="" :
+					if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
+						continue
+				### 無指定の場合、登録ユーザか(第三者避け)
+				else :
+					wUserList = CLS_UserData.sGetUserList()
+					if wFulluser['Fulluser'] not in wUserList :
+						continue
+				
+				### マッチチェック
+				wPatt = "#" + self.ARR_AnapTL[wKey]['Tag']
+				wRes = CLS_OSIF.sRe_Search( wPatt, wCont )
+				if not wRes :
+					##アンマッチ
+					continue
+				### 実行
+				if self.TwitterBoost( inROW['id'] )!=True :
+					self.STR_Cope['Invalid'] += 1
+				else :
+					self.STR_Cope["Now_Twitter"] += 1
+			
 			#############################
 			# 解析：指定ブースト
 			if self.ARR_AnapTL[wKey]['Kind']=="h" :
@@ -519,6 +550,34 @@ class CLS_LookHTL():
 		wRes = self.Obj_Parent.OBJ_MyDon.Boost( id=inID )
 		if wRes['Result']!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHTL: Boost: Mastodon error: " + wRes['Reason'] )
+			return False
+		
+		return True
+
+
+
+#####################################################
+# ついったー転送
+#####################################################
+	def TwitterBoost( self, inID ) :
+		#############################
+		# ユーザ名の変換
+		wFulluser = CLS_UserData.sUserCheck( self.Obj_Parent.CHR_Account )
+		if wFulluser['Result']!=True :
+			###今のところ通らないルート
+			return False
+		wDomain = wFulluser['Domain']
+		
+		#############################
+		# ファボられたトゥートURL
+		wToot_Url = "https://" + wDomain + gVal.DEF_TOOT_SUBURL + str(inID)
+		wCHR_Tweet = "mastodonから転送:" + '\n' + wToot_Url
+		
+		#############################
+		# Twitterへ投稿
+		wRes = self.Obj_Parent.OBJ_Twitter.Tweet( wCHR_Tweet )
+		if wRes['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHTL: TwitterBoost: Mastodon error: " + wRes['Reason'] )
 			return False
 		
 		return True
