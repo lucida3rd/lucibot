@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ランダムトゥート
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/12
+#   Update  ：2019/9/14
 #####################################################
 # Private Function:
 #   __selectMeCabDic(self):
@@ -43,7 +43,7 @@ class CLS_RandToot():
 ##	}
 
 #	DEF_TOOTRANGE = "public"
-	DEF_TOOTRANGE = "unlisted"
+#	DEF_TOOTRANGE = "unlisted"
 
 #####################################################
 # Init
@@ -72,18 +72,26 @@ class CLS_RandToot():
 		#############################
 		# トゥート頻度(乱数発生)
 		wVAL_Rand = CLS_OSIF.sGetRand( gVal.DEF_STR_TLNUM['getRandRange'] )
+		wVAL_Pub  = CLS_OSIF.sGetRand( gVal.DEF_STR_TLNUM['getRandPublic'] )
 		
 ##		if wVAL_Rand < gVal.DEF_STR_TLNUM['getRandVal'] :
 		if wVAL_Rand < gVal.DEF_STR_TLNUM['getRandVal'] or gVal.FLG_Test_Mode==True :
 		#############################
 		# ランダムトゥートを実行する
+			### public頻度
+			if wVAL_Pub==1 :
+				wCHR_Range = "public"
+			else :
+				wCHR_Range = "unlisted"
+			
 			wCHR_Toot = self.Obj_Parent.OBJ_WordCorr.GetRandToot()
 			if wCHR_Toot=="" :
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_RandToot: __run: GetRandToot is failed" )
 				return
 			
 ##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility="public" )
-			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=self.DEF_TOOTRANGE )
+##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=self.DEF_TOOTRANGE )
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=wCHR_Range )
 			if wRes['Result']!=True :
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_RandToot: __run: Mastodon error: " + wRes['Reason'] )
 				return

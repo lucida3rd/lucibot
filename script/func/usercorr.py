@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザ情報収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/12
+#   Update  ：2019/9/14
 #####################################################
 # Private Function:
 #   (none)
@@ -76,6 +76,87 @@ class CLS_UserCorr():
 			return False	#失敗
 		
 		return True			#成功
+
+
+
+#####################################################
+# 活動している有効なユーザか判定
+#####################################################
+	def IsActiveUser( self, inFulluser ) :
+		
+		wARR_Users = []
+		#############################
+		# 指定日付の抽出
+		wLag = gVal.DEF_STR_TLNUM['AutoRemoveDays'] * 24 * 60 * 60
+		wLagTime = CLS_OSIF.sTimeLag( inThreshold=wLag, inTimezone=-1 )
+		if wLagTime['Result']!=True :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: IsActiveUser: sTimeLag is failed" )
+			return False
+		
+		#############################
+		# DB接続
+		wOBJ_DB = CLS_PostgreSQL_Use( gVal.DEF_STR_FILE['DBinfo_File'] )
+		wRes = wOBJ_DB.GetIniStatus()
+		if wRes['Result']!=True :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: IsActiveUser: DB Connect test is failed: " + wRes['Reason'] )
+			wOBJ_DB.Close()
+			return False
+		
+		#############################
+		# 一定期間活動があるユーザか
+##		wQuery = "id = '" + inFulluser + "' and " + \
+##					"lupdate >= timestamp '" + str(wLagTime['RateTime']) + "'"
+##		
+##		wDBRes = wOBJ_DB.RunExist( inObjTable="TBL_USER_DATA", inWhere=wQuery )
+##		wDBRes = wOBJ_DB.GetQueryStat()
+##		if wDBRes['Result']!=True :
+##			##失敗
+##			wRes['Reason'] = "CLS_UserCorr: IsActiveUser: Run Query is failed: " + wDBRes['Reason'] + " query=" + wDBRes['Query']
+##			wOBJ_DB.Close()
+##			return False
+##		
+##		### 収集していないか、期間活動外
+##		if wDBRes['Responce']==False :
+##			wOBJ_DB.Close()
+##			return False
+##		
+		wQuery = "select locked from TBL_USER_DATA where " + \
+					"id = '" + inFulluser + "' and " + \
+					"lupdate >= timestamp '" + str(wLagTime['RateTime']) + "' " + \
+					";"
+		
+		wDBRes = wOBJ_DB.RunQuery( wQuery )
+		wDBRes = wOBJ_DB.GetQueryStat()
+		if wDBRes['Result']!=True :
+			##失敗
+			wRes['Reason'] = "CLS_UserCorr: IsActiveUser: Run Query is failed: " + wDBRes['Reason'] + " query=" + wDBRes['Query']
+			wOBJ_DB.Close()
+			return False
+		
+		### 収集していないか、期間活動外
+		if len(wDBRes['Responce']['Data'])==0 :
+			wOBJ_DB.Close()
+			return False
+		
+		### 鍵垢か
+		wChgList = []
+		if wOBJ_DB.ChgList( wDBRes['Responce']['Data'], outList=wChgList )!=True :
+			##ないケースかも
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_UserCorr: IsActiveUser: Select data is Zero" )
+			wOBJ_DB.Close()
+			return False
+		if wChgList[0][0]==True :
+			wOBJ_DB.Close()
+			return False	#鍵つき
+		
+		#############################
+		# DB切断
+		wOBJ_DB.Close()
+		
+		###有効なユーザ
+		return True
 
 
 

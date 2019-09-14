@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/11
+#   Update  ：2019/9/14
 #####################################################
 # Private Function:
 #   (none)
@@ -32,6 +32,7 @@ from lookrip import CLS_LookRIP
 from lookhard import CLS_LookHard
 from mylog import CLS_Mylog
 from traffic import CLS_Traffic
+from usercorr import CLS_UserCorr
 from gval import gVal
 #####################################################
 class CLS_BOT_Sub() :
@@ -80,6 +81,7 @@ class CLS_BOT_Sub() :
 		
 		cls.OBJ_Mylog    = CLS_Mylog( cls.CHR_User_path + gVal.DEF_STR_FILE['UserLog_path'] )
 		cls.OBJ_Traffic  = CLS_Traffic( parentObj=cls )
+		cls.OBJ_UserCorr = CLS_UserCorr( parentObj=cls )
 		
 		#############################
 		# 排他開始 (テストOFFの時)

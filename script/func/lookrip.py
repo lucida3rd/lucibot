@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/13
+#   Update  ：2019/9/14
 #####################################################
 # Private Function:
 #   __run(self):
@@ -534,17 +534,20 @@ class CLS_LookRIP():
 			#############################
 			# ふぁぼ or ぶーすと
 			if wToot['type']=="favourite" or wToot['type']=="reblog" :
-				self.__getRIP_FavBoost( wToot, wFulluser['Fulluser'], wGetTime )
+##				self.__getRIP_FavBoost( wToot, wFulluser['Fulluser'], wGetTime )
+				self.__getRIP_FavBoost( wToot, wFulluser, wGetTime )
 			
 			#############################
 			# ふぉろー
 			elif wToot['type']=="follow" :
-				self.__getRIP_Follow( wToot, wFulluser['Fulluser'], wGetTime )
+##				self.__getRIP_Follow( wToot, wFulluser['Fulluser'], wGetTime )
+				self.__getRIP_Follow( wToot, wFulluser, wGetTime )
 			
 			#############################
 			# めんしょん
 			elif wToot['type']=="mention" :
-				self.__getRIP_Mention( wToot, wFulluser['Fulluser'], wGetTime )
+##				self.__getRIP_Mention( wToot, wFulluser['Fulluser'], wGetTime )
+				self.__getRIP_Mention( wToot, wFulluser, wGetTime )
 			
 			#############################
 			# その他(あるの？)
@@ -579,7 +582,8 @@ class CLS_LookRIP():
 			return
 		
 		### ユーザ登録されていた
-		wUserChk = CLS_UserData.sUserCheck( inFulluser )
+##		wUserChk = CLS_UserData.sUserCheck( inFulluser )
+		wUserChk = CLS_UserData.sUserCheck( inFulluser['Fulluser'] )
 		if wUserChk['Result']!=True or wUserChk['Registed']==True :
 			self.STR_Cope['Ind_Inv'] += 1
 			return
@@ -634,7 +638,8 @@ class CLS_LookRIP():
 				return
 			self.ARR_NowFavID.append( wID )
 			
-			self.__getRIP_SetReindRIP( inROW, inFulluser, inTime, wID )
+##			self.__getRIP_SetReindRIP( inROW, inFulluser, inTime, wID )
+			self.__getRIP_SetReindRIP( inROW, inFulluser['Fulluser'], inTime, wID )
 			self.STR_Cope['Ind_On'] += 1
 			return
 		
@@ -647,7 +652,8 @@ class CLS_LookRIP():
 			return
 		self.ARR_NowFavID.append( wID )
 		
-		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
+##		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
+		self.__getRIP_SetNewRIP( inROW, inFulluser['Fulluser'], inTime )
 		self.STR_Cope['Ind_On'] += 1
 		return
 
@@ -668,14 +674,31 @@ class CLS_LookRIP():
 			return
 		
 		### ユーザ登録されていた
-		wUserChk = CLS_UserData.sUserCheck( inFulluser )
+##		wUserChk = CLS_UserData.sUserCheck( inFulluser )
+		wUserChk = CLS_UserData.sUserCheck( inFulluser['Fulluser'] )
 		if wUserChk['Result']!=True or wUserChk['Registed']==True :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+##		###外人 (日本人限定=ON時)
+##		if inROW['status']['language']!="ja" and gVal.STR_MasterConfig["JPonly"]=="on" :
+##			self.STR_Cope['Ind_Inv'] += 1
+##			return
+		
+		###除外ドメイン
+		if inFulluser['Domain'] in gVal.STR_DomainREM :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		### 有効なユーザか
+		if self.Obj_Parent.OBJ_UserCorr.IsActiveUser( inFulluser['Fulluser'] )!=True :
 			self.STR_Cope['Ind_Inv'] += 1
 			return
 		
 		#############################
 		# アクション通知を出す
-		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
+##		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
+		self.__getRIP_SetNewRIP( inROW, inFulluser['Fulluser'], inTime )
 		self.STR_Cope['Ind_On'] += 1
 		return
 
@@ -707,6 +730,22 @@ class CLS_LookRIP():
 ##			self.STR_Cope['Ind_Inv'] += 1
 ##			return
 ##		
+		
+		###外人 (日本人限定=ON時)
+		if inROW['status']['language']!="ja" and gVal.STR_MasterConfig["JPonly"]=="on" :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		###除外ドメイン
+		if inFulluser['Domain'] in gVal.STR_DomainREM :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
+		### 有効なユーザか
+		if self.Obj_Parent.OBJ_UserCorr.IsActiveUser( inFulluser['Fulluser'] )!=True :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
+		
 		wCont = CLS_OSIF.sDel_HTML( inROW['status']['content'] )
 		### タグ付き(アクション通知以外)
 ##		if CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )>=0 or + \
@@ -732,7 +771,8 @@ class CLS_LookRIP():
 			return
 		self.ARR_NowFavID.append( wID )
 		
-		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
+##		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
+		self.__getRIP_SetNewRIP( inROW, inFulluser['Fulluser'], inTime )
 		self.STR_Cope['Ind_On'] += 1
 		return
 
@@ -1060,7 +1100,7 @@ class CLS_LookRIP():
 ##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wToot, visibility="direct" )
 			wCHR_Title = "[通知制限開始]"
 			wCHR_Toot  = "@" + gVal.STR_MasterConfig['AdminUser'] + " " + "制限時間: " + str(gVal.DEF_STR_TLNUM['indLimmin']) + "分"
-			wCHR_Toot  = wCHR_Toot + '\n' + gVal.STR_MasterConfig['SystemTag']
+			wCHR_Toot  = wCHR_Toot + '\n' + "#" + gVal.STR_MasterConfig['SystemTag']
 			
 			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, spoiler_text=wCHR_Title, visibility="direct" )
 			if wRes['Result']!=True :

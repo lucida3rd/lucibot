@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/13
+#   Update  ：2019/9/14
 #####################################################
 # Private Function:
 #   __run(self):
@@ -586,7 +586,8 @@ class CLS_LookHTL():
 		
 		#############################
 		# ファボられたトゥートURL
-		wToot_Url = "https://" + wDomain + gVal.DEF_TOOT_SUBURL + str(inID)
+##		wToot_Url = "https://" + wDomain + gVal.DEF_TOOT_SUBURL + str(inID)
+		wToot_Url = "https://" + wDomain + "/@" + wFulluser['User'] + "/" + str(inID)
 		wCHR_Tweet = "mastodonから転送:" + '\n' + wToot_Url
 		
 		#############################

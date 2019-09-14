@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ハード監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/13
+#   Update  ：2019/9/14
 #####################################################
 # Private Function:
 #   __run(self):
@@ -164,7 +164,7 @@ class CLS_LookHard:
 		wCHR_Toot = "@" + gVal.STR_MasterConfig['AdminUser'] + " [SSL証明書期限通知]" + '\n'
 		wCHR_Toot = wCHR_Toot + wCHR_Body + '\n'
 ##		wCHR_Toot = wCHR_Toot + "期限日：" + '\n' + wCertInfo['After']
-		wCHR_Toot = wCHR_Toot + "期限日：" + '\n' + wCertInfo['After'] + '\n' + gVal.STR_MasterConfig['SystemTag']
+		wCHR_Toot = wCHR_Toot + "期限日：" + '\n' + wCertInfo['After'] + '\n' + "#" + gVal.STR_MasterConfig['SystemTag']
 		
 		#############################
 		#トゥート
@@ -223,10 +223,10 @@ class CLS_LookHard:
 		wCHR_Toot  = "@" + gVal.STR_MasterConfig['AdminUser'] + "[ハード情報通知]" + '\n'
 		
 		### 稼働時間
-		wNowDate = wRuntime['NowTD'].split(" ")
+##		wNowDate = wRuntime['NowTD'].split(" ")
 		wRunDate = wRuntime['BootTD'].split(" ")
 		
-		wCHR_Toot = wCHR_Toot + "現在日付：" + wNowDate[0] + '\n'
+##		wCHR_Toot = wCHR_Toot + "現在日付：" + wNowDate[0] + '\n'
 		wCHR_Toot = wCHR_Toot + "起動日付：" + wRunDate[0] + '\n'
 		wCHR_Toot = wCHR_Toot + "稼働時間：" + str(wRuntime['Runtime']) + " .h" + '\n'
 		wCHR_Toot = wCHR_Toot + "稼働日数：" + str(wRuntime['RunDays']) + " .h" + '\n'
@@ -256,7 +256,7 @@ class CLS_LookHard:
 ##		wCHR_Toot = wCHR_Toot + "使用率：" + str(wSwap['percent']) + " %"
 		wCHR_Toot = wCHR_Toot + "使用率：" + str(wSwap['percent']) + " %" + '\n'
 		
-		wCHR_Toot = wCHR_Toot + gVal.STR_MasterConfig['SystemTag']
+		wCHR_Toot = wCHR_Toot + "#" + gVal.STR_MasterConfig['SystemTag']
 		
 		#############################
 		#トゥート

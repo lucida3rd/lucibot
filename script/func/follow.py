@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：フォロー管理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/13
+#   Update  ：2019/9/14
 #####################################################
 # Private Function:
 #   __get_FollowTL( self, inMyID):
@@ -37,6 +37,7 @@ class CLS_Follow():
 	ARR_FollowerTL = {}	#フォロワー一覧
 	
 	VAL_FollowNum = 0
+	VAL_Followed  = 0
 
 #####################################################
 # Init
@@ -56,6 +57,7 @@ class CLS_Follow():
 		self.ARR_FollowerTL = {}
 		
 		self.VAL_FollowNum = 0
+		self.VAL_Followed  = 0
 		return
 
 
@@ -72,27 +74,72 @@ class CLS_Follow():
 # *ユーザ収集除外リストに登録したドメイン対象になると自動リムーブする。
 #####################################################
 	def RunAutoFollow(self):
+		#############################
+		# 開始ログ
+		self.Obj_Parent.OBJ_Mylog.Log( 'b', "自動フォロー 開始" )
 		
-
-
-
-
+		wARR_Follower = list(self.ARR_FollowerTL.keys())
+		wARR_Follow   = list(self.ARR_FollowTL.keys())
 		wARR_noFollow = []
 		#############################
 		# フォローしてない垢を洗い出す
-		for wFollower in self.ARR_FollowerTL :
-			if wFollower in self.ARR_FollowTL :
+		for wFollower in wARR_Follower :
+			if wFollower not in wARR_Follow :
 				wARR_noFollow.append( wFollower )
 		
+		#############################
+		# 除外ドメインを省く
+		for wFollower in wARR_noFollow[:] :
+			wFulluser = CLS_UserData.sUserCheck( wFollower )
+			if wFulluser['Result']!=True :
+				###今のところ通らないルート
+				return False
+			
+			if wFulluser['Domain'] in gVal.STR_DomainREM :
+				wARR_noFollow.remove( wFollower )
+		
+		#############################
+		# フォローできる条件ならフォローする
+		# ・収集されているか
+		# ・鍵垢ではない
+		# ・30日以内の活動があるか
+		for wFollower in wARR_noFollow :
+			### 処理回数の上限チェック
+			if self.__check_Follow()!=True :
+				break
+			
+			### フォローの条件にあてはまるユーザか
+			if self.Obj_Parent.OBJ_UserCorr.IsActiveUser( wFollower )!=True :
+				continue
+			
+			### フォローする
+			wID = self.ARR_FollowerTL[wFollower]
+			wRes = self.Obj_Parent.OBJ_MyDon.Follow( id=wID )
+			if wRes['Result']!=True :
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: RunAutoFollow: Mastodon error: " + wRes['Reason'] )
+				return False
+			
+			self.VAL_FollowNum += 1
+			self.VAL_Followed  += 1
+		
+		#############################
+		# 自アカウントのフォロー一覧を再取得
+		wRes = self.__get_FollowTL( self.Obj_Parent.ARR_MyAccountInfo['id'] )
+		if wRes['Result']!=True :
+			##失敗
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: RunAutoFollow: Get follow list is failed: " + wRes['Reason'] )
+			return False
+		
+		#############################
+		# 処理結果ログ
+		wStr = "自動フォロー 結果: Followed=" + str(self.VAL_Followed) + " noFollow=" + str(len(wARR_noFollow))
 
-
-
-
-
-
-
-
-		return
+		if gVal.FLG_Test_Mode==False :
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
+		else:
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr, True )
+		
+		return True
 
 
 
@@ -102,7 +149,7 @@ class CLS_Follow():
 	def Check_Follower( self, inFullser ):
 ##		if inFullser not in self.ARR_FollowerTL :
 		wKeyList = list( self.ARR_FollowerTL.keys() )
-		if inFullser not in wKeyList :
+		if inFullser in wKeyList :
 			return False	#フォロワーではない
 		
 		return True			#フォロワー
@@ -149,7 +196,7 @@ class CLS_Follow():
 				###リムーブ
 				wRes = self.Obj_Parent.OBJ_MyDon.Remove( id=self.ARR_FollowTL[wKey] )
 				if wRes['Result']!=True :
-					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: RunAutoFollow: Mastodon error(Domain remove): " + wRes['Reason'] )
+					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: __autoRemove: Mastodon error(Domain remove): " + wRes['Reason'] )
 					return False
 				self.VAL_FollowNum += 1
 				wRemoveNum += 1
@@ -159,7 +206,7 @@ class CLS_Follow():
 				wRes = self.__get_FollowTL( self.Obj_Parent.ARR_MyAccountInfo['id'] )
 				if wRes['Result']!=True :
 					##失敗
-					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: Get_FollowLists: Get follow list is failed: " + wRes['Reason'] )
+					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: __autoRemove: Get follow list is failed: " + wRes['Reason'] )
 					return False
 				
 				### 終わり
@@ -186,7 +233,7 @@ class CLS_Follow():
 				###リムーブ
 				wRes = self.Obj_Parent.OBJ_MyDon.Remove( id=self.ARR_FollowTL[wKey] )
 				if wRes['Result']!=True :
-					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: RunAutoFollow: Mastodon error(Old user remove): " + wRes['Reason'] )
+					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: __autoRemove: Mastodon error(Old user remove): " + wRes['Reason'] )
 					return False
 				
 				self.VAL_FollowNum += 1
@@ -197,7 +244,7 @@ class CLS_Follow():
 				wRes = self.__get_FollowTL( self.Obj_Parent.ARR_MyAccountInfo['id'] )
 				if wRes['Result']!=True :
 					##失敗
-					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: Get_FollowLists: Get follow list is failed(Old user remove): " + wRes['Reason'] )
+					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Follow: __autoRemove: Get follow list is failed(Old user remove): " + wRes['Reason'] )
 					return False
 				
 				### 終わり
@@ -253,7 +300,7 @@ class CLS_Follow():
 			wLine = wLine.split( gVal.DEF_DATA_BOUNDARY )
 			if len(wLine)!=2 :
 				continue
-			self.ARR_FollowTL.update({ wLine[1] : wLine[0] })
+			self.ARR_FollowerTL.update({ wLine[1] : wLine[0] })
 		
 		#############################
 		# 自動リムーブ
@@ -313,7 +360,7 @@ class CLS_Follow():
 		
 		wARR_SetFile = []
 		#############################
-		# フォロー一覧
+		# フォロワー一覧
 		wKeyList = list( self.ARR_FollowerTL.keys() )
 		for wUser in wKeyList :
 			wLine = self.ARR_FollowerTL[wUser] + gVal.DEF_DATA_BOUNDARY + wUser
