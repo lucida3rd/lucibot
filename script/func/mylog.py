@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ログ処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/14
+#   Update  ：2019/9/17
 #####################################################
 # Private Function:
 #   __write( self, inLogFile, inDate, inMsg ):
@@ -25,12 +25,13 @@ from gval import gVal
 class CLS_Mylog():
 #####################################################
 
-	CHR_LogPath = ""
+	CHR_LogPath  = ""
 
 #####################################################
 # 初期化
 #####################################################
-	def __init__( self, inPath ):
+##	def __init__( self, inPath ):
+	def __init__( self, inPath=None ):
 		#############################
 		# ログフォルダの存在チェック
 		if CLS_File.sExist( inPath )!=True :
@@ -46,6 +47,13 @@ class CLS_Mylog():
 # ログデータのセット
 #####################################################
 	def Log( self, inLevel, inMsg, inView=False ):
+		#############################
+		# チェック
+		if self.CHR_LogPath==None :
+			### パスが無設定
+			CLS_OSIF.sPrn( inMsg )
+			return
+		
 		#############################
 		# ログレベル：LogLevel
 		#  a：全てのログを記録　　　　　　　（LevelA,B,C）
@@ -76,18 +84,57 @@ class CLS_Mylog():
 			###時間取得失敗  時計壊れた？
 			CLS_OSIF.sPrn( inMsg )
 			return
-		
 		wDate = wTD['TimeDate'].split(" ")
-		#############################
-		# パスが無設定 or 時計異常？
-		if self.CHR_LogPath=="" or wDate[0]=="" :
-			###時間取得失敗  時計壊れた？
-			CLS_OSIF.sPrn( inMsg )
-			return
+		
+##		#############################
+##		# パスが無設定 or 時計異常？
+##		if self.CHR_LogPath=="" or wDate[0]=="" :
+##			###時間取得失敗  時計壊れた？
+##			CLS_OSIF.sPrn( inMsg )
+##			return
 		
 		#############################
 		# ファイルへ書き出す
 		wLogFile = self.CHR_LogPath + wDate[0] + ".log"
+		wOutLog = self.__write( wLogFile, wDate, inMsg )
+		
+		#############################
+		# コンソールに表示する
+		# = システムログに出る
+		if inView==True :
+			CLS_OSIF.sPrn( wOutLog )
+		
+		return
+
+
+
+#####################################################
+# Masterログデータのセット
+#####################################################
+	def MasterLog( self, inAccount, inMsg, inView=False, inHard=False ):
+		#############################
+		# 時間を取得
+		wTD = CLS_OSIF.sGetTime()
+		if wTD['Result']!=True :
+			###時間取得失敗  時計壊れた？
+			CLS_OSIF.sPrn( inMsg )
+			return
+		wDate = wTD['TimeDate'].split(" ")
+		
+		#############################
+		# ファイルパスを作成する
+		wDate = self.CHR_TimeDate.split(" ")
+		wDate = wDate.split("-")
+		
+		if inHard==False :
+			### Masterログ
+			wLogFile = gVal.DEF_STR_FILE['MasterLog_path'] + wDate[0] + wDate[1] + "_" + inAccount + ".log"
+		else :
+			### ハードログ
+			wLogFile = gVal.DEF_STR_FILE['MasterLog_path'] + wDate[0] + wDate[1] + "_hard" + ".log"
+		
+		#############################
+		# ファイルへ書き出す
 		wOutLog = self.__write( wLogFile, wDate, inMsg )
 		
 		#############################

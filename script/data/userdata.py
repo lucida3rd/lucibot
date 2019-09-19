@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/12
+#   Update  ：2019/9/19
 #####################################################
 # Private Function:
 #   (none)
@@ -325,9 +325,9 @@ class CLS_UserData() :
 				wIndex = wI
 				break
 			wI += 1
-		if wIndex==-1 :
-			return False	#トラヒックユーザではない
-		
+##		if wIndex==-1 :
+##			return False	#トラヒックユーザではない
+##		
 ##		#############################
 ##		# 1番目でSubUserの場合は確定
 ##		if wIndex==0 :
@@ -341,16 +341,28 @@ class CLS_UserData() :
 ##			return True	#確定
 ##		
 		#############################
-		# 1番目がSubUser かつ対象の場合 =確定
-		if gVal.STR_MasterConfig['MasterUser']!=wTrafficUser[0] and \
-		   wTrafficUser[0] == inUsername :
-			return True	#確定
+		# トラヒックユーザの登録がある場合
+		if len(wTrafficUser)>0 :
+			if wIndex==-1 :
+				return False	#トラヒックユーザではない
+			
+			#############################
+			# 1番目がSubUser かつ対象の場合 =確定
+			if gVal.STR_MasterConfig['MasterUser']!=wTrafficUser[0] and \
+			   wTrafficUser[0] == inUsername :
+				return True	#確定
+			
+			#############################
+			# 1番目がMasterUser かつ自分が2番目だった場合 =確定
+			elif gVal.STR_MasterConfig['MasterUser']==wTrafficUser[0] and \
+			     wTrafficUser[1] == inUsername :
+				return True	#確定
 		
 		#############################
-		# 1番目がMasterUser かつ自分が2番目だった場合 =確定
-		elif gVal.STR_MasterConfig['MasterUser']==wTrafficUser[0] and \
-		     wTrafficUser[1] == inUsername :
-			return True	#確定
+		# その他で自分がMasterUserだった場合 =確定
+		else :
+			if gVal.STR_MasterConfig['MasterUser']==inUsername :
+				return True	#確定
 		
 		return False		#対象ではない
 

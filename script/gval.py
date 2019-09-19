@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値 (test)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/14
+#   Update  ：2019/9/17
 #####################################################
 
 #####################################################
@@ -276,7 +276,7 @@ class gVal() :
 		"_back.py"		: True,
 		
 		"CronName"		: "lucibot",
-		"Log_path"		: DEF_STR_FILE['MasterLog_path'],
+##		"Log_path"		: DEF_STR_FILE['MasterLog_path'],
 		"(dummy)"		: 0
 	}
 	
