@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ハード監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/14
+#   Update  ：2019/9/19
 #####################################################
 # Private Function:
 #   __run(self):
@@ -23,6 +23,7 @@
 #   sRun(cls):
 #
 #####################################################
+from datetime import datetime
 import psutil
 
 from osif import CLS_OSIF
@@ -211,7 +212,7 @@ class CLS_LookHard:
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHard: Hard_Info: SSD Info get is failed" )
 			return False
 		
-		wRuntime = self.__get_CPU_Info()
+		wRuntime = self.__get_Runtime_Info()
 		if wRuntime['Result']!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHard: Hard_Info: Runtime Info get is failed" )
 			return False
@@ -223,13 +224,13 @@ class CLS_LookHard:
 		wCHR_Toot  = "@" + gVal.STR_MasterConfig['AdminUser'] + "[ハード情報通知]" + '\n'
 		
 		### 稼働時間
-##		wNowDate = wRuntime['NowTD'].split(" ")
+		wNowDate = wRuntime['NowTD'].split(" ")
 		wRunDate = wRuntime['BootTD'].split(" ")
 		
-##		wCHR_Toot = wCHR_Toot + "現在日付：" + wNowDate[0] + '\n'
+		wCHR_Toot = wCHR_Toot + "現在日付：" + wNowDate[0] + '\n'
 		wCHR_Toot = wCHR_Toot + "起動日付：" + wRunDate[0] + '\n'
 		wCHR_Toot = wCHR_Toot + "稼働時間：" + str(wRuntime['Runtime']) + " .h" + '\n'
-		wCHR_Toot = wCHR_Toot + "稼働日数：" + str(wRuntime['RunDays']) + " .h" + '\n'
+		wCHR_Toot = wCHR_Toot + "稼働日数：" + str(wRuntime['RunDays']) + " .day" + '\n'
 		
 		### HHD/SSD
 		wCHR_Toot = wCHR_Toot + "*--------------------*" + '\n'
@@ -441,14 +442,15 @@ class CLS_LookHard:
 			
 			###稼働日
 			wBootTime = datetime.fromtimestamp(psutil.boot_time())
-			wHardInfo['BootTD'] = wBootTime.strftime("%Y/%m/%d %H:%M:%S")
+			wHardInfo['BootTD'] = wBootTime.strftime("%Y-%m-%d %H:%M:%S")
 			
 			###稼働時間
-			wRuntime = wHardInfo['NowTD'] - wHardInfo['BootTD']
+##			wRuntime = wHardInfo['NowTD'] - wHardInfo['BootTD']
+			wRuntime = gVal.STR_TimeInfo['Object'] - wBootTime
 			wRuntime = wRuntime.total_seconds()
 			wRuntime = int( wRuntime / float(3600) )
-			wHardInfo['Runtime'] = wRuntime			#稼働時間
-			wHardInfo['RunDays'] = wRuntime / 24	#稼働日数
+			wHardInfo['Runtime'] = wRuntime				#稼働時間
+			wHardInfo['RunDays'] = int( wRuntime / 24 )	#稼働日数
 		except ValueError as err :
 			return wHardInfo
 		

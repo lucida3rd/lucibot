@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：周期トゥート処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/12
+#   Update  ：2019/9/17
 #####################################################
 # Private Function:
 #   __run(self):
@@ -111,17 +111,19 @@ class CLS_CircleToot():
 # データチェック
 #####################################################
 	def CheckData(self):
-		#############################
-		# 現在時刻を取得する
-		wTime = CLS_OSIF.sGetTime()
-		if wTime['Result']!=True :
-			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: CheckData: sGetTime failed" )
-			return False
+##		#############################
+##		# 現在時刻を取得する
+##		wTime = CLS_OSIF.sGetTime()
+##		if wTime['Result']!=True :
+##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_CircleToot: CheckData: sGetTime failed" )
+##			return False
 		
 		#############################
 		# 現時分
-		wHour   = str( wTime['Object'].strftime("%H") )
-		wMinute = str( wTime['Object'].strftime("%M") )
+##		wHour   = str( wTime['Object'].strftime("%H") )
+##		wMinute = str( wTime['Object'].strftime("%M") )
+		wHour   = str( gVal.STR_TimeInfo['Object'].strftime("%H") )
+		wMinute = str( gVal.STR_TimeInfo['Object'].strftime("%M") )
 		
 		#############################
 		# データチェック

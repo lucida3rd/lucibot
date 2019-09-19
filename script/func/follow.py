@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：フォロー管理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/14
+#   Update  ：2019/9/19
 #####################################################
 # Private Function:
 #   __get_FollowTL( self, inMyID):
@@ -309,8 +309,11 @@ class CLS_Follow():
 		#############################
 		# bot起動の最初か、1時間経っていればmastodonから取得する
 		#  *** フォロー・フォロワーがいないと常に取りにいってしまう
-		if len(self.ARR_FollowTL)>0 or len(self.ARR_FollowerTL)>0 :
+		wARR_FollowList   = list( self.ARR_FollowTL )
+		wARR_FollowerList = list( self.ARR_FollowerTL )
+##		if len(self.ARR_FollowTL)>0 or len(self.ARR_FollowerTL)>0 :
 ##			if gVal.STR_TimeInfo['OneDay']==False :
+		if len(wARR_FollowList)>0 or len(wARR_FollowerList)>0 :
 			if gVal.STR_TimeInfo['OneHour']==False :
 			    return True		#正常で返す
 		
