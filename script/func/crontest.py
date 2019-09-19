@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：cronテスト
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/17
+#   Update  ：2019/9/20
 #####################################################
 # Private Function:
 #   __testLog( self, inKind, inAccount  ):
@@ -263,15 +263,19 @@ class CLS_CronTest():
 		
 		#############################
 		# 時間取得
-		wTime = CLS_OSIF.sGetTime()
+##		wTime = CLS_OSIF.sGetTime()
 ##		wDate = wTime['TimeDate'].split(" ")
-		if wDate['Result']!=True :
+##		if wDate['Result']!=True :
+		wTime = CLS_OSIF.sGetTime()
+		if wTime['Result']!=True :
 			return None	#時間取得失敗
 		
 		#############################
 		# パスの生成
+##		wDate = wTime['TimeDate'].split(" ")
+##		wDate = wDate.split("-")
 		wDate = wTime['TimeDate'].split(" ")
-		wDate = wDate.split("-")
+		wDate = wDate[0].split("-")
 		wLogFile = gVal.DEF_STR_FILE['MasterLog_path'] + wDate[0] + wDate[1] + "_" + inAccount + ".log"
 		
 		#############################
