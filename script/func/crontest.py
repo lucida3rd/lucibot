@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：cronテスト
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/18
+#   Update  ：2019/9/17
 #####################################################
 # Private Function:
 #   __testLog( self, inKind, inAccount  ):
@@ -46,13 +46,7 @@ class CLS_CronTest():
 #     3.Master環境情報ロード(チェック)
 #     4.Userフォルダチェック
 #     5.実行権限チェック
-#     6.testログ
-#
-#   Backgroundテスト項目
-#     1.データフォルダチェック
-#     2.Master環境情報ロード(チェック)
-#     3.testログ
-#     ※Account、Kindのテストは関数コール時に実施している
+#     6.テストログ
 #####################################################
 	def Run(self):
 		#############################
@@ -160,7 +154,7 @@ class CLS_CronTest():
 ##			return wRes
 		
 		#############################
-		# 6.実行権限チェック
+		# 5.実行権限チェック
 		wFlg_Authority = True
 		#############################
 		# コマンドの組み立て
@@ -199,7 +193,7 @@ class CLS_CronTest():
 		#############################
 		
 		#############################
-		# 7.testログ
+		# 6.testログ
 		self.__testLog( wKind, wAccount )
 		
 		wRes['Responce'] = {}
@@ -262,14 +256,23 @@ class CLS_CronTest():
 		#############################
 		# TestLog有効か
 		if gVal.STR_CronInfo[inKind]!=True :
-			return		#ログ無効
+##			return		#ログ無効
+			return None	#ログ無効
 		
 		wExeName = inKind.split(".")
 		
 		#############################
 		# 時間取得
 		wTime = CLS_OSIF.sGetTime()
+##		wDate = wTime['TimeDate'].split(" ")
+		if wDate['Result']!=True :
+			return None	#時間取得失敗
+		
+		#############################
+		# パスの生成
 		wDate = wTime['TimeDate'].split(" ")
+		wDate = wDate.split("-")
+		wLogFile = gVal.DEF_STR_FILE['MasterLog_path'] + wDate[0] + wDate[1] + "_" + inAccount + ".log"
 		
 		#############################
 		# 書き込みデータを作成
@@ -279,9 +282,9 @@ class CLS_CronTest():
 		
 		#############################
 		# テストログ書き込み
-		wLogFile = gVal.STR_CronInfo['Log_path'] + wDate[0] + "_cron" + wExeName[0] + "_" + inAccount + ".log"
+##		wLogFile = gVal.STR_CronInfo['Log_path'] + wDate[0] + "_cron" + wExeName[0] + "_" + inAccount + ".log"
 		CLS_File.sAddFile( wLogFile, wSetLine, inExist=False )
-		return
+		return wLogFile
 
 
 

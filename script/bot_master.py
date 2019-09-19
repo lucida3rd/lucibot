@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理(Master)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/14
+#   Update  ：2019/9/19
 #####################################################
 # Private Function:
 #   (none)
@@ -30,6 +30,7 @@ from botctrl import CLS_BotCtrl
 from lookptl import CLS_LookPTL
 from lookltl import CLS_LookLTL
 from lookrip import CLS_LookRIP
+from lookhard import CLS_LookHard
 from circletoot import CLS_CircleToot
 from follow import CLS_Follow
 from randtoot import CLS_RandToot
@@ -211,6 +212,11 @@ class CLS_BOT_Master() :
 		#############################
 		# フォロー・フォロワー情報の更新
 		cls.OBJ_Follow.Set_FollowLists()
+		
+		#############################
+		# ハード監視処理
+		if gVal.STR_MasterConfig['LookHard']=="on" :
+			wOBJ_LookHard = CLS_LookHard( parentObj=cls )
 		
 	#############################
 	# 後処理
