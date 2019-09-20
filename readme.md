@@ -1,24 +1,9 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4 (deverop)  
 ::BotDate= 2019/9/20  
-::Version= 4.1.0.2.d  
+::Version= 4.1.0.3.d  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
-
-
-
-### v4.0→v4.1の機能差分
-v4.0.10からこれまでの基本的な設計仕様を大きく見直しています。  
-* アクション通知によるトゥート通知をMaster Userでおこなうようになりました。
-  (ただしアクション検出するトリガはこれまで通りSub Userのみとなります)  
-* アクション通知によるトゥートをCW固定にしました。  
-* リプライブースト時、未収載もブースト固定になりました。  
-* PR Userを廃止しました。当機能はMaster Userに集約されます。  
-* 個別configを廃止しました。MasterConfigに集約されます。  
-* Timeline調整数を固定値にしました。  
-* PostgreSQLを使用するようになりました。(ユーザ収集、ワード学習、ドメイン管理)  
-* 自動フォロー機能を復活し、仕様を大きく見直しました。  
-* Twitterとより深く連携できるようにしました。  
 
 
 

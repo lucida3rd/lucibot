@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ランダムトゥート
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/14
+#   Update  ：2019/9/21
 #####################################################
 # Private Function:
 #   __selectMeCabDic(self):
@@ -74,8 +74,8 @@ class CLS_RandToot():
 		wVAL_Rand = CLS_OSIF.sGetRand( gVal.DEF_STR_TLNUM['getRandRange'] )
 		wVAL_Pub  = CLS_OSIF.sGetRand( gVal.DEF_STR_TLNUM['getRandPublic'] )
 		
-##		if wVAL_Rand < gVal.DEF_STR_TLNUM['getRandVal'] :
-		if wVAL_Rand < gVal.DEF_STR_TLNUM['getRandVal'] or gVal.FLG_Test_Mode==True :
+		if wVAL_Rand < gVal.DEF_STR_TLNUM['getRandVal'] :
+##		if wVAL_Rand < gVal.DEF_STR_TLNUM['getRandVal'] or gVal.FLG_Test_Mode==True :
 		#############################
 		# ランダムトゥートを実行する
 			### public頻度
