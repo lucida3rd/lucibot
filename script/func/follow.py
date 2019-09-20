@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：フォロー管理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/19
+#   Update  ：2019/9/21
 #####################################################
 # Private Function:
 #   __get_FollowTL( self, inMyID):
@@ -149,7 +149,7 @@ class CLS_Follow():
 	def Check_Follower( self, inFullser ):
 ##		if inFullser not in self.ARR_FollowerTL :
 		wKeyList = list( self.ARR_FollowerTL.keys() )
-		if inFullser in wKeyList :
+		if inFullser not in wKeyList :
 			return False	#フォロワーではない
 		
 		return True			#フォロワー
