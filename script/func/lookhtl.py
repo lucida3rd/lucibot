@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/14
+#   Update  ：2019/9/26
 #####################################################
 # Private Function:
 #   __run(self):
@@ -211,7 +211,8 @@ class CLS_LookHTL():
 					##アンマッチ
 					continue
 				### 実行
-				if self.TwitterBoost( inROW['id'] )!=True :
+##				if self.TwitterBoost( inROW['id'] )!=True :
+				if self.TwitterBoost( inROW['id'], wFulluser )!=True :
 					self.STR_Cope['Invalid'] += 1
 				else :
 					self.STR_Cope["Now_Twitter"] += 1
@@ -575,19 +576,21 @@ class CLS_LookHTL():
 #####################################################
 # ついったー転送
 #####################################################
-	def TwitterBoost( self, inID ) :
-		#############################
-		# ユーザ名の変換
-		wFulluser = CLS_UserData.sUserCheck( self.Obj_Parent.CHR_Account )
-		if wFulluser['Result']!=True :
-			###今のところ通らないルート
-			return False
-		wDomain = wFulluser['Domain']
+##	def TwitterBoost( self, inID ) :
+	def TwitterBoost( self, inID, inFulluser ) :
+##		#############################
+##		# ユーザ名の変換
+##		wFulluser = CLS_UserData.sUserCheck( self.Obj_Parent.CHR_Account )
+##		if wFulluser['Result']!=True :
+##			###今のところ通らないルート
+##			return False
+##		wDomain = wFulluser['Domain']
 		
 		#############################
 		# ファボられたトゥートURL
 ##		wToot_Url = "https://" + wDomain + gVal.DEF_TOOT_SUBURL + str(inID)
-		wToot_Url = "https://" + wDomain + "/@" + wFulluser['User'] + "/" + str(inID)
+##		wToot_Url = "https://" + wDomain + "/@" + wFulluser['User'] + "/" + str(inID)
+		wToot_Url = "https://" + inFulluser['Domain'] + "/@" + inFulluser['Username'] + "/" + str(inID)
 		wCHR_Tweet = "mastodonから転送:" + '\n' + wToot_Url
 		
 		#############################
