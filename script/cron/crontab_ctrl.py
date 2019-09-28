@@ -157,10 +157,8 @@ class CLS_CronCtrl():
 			if wJobStr.find( wCHR_Curr )<0 :	#同一カレントか
 				continue
 			if inCommand!=None :				#ダブってるJobがあればTrue
-##				if wJobStr.find( inCommand )>=0 :
-##					wRes['Responce']['isJob'] = True
-				if wJobStr.find( inCommand )<0 :
-					continue
+				if wJobStr.find( inCommand )>=0 :
+					wRes['Responce']['isJob'] = True
 			
 			wRes['Responce']['List'].append( str(wJob) )
 		
