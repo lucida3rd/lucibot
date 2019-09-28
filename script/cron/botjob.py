@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ぼっとJob(cron制御)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/18
+#   Update  ：2019/9/27
 #####################################################
 # Private Function:
 #   __getCommand( self, inKind, inAccount ):
@@ -14,7 +14,6 @@
 #   Put( self, inKind, inAccount ):
 #   Del( self, inKind, inAccount ):
 #   isJob( self, inKind, inAccount ):
-#   Stop(self):
 #   GetList(self):
 #   List(self):
 #
@@ -213,29 +212,18 @@ class CLS_Botjob() :
 #####################################################
 # 全停止
 #####################################################
-	def Stop(self):
+##	def Stop(self):
 ##		#############################
-##		# 応答形式の取得
-##		#   "Result" : False, "Reason" : None, "Responce" : None
-##		wRes = CLS_OSIF.sGet_Resp()
-##		
-##		#############################
-##		# cronが有効か？
-##		if self.FLG_CronCtrl!=True :
-##			wRes['Reason'] = "CLS_Botjob: Stop: Cron disable"
+##		# 全cron job削除(停止)
+##		wRes = self.OBJ_CronCtrl.Clear()
+##		if wRes['Result']!=True :
+##			wRes['Reason'] = "CLS_Botjob: Stop: Failded: " + wRes['Reason']
 ##			return wRes
-		
-		#############################
-		# 全cron job削除(停止)
-		wRes = self.OBJ_CronCtrl.Clear()
-		if wRes['Result']!=True :
-			wRes['Reason'] = "CLS_Botjob: Stop: Failded: " + wRes['Reason']
-			return wRes
-		
-		wRes['Result'] = True
-		return wRes
-
-
+##		
+##		wRes['Result'] = True
+##		return wRes
+##
+##
 
 #####################################################
 # 一覧取得

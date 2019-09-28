@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：crontab制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/3/8
+#   Update  ：2019/9/28
 #####################################################
 # Private Function:
 #   (none)
@@ -139,6 +139,10 @@ class CLS_CronCtrl():
 		wRes = CLS_OSIF.sGet_Resp()
 		
 		#############################
+		# カレントパスを取得
+		wCHR_Curr = CLS_OSIF.sGetCwd()
+		
+		#############################
 		# cronが有効か？
 		if self.FLG_Cron!=True :
 			wRes['Reason'] = " GetJoblist: Cron disabled"
@@ -150,9 +154,13 @@ class CLS_CronCtrl():
 		wRes['Responce'].update({ 'isJob': False, 'List': [] })
 		for wJob in self.OBJ_Cron:  
 			wJobStr = str(wJob)
-			if inCommand!=None :	#ダブってるJobがあればTrue
-				if wJobStr.find( inCommand )>=0 :
-					wRes['Responce']['isJob'] = True
+			if wJobStr.find( wCHR_Curr )<0 :	#同一カレントか
+				continue
+			if inCommand!=None :				#ダブってるJobがあればTrue
+##				if wJobStr.find( inCommand )>=0 :
+##					wRes['Responce']['isJob'] = True
+				if wJobStr.find( inCommand )<0 :
+					continue
 			
 			wRes['Responce']['List'].append( str(wJob) )
 		
