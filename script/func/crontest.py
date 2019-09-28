@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：cronテスト
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/27
+#   Update  ：2019/9/28
 #####################################################
 # Private Function:
 #   __testLog( self, inKind, inAccount  ):
@@ -87,7 +87,8 @@ class CLS_CronTest():
 			return wRes
 		
 		if wRes['Responce']['isJob']==False and gVal.FLG_Test_Mode==False :
-			wStr = "CLS_CronTest: Job is not found: kind=" + wKind + ": account=" + wAccount
+##			wStr = "CLS_CronTest: Job is not found: kind=" + wKind + ": account=" + wAccount
+			wStr = "CLS_CronTest: Job is not found: kind=" + wKind + ": account=" + wAccount + " current: " + CLS_OSIF.sGetCwd()
 			CLS_OSIF.sPrn( wStr  )	#メールに頼る
 			
 			wRes['Result'] = False	#テストはNG
