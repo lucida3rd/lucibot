@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ぼっと制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/10
+#   Update  ：2019/9/28
 #####################################################
 # Private Function:
 #   __start(self):
@@ -420,6 +420,52 @@ class CLS_Bot_Ctrl() :
 		# コマンド
 		wCommand = CLS_OSIF.sInp( "コマンド？=> " )
 		return wCommand
+
+
+
+#####################################################
+# cron全停止 ※コンソール外
+#####################################################
+	def CronAllStop(self):
+		#############################
+		# List取得
+		wRes = self.OBJ_Job.GetList()
+		if wRes['Result']!=True :
+			return False
+		
+		#############################
+		# 登録ユーザのうちcrontabに登録されているものを True とする
+		self.FLG_On = False
+		wKeylist = self.UserList.keys()
+		for wUser in wKeylist :
+			wFlg_Online = False
+			for wJob in wRes['Responce']['List']:  
+				if wJob.find( wUser )>=0 :
+					wFlg_Online = True
+			
+			if wFlg_Online==True :
+				self.UserList[wUser] = True
+				self.FLG_On = True
+			else:
+				self.UserList[wUser] = False
+		
+		#############################
+		# 全停止を実行する
+		self.__allStop()
+		
+		return True
+
+
+
+#####################################################
+# 全再開 ※コンソール外
+#####################################################
+	def CronReStart(self):
+		#############################
+		# 全停止したcronを再実行する
+		self.__reStart()
+		
+		return True
 
 
 

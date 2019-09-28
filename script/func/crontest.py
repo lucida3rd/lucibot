@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：cronテスト
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/20
+#   Update  ：2019/9/27
 #####################################################
 # Private Function:
 #   __testLog( self, inKind, inAccount  ):
@@ -107,13 +107,14 @@ class CLS_CronTest():
 		#############################
 		# Master環境情報に異常はないか
 		if wFlg_ok==False :
-			wRes = wCLS_Botjob.Stop()	#全cronを削除する
-			if wRes['Result']!=True :
-				wStr = "CLS_CronTest: Cron stop failed: " + wRes['Reason']
-				CLS_OSIF.sPrn( wStr  )	#メールに頼る
-			
-			wStr = "Master環境情報に異常があったため、" + gVal.STR_SystemInfo['Client_Name']
-			wStr = wStr + "で登録した全cronを停止しました。"
+##			wRes = wCLS_Botjob.Stop()	#全cronを削除する
+##			if wRes['Result']!=True :
+##				wStr = "CLS_CronTest: Cron stop failed: " + wRes['Reason']
+##				CLS_OSIF.sPrn( wStr  )	#メールに頼る
+##			
+##			wStr = "Master環境情報に異常があったため、" + gVal.STR_SystemInfo['Client_Name']
+##			wStr = wStr + "で登録した全cronを停止しました。"
+			wStr = "Master環境情報に異常があったため、処理を中止します。"
 			CLS_OSIF.sPrn( wStr  )		#メールに頼る
 			
 			wRes['Result'] = False	#テストはNG
