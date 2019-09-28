@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：セットアップ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/5
+#   Update  ：2019/9/28
 #####################################################
 # Private Function:
 #   __initDB(self):
@@ -31,6 +31,7 @@ from config import CLS_Config
 from regist import CLS_Regist
 from userdata import CLS_UserData
 from botjob import CLS_Botjob
+from bot_ctrl import CLS_Bot_Ctrl
 from postgresql_use import CLS_PostgreSQL_Use
 from twitter_use import CLS_Twitter_Use
 
@@ -88,6 +89,7 @@ class CLS_Setup():
 		wCLS_Config = CLS_Config()
 		wCLS_Regist = CLS_Regist()
 		wCLS_Botjob = CLS_Botjob()
+		wCLS_Bot_Ctrl = CLS_Bot_Ctrl()
 		
 		#############################
 		# Master環境情報の変更
@@ -106,7 +108,8 @@ class CLS_Setup():
 		# 初期起動直後なので、メンテをOFFにする
 		# cronを全て剥がす
 ##		gVal.STR_MasterConfig['mMainte'] = "off"
-		wCLS_Botjob.Stop()
+##		wCLS_Botjob.Stop()
+		wCLS_Bot_Ctrl.CronAllStop()
 		
 		#############################
 		# ユーザ登録=0の時、ユーザ登録させる
@@ -304,39 +307,42 @@ class CLS_Setup():
 		
 		#############################
 		# cronの停止 +メモもする
-		wCLS_Botjob = CLS_Botjob()
+##		wCLS_Botjob = CLS_Botjob()
+		wCLS_Bot_Ctrl = CLS_Bot_Ctrl()
+		wCLS_Bot_Ctrl.CronAllStop()
+		CLS_OSIF.sSleep(120)	#とりあえずcronが停止する2分は待つ
 		
-		wFLG_Wait = False
-		wWaitRestart = {}
-		wIndex       = 0
-		for wUser in wUserList :
-			#############################
-			# 種別を判定
-			if gVal.STR_MasterConfig['MasterUser']==wUser :
-				wKind = gVal.DEF_CRON_MASTER
-			else :
-				wKind = gVal.DEF_CRON_SUB
-			
-			#############################
-			# ジョブの削除
-			wRes = wCLS_Botjob.Del( wKind, wUser )
-			if wRes['Result']!=True :
-				###おそらく動いてないcronのためスキップ
-				continue
-			
-			#############################
-			# 停止cronをメモ
-			wWaitRestart.update({ wIndex : wIndex })
-			wWaitRestart[wIndex] = {}
-			wWaitRestart[wIndex].update({ "Kind" : wKind })
-			wWaitRestart[wIndex].update({ "User" : wUser })
-			wFLG_Wait  = True
-			wIndex    += 1
-		
-		#############################
-		# 1つでも停止cronがあれば2分待つ
-		if wFLG_Wait==True :
-			CLS_OSIF.sSleep(120)
+##		wFLG_Wait = False
+##		wWaitRestart = {}
+##		wIndex       = 0
+##		for wUser in wUserList :
+##			#############################
+##			# 種別を判定
+##			if gVal.STR_MasterConfig['MasterUser']==wUser :
+##				wKind = gVal.DEF_CRON_MASTER
+##			else :
+##				wKind = gVal.DEF_CRON_SUB
+##			
+##			#############################
+##			# ジョブの削除
+##			wRes = wCLS_Botjob.Del( wKind, wUser )
+##			if wRes['Result']!=True :
+##				###おそらく動いてないcronのためスキップ
+##				continue
+##			
+##			#############################
+##			# 停止cronをメモ
+##			wWaitRestart.update({ wIndex : wIndex })
+##			wWaitRestart[wIndex] = {}
+##			wWaitRestart[wIndex].update({ "Kind" : wKind })
+##			wWaitRestart[wIndex].update({ "User" : wUser })
+##			wFLG_Wait  = True
+##			wIndex    += 1
+##		
+##		#############################
+##		# 1つでも停止cronがあれば2分待つ
+##		if wFLG_Wait==True :
+##			CLS_OSIF.sSleep(120)
 		
 		CLS_OSIF.sPrn( "各ユーザの作業ファイルを初期化しています..." + '\n' )
 		#############################
@@ -437,17 +443,20 @@ class CLS_Setup():
 		
 		#############################
 		# cronの再起動
-		if wFLG_Wait==True :
-			CLS_OSIF.sPrn( "停止していたcronを再開します..." + '\n' )
-			
-			wKeylist = wWaitRestart.keys()
-			for wKey in wKeylist :
-				#############################
-				# ジョブの登録
-				wRes = wCLS_Botjob.Put( wWaitRestart[wKey]["Kind"], wWaitRestart[wKey]["User"] )
-				if wRes['Result']!=True :
-					###失敗
-					CLS_OSIF.sPrn( "cronの起動に失敗しました: user=" + wWaitRestart[wKey]["User"] + '\n' )
+##		if wFLG_Wait==True :
+##			CLS_OSIF.sPrn( "停止していたcronを再開します..." + '\n' )
+##			
+##			wKeylist = wWaitRestart.keys()
+##			for wKey in wKeylist :
+##				#############################
+##				# ジョブの登録
+##				wRes = wCLS_Botjob.Put( wWaitRestart[wKey]["Kind"], wWaitRestart[wKey]["User"] )
+##				if wRes['Result']!=True :
+##					###失敗
+##					CLS_OSIF.sPrn( "cronの起動に失敗しました: user=" + wWaitRestart[wKey]["User"] + '\n' )
+##		
+		CLS_OSIF.sPrn( "停止していたcronを再開します..." + '\n' )
+		wCLS_Bot_Ctrl.CronReStart()
 		
 		#############################
 		# 終わり
