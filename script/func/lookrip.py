@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/14
+#   Update  ：2019/9/29
 #####################################################
 # Private Function:
 #   __run(self):
@@ -44,7 +44,8 @@ class CLS_LookRIP():
 	ARR_RateTL   = []		#過去TL(id)
 	ARR_UpdateTL = []		#新・過去TL(id)
 	
-	ARR_NowFavID = []		#今周処理したふぁぼID
+##	ARR_NowFavID = []		#今周処理したふぁぼID
+	ARR_RateInd  = {}		#過去通知
 
 ##	ARR_RateFV   = []		#過去ふぁぼ(ふぁぼ対象id)
 ##	ARR_UpdateFV = []		#新・過去ふぁぼ(ふぁぼid,時間)
@@ -55,19 +56,20 @@ class CLS_LookRIP():
 ##	ARR_Reind     = {}		#再通知
 
 	STR_Cope = {			#処理カウンタ
-		"Ind_Cope"	 : 0,		#今回受信した通知数
-		"Ind_On"	 : 0,		#正常処理
-		"Ind_Off"	 : 0,		#反応時間外で破棄
-		"Ind_Inv"    : 0,		#条件外で破棄
-		"Ind_Fail"	 : 0,		#処理失敗で破棄
+		"Ind_Cope"		: 0,	#今回受信した通知数
+		"Ind_On"		: 0,	#正常処理
+		"Ind_Off"		: 0,	#反応時間外で破棄
+		"Ind_Notified"	: 0,	#通知済み
+		"Ind_Inv"		: 0,	#条件外で破棄
+		"Ind_Fail"		: 0,	#処理失敗で破棄
 		
-		"Now_Cope"   : 0,		#処理した新トゥート数
-		"Now_Favo"   : 0,		#処理したふぁぼ通知
-		"Now_Follow" : 0,		#処理したふぉろー通知
-		"Now_Rip"    : 0,		#処理したリプ
-		"Now_Reind"  : 0,		#処理した再通知
+		"Now_Cope"		: 0,	#処理した新トゥート数
+		"Now_Favo"		: 0,	#処理したふぁぼ通知
+		"Now_Follow"	: 0,	#処理したふぉろー通知
+		"Now_Rip"		: 0,	#処理したリプ
+		"Now_Reind"		: 0,	#処理した再通知
 		
-		"dummy"     : 0	#(未使用)
+		"dummy"			: 0		#(未使用)
 	}
 	
 	STR_Ind = {				#通知制限
@@ -129,19 +131,20 @@ class CLS_LookRIP():
 			return
 		
 		#############################
+		# 過去通知の読み込み
+		#   =RIPを読む前に呼ぶこと
+		wRes = self.Get_RateInd()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get_RateInd failed" )
+			return
+		
+		#############################
 		# RIP読み込み(mastodon)
 		wRes = self.Get_RIP()
 		if wRes['Result']!=True :
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Riply read failed: " + wRes['Reason'] )
 			return
 		
-##		#############################
-##		# 過去ふぁぼの読み込み
-##		wRes = self.Get_RateFV()
-##		if wRes!=True :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Get_RateFV failed" )
-##			return
-##		
 		#############################
 		# 過去RIPの読み込み
 		wRes = self.Get_RateRIP()
@@ -198,13 +201,13 @@ class CLS_LookRIP():
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_Indlim failed" )
 ###			return
 		
-##		#############################
-##		# 新・過去ふぁぼ保存
-##		wRes = self.Set_RateFV()
-##		if wRes!=True :
-##			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateFV failed" )
-##			return
-##		
+		#############################
+		# 過去通知 保存
+		wRes = self.Set_RateInd()
+		if wRes!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: __run: Set_RateInd failed" )
+			return
+		
 		#############################
 		# 新・過去RIP保存
 		wRes = self.Set_RateRIP()
@@ -216,8 +219,8 @@ class CLS_LookRIP():
 		# 処理結果ログ
 		wStr = self.CHR_LogName + " 結果: 新Riply=" + str(self.STR_Cope['Now_Cope']) + " Ans=" + str(self.STR_Cope['Now_Rip']) + " Limit=" + str(self.STR_Ind['Count']) + '\n'
 		wStr = wStr + "Ind=[Cope:" + str(self.STR_Cope['Ind_Cope']) + " On:" + str(self.STR_Cope['Ind_On']) + " Off:" + str(self.STR_Cope['Ind_Off'])
-		wStr = wStr + " Invalid:" + str(self.STR_Cope['Ind_Inv']) + " Failed:" + str(self.STR_Cope['Ind_Fail']) + "]"
-		wStr = wStr + " Favo=" + str(self.STR_Cope['Now_Favo']) + " Follow=" + str(self.STR_Cope['Now_Follow']) + " Reind=" + str(self.STR_Cope['Now_Reind'])
+		wStr = wStr + " Notified:" + str(self.STR_Cope['Ind_Notified']) + " Invalid:" + str(self.STR_Cope['Ind_Inv']) + " Failed:" + str(self.STR_Cope['Ind_Fail']) + "]" + '\n'
+		wStr = wStr + "Favo=" + str(self.STR_Cope['Now_Favo']) + " Follow=" + str(self.STR_Cope['Now_Follow']) + " Reind=" + str(self.STR_Cope['Now_Reind'])
 
 		if gVal.FLG_Test_Mode==False :
 			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
@@ -508,7 +511,7 @@ class CLS_LookRIP():
 		#############################
 		# type別に取り込み先を振り分け
 ###		wFavID = []
-		self.ARR_NowFavID = []
+##		self.ARR_NowFavID = []
 		for wToot in wGet_TootList :
 			self.STR_Cope['Ind_Cope'] += 1
 			
@@ -582,6 +585,7 @@ class CLS_LookRIP():
 			return
 		
 		### ユーザ登録されていた
+		###  =登録ユーザのふぁぼ等は通知しない
 ##		wUserChk = CLS_UserData.sUserCheck( inFulluser )
 		wUserChk = CLS_UserData.sUserCheck( inFulluser['Fulluser'] )
 		if wUserChk['Result']!=True or wUserChk['Registed']==True :
@@ -591,28 +595,36 @@ class CLS_LookRIP():
 		wCont = CLS_OSIF.sDel_HTML( inROW['status']['content'] )
 		### @ 入り(リプライ)のふぁぼ、ブースト
 ###		if CLS_OSIF.sRe_Search( "@", wCont )==0 :
-		wRes = CLS_OSIF.sRe_Search( "@", wCont )
-		if wRes :
-			if wRes.start()==0 :
-				self.STR_Cope['Ind_Inv'] += 1
-				return
+##		wRes = CLS_OSIF.sRe_Search( "@", wCont )
+##		if wRes :
+##			if wRes.start()==0 :
+##				self.STR_Cope['Ind_Inv'] += 1
+##				return
+		if wCont.find("@")==0 :
+			self.STR_Cope['Ind_Inv'] += 1
+			return
 		
 		### タグ付き(アクション通知以外)
 ##		if CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )>=0 or + \
 ##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )>=0 or + \
 ##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )>=0 :
-		wRes_1 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )
-		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )
-		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )
-		if wRes_1 or wRes_2 or wRes_3 :
+##		wRes_1 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )
+##		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )
+##		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )
+##		if wRes_1 or wRes_2 or wRes_3 :
+		wRes_1 = wCont.find( gVal.STR_MasterConfig['mTootTag'] )
+		wRes_2 = wCont.find( gVal.STR_MasterConfig['prTag'] )
+		wRes_3 = wCont.find( gVal.STR_MasterConfig['TrafficTag'] )
+		if wRes_1>=0 or wRes_2>=0 or wRes_3>=0 :
 			self.STR_Cope['Ind_Inv'] += 1
 			return
 		
 		#############################
 		# アクション通知への反応 =>再通知
 ##		if CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )>=0 :
-		wRes = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )
-		if wRes :
+##		wRes = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )
+##		if wRes :
+		if wCont.find( gVal.STR_MasterConfig['iActionTag'] )>=0 :
 			### public以外の場合
 			if inROW['status']['visibility']!="public" :
 				self.STR_Cope['Ind_Inv'] += 1
@@ -620,38 +632,63 @@ class CLS_LookRIP():
 			
 			###フォロー通知は除外
 ##			if CLS_OSIF.sRe_Search( self.DEF_TITLE_NEW_FOLLOWER, wCont )>=0 :
-			wRes = CLS_OSIF.sRe_Search( self.DEF_TITLE_NEW_FOLLOWER, wCont )
-			if wRes :
+##			wRes = CLS_OSIF.sRe_Search( self.DEF_TITLE_NEW_FOLLOWER, wCont )
+##			if wRes :
+			if wCont.find( self.DEF_TITLE_NEW_FOLLOWER )>=0 :
 				self.STR_Cope['Ind_Inv'] += 1
 				return
 			
 			### 通知元のトゥートidを抜き出す
-			wID = self.__getRIP_IndiTootID( wCont )
-			if wID==-1 :
+##			wID = self.__getRIP_IndiTootID( wCont )
+##			if wID==-1 :
+			wNetaID = self.__getRIP_IndiTootID( wCont )
+			if wNetaID==-1 :
 				self.STR_Cope['Ind_Inv'] += 1
 				return
 			
-			### この周では既に通知済みのID
-			wID = str( inROW['id'] )
-			if wID in self.ARR_NowFavID :
-				self.STR_Cope['Ind_Inv'] += 1
+			#############################
+			# 通知済みか
+			#   True=  未通知、通知済みをメモ
+			#   False= 通知済み
+			if self.__set_RateInd( wNetaID, inTime )!=True :
+				##通知済み
+				self.STR_Cope['Ind_Notified'] += 1
 				return
-			self.ARR_NowFavID.append( wID )
+			
+			#############################
+			# 新リプに設定する
+##			### この周では既に通知済みのID
+##			wID = str( inROW['id'] )
+##			if wID in self.ARR_NowFavID :
+##				self.STR_Cope['Ind_Inv'] += 1
+##				return
+##			self.ARR_NowFavID.append( wID )
 			
 ##			self.__getRIP_SetReindRIP( inROW, inFulluser, inTime, wID )
-			self.__getRIP_SetReindRIP( inROW, inFulluser['Fulluser'], inTime, wID )
+##			self.__getRIP_SetReindRIP( inROW, inFulluser['Fulluser'], inTime, wID )
+			self.__getRIP_SetReindRIP( inROW, inFulluser['Fulluser'], inTime, wNetaID )
 			self.STR_Cope['Ind_On'] += 1
 			return
 		
+		wID = str( inROW['status']['id'] )
 		#############################
-		# アクション通知を出す
-		### この周では既に通知済みのID
-		wID = str( inROW['id'] )
-		if wID in self.ARR_NowFavID :
-			self.STR_Cope['Ind_Inv'] += 1
+		# 通知済みか
+		#   True=  未通知、通知済みをメモ
+		#   False= 通知済み
+		if self.__set_RateInd( wID, inTime )==False :
+			##通知済み
+			self.STR_Cope['Ind_Notified'] += 1
 			return
-		self.ARR_NowFavID.append( wID )
 		
+		#############################
+		# 新リプに設定する
+##		### この周では既に通知済みのID
+##		wID = str( inROW['id'] )
+##		if wID in self.ARR_NowFavID :
+##			self.STR_Cope['Ind_Inv'] += 1
+##			return
+##		self.ARR_NowFavID.append( wID )
+##		
 ##		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
 		self.__getRIP_SetNewRIP( inROW, inFulluser['Fulluser'], inTime )
 		self.STR_Cope['Ind_On'] += 1
@@ -696,7 +733,7 @@ class CLS_LookRIP():
 			return
 		
 		#############################
-		# アクション通知を出す
+		# 新リプに設定する
 ##		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
 		self.__getRIP_SetNewRIP( inROW, inFulluser['Fulluser'], inTime )
 		self.STR_Cope['Ind_On'] += 1
@@ -752,25 +789,31 @@ class CLS_LookRIP():
 ##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )>=0 or + \
 ##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )>=0 or + \
 ##		   CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )>=0 :
-		wRes_1 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )
-		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )
-		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )
-		wRes_4 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )
-		wRes_5 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['SystemTag'], wCont )
+##		wRes_1 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], wCont )
+##		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], wCont )
+##		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    wCont )
+##		wRes_4 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], wCont )
+##		wRes_5 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['SystemTag'], wCont )
 ##		if wRes_1 or wRes_2 or wRes_3 or wRes_4 :
-		if wRes_1 or wRes_2 or wRes_3 or wRes_4 or wRes_5 :
+##		if wRes_1 or wRes_2 or wRes_3 or wRes_4 or wRes_5 :
+		wRes_1 = wCont.find( gVal.STR_MasterConfig['iActionTag'] )
+		wRes_2 = wCont.find( gVal.STR_MasterConfig['mTootTag'] )
+		wRes_3 = wCont.find( gVal.STR_MasterConfig['prTag'] )
+		wRes_4 = wCont.find( gVal.STR_MasterConfig['TrafficTag'] )
+		wRes_5 = wCont.find( gVal.STR_MasterConfig['SystemTag'] )
+		if wRes_1>=0 or wRes_2>=0 or wRes_3>=0 or wRes_4>=0 or wRes_5>=0 :
 			self.STR_Cope['Ind_Inv'] += 1
 			return
 		
 		#############################
-		# アクション通知を出す
-		### この周では既に通知済みのID
-		wID = str( inROW['id'] )
-		if wID in self.ARR_NowFavID :
-			self.STR_Cope['Ind_Inv'] += 1
-			return
-		self.ARR_NowFavID.append( wID )
-		
+		# 新リプに設定する
+##		### この周では既に通知済みのID
+##		wID = str( inROW['id'] )
+##		if wID in self.ARR_NowFavID :
+##			self.STR_Cope['Ind_Inv'] += 1
+##			return
+##		self.ARR_NowFavID.append( wID )
+##		
 ##		self.__getRIP_SetNewRIP( inROW, inFulluser, inTime )
 		self.__getRIP_SetNewRIP( inROW, inFulluser['Fulluser'], inTime )
 		self.STR_Cope['Ind_On'] += 1
@@ -873,51 +916,89 @@ class CLS_LookRIP():
 		
 		wIndex = wIndex + len(wCHR_Serch)
 		wCHR_id = inToot[wIndex:]
-		wCHR_id = wCHR_id.split("[Admin]")
+		wCHR_id = wCHR_id.split("#")
 		wCHR_id = wCHR_id[0]
 		return wCHR_id
 
 
 
 #####################################################
-# 過去ふぁぼ取得・保存
+# 過去通知取得・保存
 #####################################################
-#	def Get_RateFV(self):
-#		#############################
-#		# 読み出し先初期化
-#		wRateList = []
-#		
-#		#############################
-#		# ファイル読み込み
-#		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_FavFile']
-#		if CLS_File.sReadFile( wFile_path, outLine=wRateList )!=True :
-#			return False	#失敗
-#		
-#		#############################
-#		# 過去ふぁぼの作成
-#		# 反応時間内のidを詰め込む
-#		self.ARR_RateFV = []
-#		for wLine in wRateList :
-#			wFavData = wLine.split(",")
-#			wGetLag  = CLS_OSIF.sTimeLag( wFavData[1], inThreshold=self.VAL_ReaRIPmin )
-#			if wGetLag['Result']!=True :
-#				continue
-#			if wGetLag['Beyond']==True :
-#				continue	#反応時間外
-#			
-#			self.ARR_RateFV.append( wFavData[0] )
-#		
-#		return True			#成功
-#
-#	#####################################################
-#	def Set_RateFV(self):
-#		#############################
-#		# ファイル書き込み (改行つき)
-#		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_FavFile']
-#		if CLS_File.sWriteFile( wFile_path, self.ARR_UpdateFV, inRT=True )!=True :
-#			return False	#失敗
-#		
-#		return True			#成功
+	def Get_RateInd(self):
+		#############################
+		# 読み出し先初期化
+		wRateList = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_IndFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wRateList )!=True :
+			return False	#失敗
+		
+		#############################
+		# 過去ふぁぼの作成
+		# 反応時間内のidを詰め込む
+		self.ARR_RateInd = {}
+		for wLine in wRateList :
+			wFavData = wLine.split(",")
+			if len(wFavData)<2 :
+				continue	#不正
+			wGetLag  = CLS_OSIF.sTimeLag( wFavData[1], inThreshold=self.VAL_ReaRIPmin, inTimezone=-1 )
+				### *タイムゾーンは補正済
+			if wGetLag['Result']!=True :
+				continue
+			if wGetLag['Beyond']==True :
+###				print("xxA: Beyond: " + wFavData[1] + " RIPmin=" + str(self.VAL_ReaRIPmin) + " Lag=" + str(wGetLag['RateSec']) )
+				continue	#反応時間外
+			
+			#############################
+			# 辞書に詰める
+			self.__set_RateInd( wFavData[0], wFavData[1], True )
+		
+		return True			#成功
+
+	#####################################################
+	def __is_RateInd( self, inID ):
+		wKeyList = list( self.ARR_RateInd.keys() )
+		if inID not in wKeyList :
+			return False	# 未通知
+		return True			# 通知済み
+
+	#####################################################
+	def __set_RateInd( self, inID, inCreatedAt, inFlgInit=False ):
+		#############################
+		# 通知済みか
+		if self.__is_RateInd( inID )==True :
+			return False	# 通知済みのため詰めない
+		
+		#############################
+		# 辞書に詰める
+		self.ARR_RateInd.update({ inID : "" })
+		self.ARR_RateInd[inID] = {}
+		self.ARR_RateInd[inID].update({ "created_at" : inCreatedAt })
+		return True	#成功
+
+	#####################################################
+	def Set_RateInd(self):
+		#############################
+		# 書き込み先初期化
+		wRateList = []
+		
+		#############################
+		# リストに詰める
+		wKeyList = list( self.ARR_RateInd.keys() )
+		for wKey in wKeyList :
+			wLine = wKey + "," + self.ARR_RateInd[wKey]['created_at']
+			wRateList.append( wLine )
+		
+		#############################
+		# ファイル書き込み (改行つき)
+		wFile_path = self.Obj_Parent.CHR_User_path + gVal.DEF_STR_FILE['Rate_IndFile']
+		if CLS_File.sWriteFile( wFile_path, wRateList, inRT=True )!=True :
+			return False	#失敗
+		
+		return True			#成功
 
 
 

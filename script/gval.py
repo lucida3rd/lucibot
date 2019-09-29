@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/17
+#   Update  ：2019/9/29
 #####################################################
 
 #####################################################
@@ -41,13 +41,13 @@ class gVal() :
 		"MasterUser"	: "",						#masterユーザ
 		"AdminUser"		: "",						#監視ユーザ(通知先)
 ##		"PRUser"		: "",						#PRユーザ(広報・周期トゥート用)
-		"mTootTag"			: "[Sender]",				#手動トゥートタグ
-##		"iFavoTag"			: "[favoind]",				#ファボ通知タグ
-		"iActionTag"		: "[action]",				#アクション通知タグ
-		"prTag"				: "[prtoot]",				#PRトゥートタグ
-		"TrafficTag"		: "[traffic]",				#トラヒックトゥートタグ
+		"mTootTag"			: "sample_sender",			#手動トゥートタグ
+##		"iFavoTag"			: "sample_favoind",			#ファボ通知タグ
+		"iActionTag"		: "sample_action",			#アクション通知タグ
+		"prTag"				: "sample_prtoot",			#PRトゥートタグ
+		"TrafficTag"		: "sample_traffic",			#トラヒックトゥートタグ
 		"TwitterTag"		: "",						#Twitter用タグ
-		"SystemTag"			: "[system]",				#システム監視トゥートタグ
+		"SystemTag"			: "sample_system",			#システム監視トゥートタグ
 		
 ##		"TwitterUser"	: "",						#twiterユーザ
 		"Twitter"		: "off",					#twiter連携
@@ -238,6 +238,7 @@ class gVal() :
 		"Rate_PTLFile"			: "data/rptl.txt",
 		"Rate_RipFile"			: "data/rreply.txt",
 ##		"Rate_FavFile"			: "data/rfav.txt",
+		"Rate_IndFile"			: "data/rind.txt",
 		"IndLim_File"			: "data/indlim.txt",
 		"FollowListFile"		: "data/follow.txt",
 		"FollowerListFile"		: "data/follower.txt",
