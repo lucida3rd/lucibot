@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ぼっと制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/28
+#   Update  ：2019/9/29
 #####################################################
 # Private Function:
 #   __start(self):
@@ -175,7 +175,7 @@ class CLS_Bot_Ctrl() :
 			wStr = wStr + "フラグをリセットしました。再度やり直してください。[RT]"
 			CLS_OSIF.sInp( wStr )
 			self.FLG_AllStop = False
-			return
+			return False
 		
 		#############################
 		# 起動中のbotがあるか
@@ -204,12 +204,12 @@ class CLS_Bot_Ctrl() :
 		if len(self.WaitRestart)==0 :
 			wStr = "停止したbotはありませんでした。[RT]"
 			CLS_OSIF.sInp( wStr )
-			return
+			return False
 		
 		wStr = "起動中のbotを停止しました。[RT]"
 		CLS_OSIF.sInp( wStr )
 		self.FLG_AllStop = True
-		return
+		return True
 
 
 
@@ -451,9 +451,11 @@ class CLS_Bot_Ctrl() :
 		
 		#############################
 		# 全停止を実行する
-		self.__allStop()
+		wRes = self.__allStop()
+		## True= 停止あり
+		## False= 停止なし
 		
-		return True
+		return wRes
 
 
 

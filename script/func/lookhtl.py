@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/26
+#   Update  ：2019/9/28
 #####################################################
 # Private Function:
 #   __run(self):
@@ -298,13 +298,19 @@ class CLS_LookHTL():
 			return False
 		
 		### 通知類は除外
-		wRes_1 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], inCont )
-		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], inCont )
-		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    inCont )
-		wRes_4 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], inCont )
-		wRes_5 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['SystemTag'], inCont )
+##		wRes_1 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['iActionTag'], inCont )
+##		wRes_2 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['mTootTag'], inCont )
+##		wRes_3 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['prTag'],    inCont )
+##		wRes_4 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['TrafficTag'], inCont )
+##		wRes_5 = CLS_OSIF.sRe_Search( gVal.STR_MasterConfig['SystemTag'], inCont )
+		wRes_1 = inCont.find( gVal.STR_MasterConfig['iActionTag'] )
+		wRes_2 = inCont.find( gVal.STR_MasterConfig['mTootTag'] )
+		wRes_3 = inCont.find( gVal.STR_MasterConfig['prTag'] )
+		wRes_4 = inCont.find( gVal.STR_MasterConfig['TrafficTag'] )
+		wRes_5 = inCont.find( gVal.STR_MasterConfig['SystemTag'] )
 ##		if wRes_1 or wRes_2 or wRes_3 or wRes_4 :
-		if wRes_1 or wRes_2 or wRes_3 or wRes_4 or wRes_5 :
+##		if wRes_1 or wRes_2 or wRes_3 or wRes_4 or wRes_5 :
+		if wRes_1>=0 or wRes_2>=0 or wRes_3>=0 or wRes_4>=0 or wRes_5>=0 :
 			return False
 		
 		return True

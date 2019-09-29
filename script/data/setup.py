@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：セットアップ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/28
+#   Update  ：2019/9/29
 #####################################################
 # Private Function:
 #   __initDB(self):
@@ -306,11 +306,13 @@ class CLS_Setup():
 		wUserList = CLS_UserData.sGetUserList()
 		
 		#############################
-		# cronの停止 +メモもする
+		# cronの停止
 ##		wCLS_Botjob = CLS_Botjob()
 		wCLS_Bot_Ctrl = CLS_Bot_Ctrl()
-		wCLS_Bot_Ctrl.CronAllStop()
-		CLS_OSIF.sSleep(120)	#とりあえずcronが停止する2分は待つ
+		wFlg_CronStop = wCLS_Bot_Ctrl.CronAllStop()
+		if wFlg_CronStop==True :
+			### 停止したbotあり
+			CLS_OSIF.sSleep(120)	#とりあえずcronが停止する2分は待つ
 		
 ##		wFLG_Wait = False
 ##		wWaitRestart = {}
@@ -389,6 +391,12 @@ class CLS_Setup():
 			self.__initFile( wDefFile_path, wDstFile_path )
 			
 			#############################
+			# 過去通知ファイル
+			wDefFile_path = gVal.DEF_STR_FILE['defUserdata_path'] + gVal.DEF_STR_FILE['Rate_IndFile']
+			wDstFile_path = wUserPath + gVal.DEF_STR_FILE['Rate_IndFile']
+			self.__initFile( wDefFile_path, wDstFile_path )
+			
+			#############################
 			# フォローファイル
 			wDefFile_path = gVal.DEF_STR_FILE['defUserdata_path'] + gVal.DEF_STR_FILE['FollowListFile']
 			wDstFile_path = wUserPath + gVal.DEF_STR_FILE['FollowListFile']
@@ -455,8 +463,10 @@ class CLS_Setup():
 ##					###失敗
 ##					CLS_OSIF.sPrn( "cronの起動に失敗しました: user=" + wWaitRestart[wKey]["User"] + '\n' )
 ##		
-		CLS_OSIF.sPrn( "停止していたcronを再開します..." + '\n' )
-		wCLS_Bot_Ctrl.CronReStart()
+		if wFlg_CronStop==True :
+			### 停止したbotあり
+			CLS_OSIF.sPrn( "停止していたcronを再開します..." + '\n' )
+			wCLS_Bot_Ctrl.CronReStart()
 		
 		#############################
 		# 終わり
