@@ -2,12 +2,12 @@ DataVer=1
 
 MasterUser=
 AdminUser=
-mTootTag=[Sender]
-iActionTag=[action]
-prTag=[prtoot]
-TrafficTag=[traffic]
+mTootTag=sample_sender
+iActionTag=sample_action
+prTag=sample_prtoot
+TrafficTag=sample_traffic
 TwitterTag=
-SystemTag=[system]
+SystemTag=sample_system
 
 Twitter=off
 

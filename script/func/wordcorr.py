@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ワード収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/13
+#   Update  ：2019/9/29
 #####################################################
 # Private Function:
 #   __selectMeCabDic(self):
@@ -309,8 +309,9 @@ class CLS_WordCorr():
 		
 		#############################
 		# ' 文字が含まれていたら除外する
-		wRes = CLS_OSIF.sRe_Search( "'", inCont )
-		if wRes :
+##		wRes = CLS_OSIF.sRe_Search( "'", inCont )
+##		if wRes :
+		if inCont.find("'")>=0 :
 			return False
 		
 		#############################
