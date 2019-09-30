@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/29
+#   Update  ：2019/9/30
 #####################################################
 # Private Function:
 #   __run(self):
@@ -948,13 +948,14 @@ class CLS_LookRIP():
 				### *タイムゾーンは補正済
 			if wGetLag['Result']!=True :
 				continue
-			if wGetLag['Beyond']==True :
+##			if wGetLag['Beyond']==True :
 ###				print("xxA: Beyond: " + wFavData[1] + " RIPmin=" + str(self.VAL_ReaRIPmin) + " Lag=" + str(wGetLag['RateSec']) )
-				continue	#反応時間外
+##				continue	#反応時間外
 			
 			#############################
 			# 辞書に詰める
-			self.__set_RateInd( wFavData[0], wFavData[1], True )
+##			self.__set_RateInd( wFavData[0], wFavData[1], True )
+			self.__set_RateInd( wFavData[0], wFavData[1], wGetLag['Beyond'] )
 		
 		return True			#成功
 
@@ -966,7 +967,8 @@ class CLS_LookRIP():
 		return True			# 通知済み
 
 	#####################################################
-	def __set_RateInd( self, inID, inCreatedAt, inFlgInit=False ):
+##	def __set_RateInd( self, inID, inCreatedAt, inFlgInit=False ):
+	def __set_RateInd( self, inID, inCreatedAt, inFLG_Beyond=False ):
 		#############################
 		# 通知済みか
 		if self.__is_RateInd( inID )==True :
@@ -977,6 +979,7 @@ class CLS_LookRIP():
 		self.ARR_RateInd.update({ inID : "" })
 		self.ARR_RateInd[inID] = {}
 		self.ARR_RateInd[inID].update({ "created_at" : inCreatedAt })
+		self.ARR_RateInd[inID].update({ "beyond"     : inFLG_Beyond })
 		return True	#成功
 
 	#####################################################
@@ -989,6 +992,8 @@ class CLS_LookRIP():
 		# リストに詰める
 		wKeyList = list( self.ARR_RateInd.keys() )
 		for wKey in wKeyList :
+			if self.ARR_RateInd[wKey]['beyond']==True :
+				continue	#通知解除
 			wLine = wKey + "," + self.ARR_RateInd[wKey]['created_at']
 			wRateList.append( wLine )
 		
