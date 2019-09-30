@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値 (test)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/29
+#   Update  ：2019/9/30
 #####################################################
 
 #####################################################
@@ -182,7 +182,7 @@ class gVal() :
 		"Readme"				: "readme.md",
 		"defUserdata_path"		: "_default/",
 		"defMasterdata_path"	: "_master/",
-		"defMasterConfig"		: "_master/mconfig_test.txt",
+		"defMasterConfig"		: "_master/mconfig.txt",
 		"LockFile"				: "data/_lock.txt",
 		"Chk1HourFile"			: "data/_chk1hour.txt",
 		
@@ -191,7 +191,7 @@ class gVal() :
 		"CLDataFile"			: "data/ctootd.txt",
 		
 		"MasterConfig_path"		: DEF_MASTERCONFIG,
-		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig.txt",
+		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig_test.txt",
 		"MasterLog_path"		: DEF_MASTERCONFIG + "log/",
 ##		"MasterNowTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_now.txt",
 ##		"MasterRatTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_rat.txt",
