@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トゥート処理 (コンソール操作用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/8/30
+#   Update  ：2019/9/30
 #####################################################
 # Private Function:
 #   __manualToot_Disp( self, inFulluser ):
@@ -104,6 +104,13 @@ class CLS_Toot():
 ##			elif wCommand=="\c" :
 			elif wCommand.find("\\c")>=0 :
 				self.SetRange('ManualToot')
+			
+			#############################
+			# (ないコマンド)
+			elif wCommand.find("\\")==0 :
+				wStr = "そのコマンドはありません。[RT]"
+				CLS_OSIF.sInp( wStr )
+				continue
 			
 			#############################
 			# トゥート
@@ -275,6 +282,13 @@ class CLS_Toot():
 			# 一覧
 			elif wCommand.find("\\l")>=0 :
 				self.__multicastList( wSendList )
+			
+			#############################
+			# (ないコマンド)
+			elif wCommand.find("\\")==0 :
+				wStr = "そのコマンドはありません。[RT]"
+				CLS_OSIF.sInp( wStr )
+				continue
 			
 			#############################
 			# トゥート
