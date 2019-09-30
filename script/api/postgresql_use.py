@@ -4,7 +4,7 @@
 # public
 #   Class   ：ぽすぐれユーズ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/6
+#   Update  ：2019/9/30
 #####################################################
 # Private Function:
 #   __initIniStatus(self):
@@ -72,9 +72,15 @@ class CLS_PostgreSQL_Use():
 #####################################################
 	PostgreSQL_use = ""						#PostgreSQLモジュール実体
 	IniStatus = ""
-##		"Result"   : False
-##		"Reason"   : None
-##		"Responce" : None
+	##	"Result"   : False
+	##	"Reason"   : None
+	##	"Responce" : None
+	
+	QueryStat = ""
+	##	"Result"	: False,
+	##	"Reason"	: None,
+	##	"Responce"	: None,
+	##	"Query"		: "None"
 
 	STR_DBdata = {
 		"hostname"		:	"",
@@ -85,7 +91,7 @@ class CLS_PostgreSQL_Use():
 
 	DEF_MOJI_ENCODE = 'utf-8'				#ファイル文字エンコード
 
-	STR_QueryStat = ""
+##	STR_QueryStat = ""
 ##		"Result"		: False,
 ##		"Cursol"		: None,
 ##		"Error"			: None
@@ -106,8 +112,7 @@ class CLS_PostgreSQL_Use():
 		self.IniStatus = {
 			"Result"   : False,
 			"Reason"   : "DB closed",
-			"Responce" : None,
-			"Query"    : None
+			"Responce" : None
 		}
 		return
 
@@ -128,7 +133,8 @@ class CLS_PostgreSQL_Use():
 		self.QueryStat = {
 			"Result"	: False,
 			"Reason"	: None,
-			"Responce"	: None
+			"Responce"	: None,
+			"Query"		: "None"
 		}
 		return
 
