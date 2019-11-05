@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/30
+#   Update  ：2019/11/5
 #####################################################
 # Private Function:
 #   __run(self):
@@ -327,6 +327,12 @@ class CLS_LookRIP():
 		wCHR_Toot = inROW['content']
 		
 		#############################
+		# タグの付け直し
+		wTag = "#" + gVal.STR_MasterConfig['iActionTag']
+		wCHR_Toot.strip( wTag )
+		wCHR_Toot = wCHR_Toot + '\n' + "#" + gVal.STR_MasterConfig['iActionTag']
+		
+		#############################
 		# トゥートの送信
 		wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, spoiler_text=wCHR_Title, visibility=inROW['visibility'] )
 		if wRes['Result']!=True :
@@ -522,6 +528,20 @@ class CLS_LookRIP():
 				self.STR_Cope['Ind_Fail'] += 1
 				continue
 			if wGetLag['Beyond']==True :
+
+				#############################
+				# アクション通知のふぁぼ or ぶーすとの場合、
+				# 過去通知を削除する
+				if wToot['type']=="favourite" or wToot['type']=="reblog" :
+					if "status" in wToot :
+						wID = str( wToot['status']['id'] )
+						wKeyList = list( self.ARR_RateInd.keys() )
+						if wID in wKeyList :
+							del self.ARR_RateInd[wID]
+
+							self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: Get_RIP: Rel" + wID )
+
+
 				self.STR_Cope['Ind_Off'] += 1
 				continue	#反応時間外
 			
@@ -992,8 +1012,8 @@ class CLS_LookRIP():
 		# リストに詰める
 		wKeyList = list( self.ARR_RateInd.keys() )
 		for wKey in wKeyList :
-			if self.ARR_RateInd[wKey]['beyond']==True :
-				continue	#通知解除
+##			if self.ARR_RateInd[wKey]['beyond']==True :
+##				continue	#通知解除
 			wLine = wKey + "," + self.ARR_RateInd[wKey]['created_at']
 			wRateList.append( wLine )
 		
@@ -1126,9 +1146,15 @@ class CLS_LookRIP():
 			if wGetLag['Beyond']==True :
 			#############################
 			# 通知制限が過ぎたのでクリア
+				wFLG_Limit = False
+				if self.STR_Ind['Count']>=gVal.DEF_STR_TLNUM['indLimcnt'] :
+					wFLG_Limit = True
 				self.STR_Ind['Count'] = 0
 				self.STR_Ind['TimeDate'] = ""
-				self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_LookRIP: Get_Indlim: 通知制限 [解除]" )
+###				self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_LookRIP: Get_Indlim: 通知制限 [解除]" )
+				if wFLG_Limit==True :
+					###制限中だったら解除ログを出す
+					self.Obj_Parent.OBJ_Mylog.Log( 'c', "CLS_LookRIP: Get_Indlim: 通知制限 [解除]" )
 		
 		return True			#成功
 
