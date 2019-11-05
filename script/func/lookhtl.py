@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/28
+#   Update  ：2019/10/28
 #####################################################
 # Private Function:
 #   __run(self):
@@ -265,7 +265,7 @@ class CLS_LookHTL():
 					continue	#指定ではない
 				
 				#対象のブーストユーザか
-				if self.ARR_AnapTL[wKey]['Tag']!=wFulluser :
+				if self.ARR_AnapTL[wKey]['Tag']!=wFulluser['Fulluser'] :
 					continue	#指定ではない
 				
 				### 実行
