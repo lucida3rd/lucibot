@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：周期トゥート処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/17
+#   Update  ：2019/10/18
 #####################################################
 # Private Function:
 #   __run(self):
@@ -144,6 +144,14 @@ class CLS_CircleToot():
 				continue
 			
 			#############################
+			# 曜日チェック
+			if self.ARR_CLData[wKey]["Week"]!="" :
+				wWeeks = self.ARR_CLData[wKey]["Week"].split(",")
+				if gVal.STR_TimeInfo['Week'] not in wWeeks :
+					self.STR_Cope['Invalid'] += 1
+					continue
+			
+			#############################
 			# 時間チェック：0～23時
 			if self.ARR_CLData[wKey]["Sended"]!="*" :
 				if self.ARR_CLData[wKey]["Hour"]!=wHour :
@@ -252,6 +260,7 @@ class CLS_CircleToot():
 		self.ARR_CLData = {}
 		wCLTootList = []	#トゥートパターン
 		wCLDataList = []	#データ
+		wWeekly = [ "1", "2", "3", "4", "5", "6", "0" ]
 		
 		#############################
 		# ファイル読み込み
@@ -270,12 +279,14 @@ class CLS_CircleToot():
 		# データ枠の作成
 		for wLine in wCLTootList :
 			wLine = wLine.split( gVal.DEF_DATA_BOUNDARY )
-			if len(wLine)!=3 :
+##			if len(wLine)!=3 :
+			if len(wLine)!=4 :
 				continue	#フォーマットになってない
 			if wLine[0].find("#")==0 :
 				continue	#コメントアウト
 			
-			wIndex = wLine[1] + ":" + wLine[2]
+##			wIndex = wLine[1] + ":" + wLine[2]
+			wIndex = wLine[1] + ":" + wLine[3]
 			wKeylist = list( self.ARR_CLData.keys() )
 			if wIndex in wKeylist :
 				continue	#キー被り
@@ -291,7 +302,20 @@ class CLS_CircleToot():
 			self.ARR_CLData[wIndex].update({ "Sended" : "-" })
 			self.ARR_CLData[wIndex].update({ "Hour"   : wLine[1][0] })
 			self.ARR_CLData[wIndex].update({ "Minute" : wLine[1][1] })
-			self.ARR_CLData[wIndex].update({ "TootFile" : wLine[2]  })
+##			self.ARR_CLData[wIndex].update({ "TootFile" : wLine[2]  })
+			self.ARR_CLData[wIndex].update({ "Week"   : "" })
+			self.ARR_CLData[wIndex].update({ "TootFile" : wLine[3]  })
+			
+			#############################
+			# 曜日の妥当性
+			wWeeks = wLine[2].split(",")
+			wSetWeeks = []
+			for wWk in wWeeks :
+				if wWk in wWeekly :
+					wSetWeeks.append( wWk )
+			
+			if len(wSetWeeks)>0 :
+				self.ARR_CLData[wIndex]["Week"] = ','.join( wSetWeeks )
 		
 		#############################
 		# データの反映
@@ -310,7 +334,9 @@ class CLS_CircleToot():
 				self.ARR_CLData[wIndex]["Sended"] = wLine[1]
 				self.ARR_CLData[wIndex]["Hour"]   = wLine[2]
 				self.ARR_CLData[wIndex]["Minute"] = wLine[3]
-				self.ARR_CLData[wIndex]["TootFile"] = wLine[4]
+##				self.ARR_CLData[wIndex]["TootFile"] = wLine[4]
+				self.ARR_CLData[wIndex]["Week"]   = wLine[4]
+				self.ARR_CLData[wIndex]["TootFile"] = wLine[5]
 				self.ARR_CLData[wIndex]["Valid"]  = True
 		
 		return True			#成功
@@ -330,6 +356,7 @@ class CLS_CircleToot():
 			wSetLine = self.ARR_CLData[wKey]["Sended"] + ","
 			wSetLine = wSetLine + str(self.ARR_CLData[wKey]["Hour"]) + ","
 			wSetLine = wSetLine + str(self.ARR_CLData[wKey]["Minute"]) + ","
+			wSetLine = wSetLine + self.ARR_CLData[wKey]["Week"] + ","
 			wSetLine = wSetLine + self.ARR_CLData[wKey]["TootFile"]
 			wCLDataList.append( wSetLine )
 		
