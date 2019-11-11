@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：セットアップ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/29
+#   Update  ：2019/11/11
 #####################################################
 # Private Function:
 #   __initDB(self):
@@ -664,6 +664,30 @@ class CLS_Setup():
 					"lupdate     TIMESTAMP," + \
 					"keeped      BOOL  DEFAULT false," + \
 					" PRIMARY KEY ( claz ) ) ;"
+		
+		inOBJ_DB.RunQuery( wQuery )
+		return
+
+
+
+#####################################################
+# テーブル作成: TBL_TREND
+#####################################################
+	def __create_TBL_TREND( self, inOBJ_DB, inTBLname="TBL_TREND" ):
+		#############################
+		# テーブルのドロップ
+		wQuery = "drop table if exists " + inTBLname + ";"
+		inOBJ_DB.RunQuery( wQuery )
+		
+		#############################
+		# テーブル枠の作成
+		wQuery = "create table " + inTBLname + "(" + \
+					"rank        INTEGER  DEFAULT 0," + \
+					"name        TEXT  NOT NULL," + \
+					"domain      TEXT  NOT NULL," + \
+					"uses        INTEGER  DEFAULT 0," + \
+					"accs        INTEGER  DEFAULT 0" + \
+					" ) ;"
 		
 		inOBJ_DB.RunQuery( wQuery )
 		return
