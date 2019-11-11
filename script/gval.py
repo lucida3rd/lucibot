@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/29
+#   Update  ：2019/11/8
 #####################################################
 
 #####################################################
@@ -75,6 +75,7 @@ class gVal() :
 		"Traffic"		: "off",					#トラヒック集計
 		"LookHard"		: "off",					#ハード監視
 		"WordStudy"		: "off",					#ワード学習
+		"Trend"			: "off",					#トレンド通知
 		
 		"JPonly"		: "off",					#日本人のみ監視
 		
@@ -192,6 +193,7 @@ class gVal() :
 		
 		"MasterConfig_path"		: DEF_MASTERCONFIG,
 		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig.txt",
+###		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig_test.txt",
 		"MasterLog_path"		: DEF_MASTERCONFIG + "log/",
 ##		"MasterNowTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_now.txt",
 ##		"MasterRatTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_rat.txt",
@@ -202,6 +204,7 @@ class gVal() :
 		"PatternRIPFile"		: DEF_MASTERCONFIG + "toot/reply.txt",
 		"OtherRIPFile"			: DEF_MASTERCONFIG + "toot/reply_others.txt",
 		"StudyRIPFile"			: DEF_MASTERCONFIG + "toot/reply_study.txt",
+		"TrendTootFile"			: DEF_MASTERCONFIG + "toot/trend.txt",
 
 		"HTLBoostFile"			: DEF_MASTERCONFIG + "toot/hboost.txt",
 		"TrafficTootFile"		: DEF_MASTERCONFIG + "toot/traffic.txt",

@@ -33,5 +33,7 @@ LookHard=off
 
 WordStudy=off
 
+Trend=off
+
 JPonly=on
 LogLevel=c

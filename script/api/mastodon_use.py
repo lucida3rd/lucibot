@@ -4,7 +4,7 @@
 # public
 #   Class   ：mastodon API
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/6
+#   Update  ：2019/11/11
 #####################################################
 # Private Function:
 #   __initIniStatus(self):
@@ -42,6 +42,7 @@
 #   GetPublicTL(self, timeline="public", max_id=None, since_id=None, limit=None):
 #   GetHashtagTL(self, hashtag, local=False, max_id=None, since_id=None, limit=None, only_media=False):
 #   GetListTL( self, id, timeline="", max_id=None, since_id=None, limit=None):
+#   GetFeaturedTags(self):
 #
 # ◇一覧取得系
 #   GetNotificationList(self, id=None, max_id=None, since_id=None, limit=None):
@@ -644,6 +645,24 @@ class CLS_Mastodon_Use:
 		# APIを叩く
 		params = self.__generate_params(params_initial, ['hashtag'])
 		url = '/api/v1/timelines/tag/{0}'.format(hashtag)
+		wRes = self.__api_request('GET', url, params)
+		return wRes
+
+
+
+#####################################################
+# トレンドハッシュタグ取得
+#####################################################
+	def GetTrends( self, limit=None ):
+#		#############################
+#		# 応答形式の取得
+#		#  {"Result" : False, "Reason" : None, "Responce" : None}
+#		wRes = CLS_Mastodon_Use.sGet_API_Resp()
+		
+		#############################
+		# APIを叩く
+		params = self.__generate_params(locals())
+		url = '/api/v1/trends'
 		wRes = self.__api_request('GET', url, params)
 		return wRes
 
