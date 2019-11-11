@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：PTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/14
+#   Update  ：2019/11/7
 #####################################################
 # Private Function:
 #   __run(self):
@@ -339,6 +339,15 @@ class CLS_LookPTL():
 		
 		###リプライ（先頭に@付きトゥート）
 		if inCont.find('@') == 0 :
+			return False
+		
+		###タグ付き
+		### PRタグは自分しか使わないので上の条件で弾ける
+		wRes_1 = inCont.find( gVal.STR_MasterConfig['iActionTag'] )
+		wRes_2 = inCont.find( gVal.STR_MasterConfig['mTootTag'] )
+		wRes_4 = inCont.find( gVal.STR_MasterConfig['TrafficTag'] )
+		wRes_5 = inCont.find( gVal.STR_MasterConfig['SystemTag'] )
+		if wRes_1>=0 or wRes_2>=0 or wRes_4>=0 or wRes_5>=0 :
 			return False
 		
 		return True

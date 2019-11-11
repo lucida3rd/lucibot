@@ -1,7 +1,7 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4 (master)  
-::BotDate= 2019/11/5  
-::Version= 4.1.0.10  
+::BotDate= 2019/11/11  
+::Version= 4.1.1.0  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
 
@@ -30,6 +30,7 @@ python3で作成したmastodonクラウド環境下で動くことを前提に�
     * [リプライ機能](#iReplyFunc)
     * [ワード学習機能](#iWordStudy)
     * [トラヒック表示機能](#iTrafficView)
+    * [トレンド機能](#iTrend)
     * [ハード監視機能](#iHardLook)
     * [ユーザ収集機能](#iUserCorrect)
     * [自動フォロー機能](#iAutoFollow)
@@ -121,6 +122,7 @@ $ python3 run.py
 | ワード学習機能        | 連合TL         |   〇   |   －    |MasterドメインはSub   |
 | ユーザ収集機能        | 連合TL         |   〇   |   －    |MasterドメインはSub   |
 | トラヒック機能        | ローカルTL     |   〇   |   〇    |                      |
+| トレンド機能          | －             |   〇   |   〇    |MasterドメインはSub   |
 | 自動フォロー機能      | 通知TL         |   〇   |   －    |                      |
 | リプライ機能          | 通知TL         |   〇   |   〇    |                      |
 | リプライブースト機能  | 通知TL         |   －   |   〇    |                      |
@@ -263,6 +265,15 @@ botが学習した単語を組み合わせて適当にトゥートします。
 トラヒック収集開始の最初の1時間分は計測を捨てます。  
 この情報はデータベースに記録されます。  
 　機能有効：Traffic=on  
+
+
+
+<a id="iTrend"></a>
+## トレンド
+1時間ごとに任意のドメインのトレンドを集計し、botでトゥートします。  
+トゥートは非公開でおこなわれます。  
+この情報はデータベースに記録されます。  
+　機能有効：Trend=on  
 
 
 

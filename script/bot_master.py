@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理(Master)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/19
+#   Update  ：2019/11/11
 #####################################################
 # Private Function:
 #   (none)
@@ -30,6 +30,7 @@ from botctrl import CLS_BotCtrl
 from lookptl import CLS_LookPTL
 from lookltl import CLS_LookLTL
 from lookrip import CLS_LookRIP
+from trend import CLS_Trend
 from lookhard import CLS_LookHard
 from circletoot import CLS_CircleToot
 from follow import CLS_Follow
@@ -198,6 +199,11 @@ class CLS_BOT_Master() :
 		#############################
 		# RIP監視処理
 		wOBJ_LookRIP = CLS_LookRIP( parentObj=cls )
+		
+		#############################
+		# トレンド処理
+		if gVal.STR_MasterConfig['Trend']=="on" :
+			wOBJ_Trend = CLS_Trend( parentObj=cls )
 		
 		#############################
 		# ランダムトゥート処理

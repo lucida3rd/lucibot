@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：リプライ監視処理(サブ用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/5
+#   Update  ：2019/11/8
 #####################################################
 # Private Function:
 #   __run(self):
@@ -529,18 +529,18 @@ class CLS_LookRIP():
 				continue
 			if wGetLag['Beyond']==True :
 
-				#############################
-				# アクション通知のふぁぼ or ぶーすとの場合、
-				# 過去通知を削除する
-				if wToot['type']=="favourite" or wToot['type']=="reblog" :
-					if "status" in wToot :
-						wID = str( wToot['status']['id'] )
-						wKeyList = list( self.ARR_RateInd.keys() )
-						if wID in wKeyList :
-							del self.ARR_RateInd[wID]
-
-							self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: Get_RIP: Rel" + wID )
-
+#				#############################
+#				# アクション通知のふぁぼ or ぶーすとの場合、
+#				# 過去通知を削除する
+#				if wToot['type']=="favourite" or wToot['type']=="reblog" :
+#					if "status" in wToot :
+#						wID = str( wToot['status']['id'] )
+#						wKeyList = list( self.ARR_RateInd.keys() )
+#						if wID in wKeyList :
+#							del self.ARR_RateInd[wID]
+#
+#							self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookRIP: Get_RIP: Rel" + wID )
+#
 
 				self.STR_Cope['Ind_Off'] += 1
 				continue	#反応時間外
@@ -992,6 +992,10 @@ class CLS_LookRIP():
 		#############################
 		# 通知済みか
 		if self.__is_RateInd( inID )==True :
+			# 通知の時間が違っていたら情報を更新する
+			if self.ARR_RateInd[inID]['created_at']!=inCreatedAt :
+				self.ARR_RateInd[inID]['created_at'] = inCreatedAt
+				self.ARR_RateInd[inID]['beyond']     = False		#次の周で消す判定させる
 			return False	# 通知済みのため詰めない
 		
 		#############################
@@ -1012,8 +1016,8 @@ class CLS_LookRIP():
 		# リストに詰める
 		wKeyList = list( self.ARR_RateInd.keys() )
 		for wKey in wKeyList :
-##			if self.ARR_RateInd[wKey]['beyond']==True :
-##				continue	#通知解除
+			if self.ARR_RateInd[wKey]['beyond']==True :
+				continue	#通知解除
 			wLine = wKey + "," + self.ARR_RateInd[wKey]['created_at']
 			wRateList.append( wLine )
 		
