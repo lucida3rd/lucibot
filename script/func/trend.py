@@ -64,8 +64,8 @@ class CLS_Trend():
 		
 		#############################
 		# 1時間経ってる周回か
-#		if gVal.STR_TimeInfo['OneHour']==False :
-#			return	#周回ではない
+		if gVal.STR_TimeInfo['OneHour']==False :
+			return	#周回ではない
 		
 		#############################
 		# トレンドパターン読み込み
