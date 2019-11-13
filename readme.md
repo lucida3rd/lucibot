@@ -1,7 +1,7 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4 (deverop)  
-::BotDate= 2019/11/11  
-::Version= 4.1.1.1.d  
+::BotDate= 2019/11/13  
+::Version= 4.1.1.2.d  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
 
@@ -274,6 +274,9 @@ botが学習した単語を組み合わせて適当にトゥートします。
 トゥートは非公開でおこなわれます。  
 この情報はデータベースに記録されます。  
 　機能有効：Trend=on  
+
+補足：  
+　botでトゥートする際、botのドメインでハッシュタグ検索できないものは無駄を省くため除外されます。  
 
 
 

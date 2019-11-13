@@ -4,7 +4,7 @@
 # public
 #   Class   ：mastodon API
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/11
+#   Update  ：2019/11/13
 #####################################################
 # Private Function:
 #   __initIniStatus(self):
@@ -42,7 +42,7 @@
 #   GetPublicTL(self, timeline="public", max_id=None, since_id=None, limit=None):
 #   GetHashtagTL(self, hashtag, local=False, max_id=None, since_id=None, limit=None, only_media=False):
 #   GetListTL( self, id, timeline="", max_id=None, since_id=None, limit=None):
-#   GetFeaturedTags(self):
+#   GetTrends( self, limit=None ):
 #
 # ◇一覧取得系
 #   GetNotificationList(self, id=None, max_id=None, since_id=None, limit=None):
@@ -613,7 +613,8 @@ class CLS_Mastodon_Use:
 #####################################################
 # ハッシュタグTL取得
 #####################################################
-	def GetHashtagTL(self, hashtag, local=False, max_id=None, since_id=None, limit=None, only_media=False):
+##	def GetHashtagTL(self, hashtag, local=False, max_id=None, since_id=None, limit=None, only_media=False):
+	def GetHashtagTL(self, hashtag, local=False, max_id=None, min_id=None, since_id=None, limit=None, only_media=False):
 		#############################
 		# 応答形式の取得
 		#  {"Result" : False, "Reason" : None, "Responce" : None}
@@ -629,6 +630,9 @@ class CLS_Mastodon_Use:
 		# 引数を辞書にまとめる
 		if max_id != None:
 			max_id = self.__unpack_id(max_id)
+		
+		if min_id != None:
+			min_id = self.__unpack_id(min_id)
 		
 		if since_id != None:
 			since_id = self.__unpack_id(since_id)
@@ -652,6 +656,7 @@ class CLS_Mastodon_Use:
 
 #####################################################
 # トレンドハッシュタグ取得
+#  *limitの最大値は10
 #####################################################
 	def GetTrends( self, limit=None ):
 #		#############################
