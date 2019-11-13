@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：セットアップ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/11
+#   Update  ：2019/11/13
 #####################################################
 # Private Function:
 #   __initDB(self):
@@ -502,6 +502,7 @@ class CLS_Setup():
 		self.__create_TBL_TRAFFIC_DATA( wOBJ_DB )
 		self.__create_TBL_WORD_CORRECT( wOBJ_DB )
 		self.__create_TBL_CLAZ_LIST( wOBJ_DB )
+		self.__create_TBL_TREND( wOBJ_DB )
 		
 		#############################
 		# DBのクローズ
@@ -686,7 +687,8 @@ class CLS_Setup():
 					"name        TEXT  NOT NULL," + \
 					"domain      TEXT  NOT NULL," + \
 					"uses        INTEGER  DEFAULT 0," + \
-					"accs        INTEGER  DEFAULT 0" + \
+					"accs        INTEGER  DEFAULT 0," + \
+					"lupdate     TIMESTAMP" + \
 					" ) ;"
 		
 		inOBJ_DB.RunQuery( wQuery )
