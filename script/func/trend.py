@@ -73,8 +73,9 @@ class CLS_Trend():
 		
 		#############################
 		# 1時間経ってる周回か
-		if gVal.STR_TimeInfo['OneHour']==False :
-			return	#周回ではない
+		if gVal.FLG_Test_Mode==False :
+			if gVal.STR_TimeInfo['OneHour']==False :
+				return	#周回ではない
 		
 		#############################
 		# トレンドパターン読み込み
@@ -169,7 +170,8 @@ class CLS_Trend():
 						"'" + self.ARR_Trend[wKey]['name'] + "'," + \
 						"'" + wDomain + "'," + \
 						str(self.ARR_Trend[wKey]['uses']) + "," + \
-						str(self.ARR_Trend[wKey]['accs']) + " " + \
+						str(self.ARR_Trend[wKey]['accs']) + "," + \
+						"'" + str(self.ARR_Trend[wKey]['lupdate']) + "' " + \
 						") ;"
 			
 			wDBRes = wOBJ_DB.RunQuery( wQuery )
@@ -220,6 +222,26 @@ class CLS_Trend():
 		wRank = 1
 		for wLine in wARR_Trend :
 			#############################
+			# ハッシュタグTLとして取得できるか
+			wResHash = self.Obj_Parent.OBJ_MyDon.GetHashtagTL( hashtag=wLine['name'], limit=1 )
+			if wResHash['Result']!=True :
+				### APIの失敗
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Trend: Get_Trend: GetHashtagTL is failed: " + wLine['name'] + " reason=" + wResHash['Reason'] )
+				continue
+			if len(wResHash['Responce'])==0 :
+				### TLがない
+				self.Obj_Parent.OBJ_Mylog.Log( 'c', "Hashtag TLなし: " + wLine['name'] )
+				self.STR_Cope['No_HashtagTL'] += 1
+				continue
+			
+			### トゥート時間を取得
+			wTootTD = "None"
+				#更新時間 (mastodon時間)
+			wGetTime = CLS_OSIF.sGetTimeformat( wResHash['Responce'][0]['created_at'] )
+			if wGetTime['Result']==True :
+				wTootTD = wGetTime['TimeDate']
+			
+			#############################
 			# トレンド値を計算
 			#   2時間以内のタグ利用数、使用ユーザ数？
 			wUses = 0
@@ -237,6 +259,7 @@ class CLS_Trend():
 ##			self.ARR_Trend[wIndex].update({ "url"  : wLine['url'] })
 			self.ARR_Trend[wIndex].update({ "uses" : wUses })
 			self.ARR_Trend[wIndex].update({ "accs" : wAccs })
+			self.ARR_Trend[wIndex].update({ "lupdate" : wTootTD })
 			wRank  += 1
 			wIndex += 1
 		
@@ -295,6 +318,7 @@ class CLS_Trend():
 			wARR_Trend[wIndex].update({ "domain" : "" })
 			wARR_Trend[wIndex].update({ "uses"   : 0 })
 			wARR_Trend[wIndex].update({ "accs"   : 0 })
+			wARR_Trend[wIndex].update({ "lupdate" : "None" })
 			
 			##トレンド情報の取り出し
 			wGetTap = []
@@ -310,7 +334,8 @@ class CLS_Trend():
 			wARR_Trend[wIndex].update({ "name"   : wGetTap[1].strip() })
 			wARR_Trend[wIndex].update({ "domain" : wGetTap[2].strip() })
 			wARR_Trend[wIndex].update({ "uses"   : int( wGetTap[3] ) })
-			wARR_Trend[wIndex].update({ "accs  " : int( wGetTap[4] ) })
+			wARR_Trend[wIndex].update({ "accs"   : int( wGetTap[4] ) })
+			wARR_Trend[wIndex].update({ "lupdate" : wGetTap[5] })
 			wIndex += 1
 		
 		#############################
@@ -390,7 +415,8 @@ class CLS_Trend():
 					continue
 				
 				###とりあえずソートなしで
-				wCHR_Body = wCHR_Body + "#" + wARR_Trend[wKey]['name'] + " (" + str(wARR_Trend[wKey]['uses']) + ")" + '\n'
+				wCHR_Body = wCHR_Body + "#" + wARR_Trend[wKey]['name'] + '\n'
+				wCHR_Body = wCHR_Body + "(" + str(wARR_Trend[wKey]['uses']) + ") [" + str(wARR_Trend[wKey]['lupdate']) + "]" + '\n' + '\n'
 				wVAL_Send += 1
 				
 ###				wCHR_Toot = wCHR_Body + "***上から最新順"
@@ -400,7 +426,7 @@ class CLS_Trend():
 				self.Obj_Parent.OBJ_Mylog.Log( 'c', "トレンド送信なし: 有効なハッシュタグTLがない" )
 				return
 			
-			wCHR_Toot = wCHR_Body + "***上から最新順"
+			wCHR_Toot = wCHR_Body + "**上から最新順" + '\n' + "**() 2日間のタグ使用数" + '\n' + "**[] 最終使用日時"
 			#############################
 			# トゥートの送信
 			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, spoiler_text=wCHR_Title, visibility=self.DEF_SENDRANGE )
