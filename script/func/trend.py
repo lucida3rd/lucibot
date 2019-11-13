@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トレンド処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/11
+#   Update  ：2019/11/13
 #####################################################
 # Private Function:
 #   __getTrafficPatt(self):
@@ -36,6 +36,15 @@ class CLS_Trend():
 
 								#**パターン解析からロードする
 	ARR_SendDomain = []			#トレンド通知対象ドメイン
+
+	STR_Cope = {				#処理カウンタ
+		"Now_Cope"		: 0,	#処理したトレンド数
+		"Now_Send"		: 0,	#送信したトゥート数
+		
+		"No_HashtagTL"	: 0,	#ハッシュタグTLなし数
+		"dummy"			: 0		#(未使用)
+	}
+
 	DEF_SENDRANGE  = "private"
 
 #####################################################
@@ -86,6 +95,16 @@ class CLS_Trend():
 			#############################
 			# 送信
 			self.Send_Trend()
+		
+		#############################
+		# 処理結果ログ
+		wStr = self.CHR_LogName + " 結果: Trend数=" + str(self.STR_Cope['Now_Cope'])
+		wStr = wStr + " Sended=" + str(self.STR_Cope['Now_Send'])
+		wStr = wStr + " NoHashtagTL=" + str(self.STR_Cope['No_HashtagTL'])
+		if gVal.FLG_Test_Mode==False :
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr )
+		else:
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', wStr, inView=True )
 		
 		return
 
@@ -165,6 +184,10 @@ class CLS_Trend():
 		#############################
 		# 正常終了
 		wOBJ_DB.Close()
+		
+		#############################
+		# カウント
+		self.STR_Cope['Now_Cope'] += len(self.ARR_Trend)
 		return
 
 	def __getTrends(self):
@@ -216,70 +239,7 @@ class CLS_Trend():
 			self.ARR_Trend[wIndex].update({ "accs" : wAccs })
 			wRank  += 1
 			wIndex += 1
-
-###
-#			wARR_SetTrend.update({ wIndex : "" })
-#			wARR_SetTrend[wIndex] = {}
-#			wARR_SetTrend[wIndex].update({ "name" : wLine['name'] })
-##			wARR_SetTrend[wIndex].update({ "url"  : wLine['url'] })
-#			wARR_SetTrend[wIndex].update({ "uses" : wUses })
-#			wARR_SetTrend[wIndex].update({ "accs" : wAccs })
-#			wIndex += 1
-#		
-#		#############################
-#		# ソート
-#		wKeyList = wARR_SetTrend.keys()
-#		### 1以下はソートしない
-#		if len(wKeyList)==0 :
-#			return wRes
-#		if len(wKeyList)==1 :
-#			self.ARR_Trend.update({ wIndex : wARR_SetTrend[0] })
-#			return wRes	# 1以下はソートしない
-#		
-#		wTrendLen = len(wARR_SetTrend)	#取得トレンド数
-#		wSetKeylist = []
-#		wKey = 0
-#		wB_Index = -1
-#		wCount = 0
-#		while True :
-#			wKey = -1
-#			for wChooseKey in wKeyList :
-#				if wChooseKey in wSetKeylist :
-#					continue	#既に決定してる要素
-#				wKey = wChooseKey
-#				break
-#			if wKey==-1 :
-#				break	#全て決定済
-#			
-#			wB_Index = wKey
-#			for wKey2 in wKeyList :
-#				if wKey==wKey2 :
-#					continue	#自分は除外
-#				if wKey2 in wSetKeylist :
-#					continue	#既に決定してる要素
-#				
-#				if wARR_SetTrend[wKey]['uses']<wARR_SetTrend[wKey2]['uses'] :
-#					wB_Index = wKey2	#今より大きい要素が見つかった
-#			
-#			wSetKeylist.append( wB_Index )	#一番大きい要素を記録
-#			wCount += 1
-#		
-#		#############################
-#		# ソート結果順に辞書に詰める
-#		wIndex = 0
-#		for wKey in wSetKeylist :
-#			self.ARR_Trend.update({ wIndex : "" })
-#			self.ARR_Trend[wIndex] = {}
-#			self.ARR_Trend[wIndex].update({ "name" : wARR_SetTrend[wKey]['name'] })
-##			self.ARR_Trend[wIndex].update({ "url"  : wARR_SetTrend[wKey]['url'] })
-#			self.ARR_Trend[wIndex].update({ "uses" : wARR_SetTrend[wKey]['uses'] })
-#			self.ARR_Trend[wIndex].update({ "accs" : wARR_SetTrend[wKey]['accs'] })
-#			wIndex += 1
 		
-##		print( "GetTrends: " + str(len(wARR_Trend)) )
-##		wKeylist = self.ARR_Trend.keys()
-##		for wKey in wKeylist :
-##			print( self.ARR_Trend[wKey]['name'] + ": " + str(self.ARR_Trend[wKey]['uses']) )
 		return wRes
 
 
@@ -380,29 +340,6 @@ class CLS_Trend():
 			wKey = 0
 			wB_Index = -1
 			wRank = 1
-#			wCount = 0
-#			while True :
-#				wKey = -1
-#				for wChooseKey in wARR_MatomeKeys :
-#					if wChooseKey in wSetKeylist :
-#						continue	#既に決定してる要素
-#					wKey = wChooseKey
-#					break
-#				if wKey==-1 :
-#					break	#全て決定済
-#				
-#				wB_Index = wKey
-#				for wKey2 in wARR_MatomeKeys :
-#					if wKey==wKey2 :
-#						continue	#自分は除外
-#					if wKey2 in wSetKeylist :
-#						continue	#既に決定してる要素
-#					
-#					if wARR_Trend[wKey]['uses']<wARR_Trend[wKey2]['uses'] :
-#						wB_Index = wKey2	#今より大きい要素が見つかった
-#				
-#				wSetKeylist.append( wB_Index )	#一番大きい要素を記録
-#				wCount += 1
 			while True :
 				wKey = -1
 				for wChooseKey in wARR_MatomeKeys :
@@ -434,21 +371,47 @@ class CLS_Trend():
 			wCHR_Title = "Mastodon " + wDomain + " TrendTag: " + wCHR_TimeDate[0] + " " + str(gVal.STR_TimeInfo['Hour']) + "時"
 			
 			wCHR_Body = ""
+			wVAL_Send = 0
 			for wKey in wSetKeylist :
-				if wARR_Trend[wKey]['domain']!=wDomain :
-					continue	#違うドメインのトレンド
+##				if wARR_Trend[wKey]['domain']!=wDomain :
+##					continue	#違うドメインのトレンド
+##				
+				#############################
+				# ハッシュタグTLとして取得できるか
+				wResHash = self.Obj_Parent.OBJ_MyDon.GetHashtagTL( hashtag=wARR_Trend[wKey]['name'], limit=1 )
+				if wResHash['Result']!=True :
+					### APIの失敗
+					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Trend: __getTrends: GetHashtagTL is failed: " + wARR_Trend[wKey]['name'] + " reason=" + wResHash['Reason'] )
+					continue
+				if len(wResHash['Responce'])==0 :
+					### TLがない
+					self.Obj_Parent.OBJ_Mylog.Log( 'c', "Hashtag TLなし: " + wARR_Trend[wKey]['name'] )
+					self.STR_Cope['No_HashtagTL'] += 1
+					continue
 				
 				###とりあえずソートなしで
 				wCHR_Body = wCHR_Body + "#" + wARR_Trend[wKey]['name'] + " (" + str(wARR_Trend[wKey]['uses']) + ")" + '\n'
+				wVAL_Send += 1
 				
-				wCHR_Toot = wCHR_Body + "***上から最新順"
-		
+###				wCHR_Toot = wCHR_Body + "***上から最新順"
+			
+			### ハッシュタグTLとして検索できるものがなかった
+			if wVAL_Send==0 :
+				self.Obj_Parent.OBJ_Mylog.Log( 'c', "トレンド送信なし: 有効なハッシュタグTLがない" )
+				return
+			
+			wCHR_Toot = wCHR_Body + "***上から最新順"
 			#############################
 			# トゥートの送信
 			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, spoiler_text=wCHR_Title, visibility=self.DEF_SENDRANGE )
 			if wRes['Result']!=True :
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_Trend: Send_Trend: Mastodon error: " + wRes['Reason'] )
 				return
+			
+			#############################
+			# カウント
+##			self.STR_Cope['Now_Send'] += len(wSetKeylist)
+			self.STR_Cope['Now_Send'] += wVAL_Send
 		
 		return
 
