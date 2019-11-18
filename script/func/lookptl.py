@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：PTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/7
+#   Update  ：2019/11/19
 #####################################################
 # Private Function:
 #   __run(self):
@@ -42,6 +42,8 @@ class CLS_LookPTL():
 	ARR_AnapTL   = {}		#TL解析パターン
 	ARR_RateTL   = []		#過去TL(id)
 	ARR_UpdateTL = []		#新・過去TL(id)
+	ARR_NoWPaccount = []	#監視除外アカウント
+	ARR_NoWPdomain  = []	#監視除外ドメイン
 
 	STR_Cope = {			#処理カウンタ
 		"Now_Cope"  : 0,		#処理した新トゥート数
@@ -297,6 +299,16 @@ class CLS_LookPTL():
 			#解析：ワード監視
 			if self.ARR_AnapTL[wKey]['Kind']=="w" and gVal.STR_MasterConfig['PTL_WordOpe']=="on" and \
 			   gVal.STR_MasterConfig['AdminUser']!="" :
+				
+				# 監視除外アカウントか
+				if wFulluser['Fulluser'] in self.ARR_NoWPaccount :
+					self.Obj_Parent.OBJ_Mylog.Log( 'c', "ワード監視除外アカウント: " + wFulluser['Fulluser'] )
+					continue
+				# 監視除外ドメインか
+				if wFulluser['Domain'] in self.ARR_NoWPdomain :
+					self.Obj_Parent.OBJ_Mylog.Log( 'c', "ワード監視除外ドメイン: " + wFulluser['Domain'] )
+					continue
+				
 				###マッチチェック
 				wRes = CLS_OSIF.sRe_Search( self.ARR_AnapTL[wKey]['Pattern'], wCont )
 				if not wRes :
@@ -444,6 +456,8 @@ class CLS_LookPTL():
 		#############################
 		# 読み出し先初期化
 		self.ARR_AnapTL = {}
+		self.ARR_NoWPaccount = []
+		self.ARR_NoWPdomain = []
 		wAnapList = []	#解析パターンファイル
 		
 		#############################
@@ -463,6 +477,13 @@ class CLS_LookPTL():
 				continue	#フォーマットになってない
 			if wLine[0].find("#")==0 :
 				continue	#コメントアウト
+			
+			if wLine[0]=="wa" :	#監視除外アカウント
+				self.ARR_NoWPaccount.append( wLine[1] )
+				continue
+			if wLine[0]=="wd" :	#監視除外ドメイン
+				self.ARR_NoWPdomain.append( wLine[1] )
+				continue
 			
 			self.ARR_AnapTL.update({ wIndex : "" })
 			self.ARR_AnapTL[wIndex] = {}
