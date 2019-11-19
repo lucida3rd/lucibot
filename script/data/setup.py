@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：セットアップ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/13
+#   Update  ：2019/11/19
 #####################################################
 # Private Function:
 #   __initDB(self):
@@ -503,6 +503,7 @@ class CLS_Setup():
 		self.__create_TBL_WORD_CORRECT( wOBJ_DB )
 		self.__create_TBL_CLAZ_LIST( wOBJ_DB )
 		self.__create_TBL_TREND( wOBJ_DB )
+		self.__create_TBL_TWITTER_READER( wOBJ_DB )
 		
 		#############################
 		# DBのクローズ
@@ -690,6 +691,31 @@ class CLS_Setup():
 					"accs        INTEGER  DEFAULT 0," + \
 					"lupdate     TIMESTAMP" + \
 					" ) ;"
+		
+		inOBJ_DB.RunQuery( wQuery )
+		return
+
+
+
+#####################################################
+# テーブル作成: TBL_TWITTER_READER
+#####################################################
+	def __create_TBL_TWITTER_READER( self, inOBJ_DB, inTBLname="TBL_TWITTER_READER" ):
+		#############################
+		# テーブルのドロップ
+		wQuery = "drop table if exists " + inTBLname + ";"
+		inOBJ_DB.RunQuery( wQuery )
+		
+		#############################
+		# テーブル枠の作成
+		wQuery = "create table " + inTBLname + "(" + \
+					"id          TEXT  NOT NULL," + \
+					"text        TEXT  NOT NULL," + \
+					"screen_name TEXT  NOT NULL," + \
+					"send_user   TEXT  NOT NULL," + \
+					"lupdate     TIMESTAMP," + \
+					"sended      BOOL  DEFAULT false," + \
+					" PRIMARY KEY ( id ) ) ;"
 		
 		inOBJ_DB.RunQuery( wQuery )
 		return

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値 (test)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/8
+#   Update  ：2019/11/19
 #####################################################
 
 #####################################################
@@ -46,7 +46,8 @@ class gVal() :
 		"iActionTag"		: "sample_action",			#アクション通知タグ
 		"prTag"				: "sample_prtoot",			#PRトゥートタグ
 		"TrafficTag"		: "sample_traffic",			#トラヒックトゥートタグ
-		"TwitterTag"		: "",						#Twitter用タグ
+		"TwitterTag"		: "",						#mastodon→Twitterタグ(twitter側でツイート用)
+		"TwitterReaderTag"	: "",						#Twitter→mastodonタグ(mastodon側でトゥート用)
 		"SystemTag"			: "sample_system",			#システム監視トゥートタグ
 		
 ##		"TwitterUser"	: "",						#twiterユーザ
@@ -207,7 +208,7 @@ class gVal() :
 
 		"HTLBoostFile"			: DEF_MASTERCONFIG + "toot/hboost.txt",
 		"TrafficTootFile"		: DEF_MASTERCONFIG + "toot/traffic.txt",
-		"TweetPatternFile"		: DEF_MASTERCONFIG + "toot/twitter.txt",
+		"TwetterReaderFile"		: DEF_MASTERCONFIG + "toot/twitter_reader.txt",
 		"DBInfoFile"			: DEF_MASTERCONFIG + "toot/.dbinfo.txt",
 		
 ##		"DomainREMFile"			: DEF_MASTERCONFIG + "user/xxdomain.txt",

@@ -1,6 +1,14 @@
 ###監視ワード(w|,|正規表現パターン|,|xxx@xxx)
 #w|,|アズレン|アズールレーン|,|lucida3poi@mstdn.mynoghra.jp
 
+###監視除外・アカウント(wa|,|除外アカウント)
+#wa|,|lucida3free@mstdn.mynoghra.jp|,|
+
+###監視除外・ドメイン(wd|,|除外ドメイン)
+#wd|,|mstdn.mynoghra.jp|,|
+
+
+
 ###ファボる(f|,|正規表現パターン)
 #f|,|出社|しごもど|,|
 
