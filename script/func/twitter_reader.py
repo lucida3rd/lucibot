@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：Twitterリーダ処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/19
+#   Update  ：2019/11/20
 #####################################################
 # Private Function:
 #   __getTrafficPatt(self):
@@ -31,7 +31,6 @@ class CLS_TwitterReader():
 	CHR_LogName  = "Twitterリーダ処理"
 	Obj_Parent = ""				#親クラス実体
 	
-##	FLG_Valid  = False			#トレンド対象
 	ARR_NewTL    = []			#Twitter TL(API)
 	ARR_AnapTL   = {}			#TL解析パターン
 	ARR_RateTL   = []			#過去TL(id)
@@ -74,7 +73,6 @@ class CLS_TwitterReader():
 			return
 		
 		self.Obj_Parent = parentObj
-##		self.FLG_Valid  = CLS_UserData.sCheckTrafficUser( self.Obj_Parent.CHR_Account )
 		self.__run()	#処理開始
 		return
 
@@ -153,8 +151,8 @@ class CLS_TwitterReader():
 						wFlg_Rate = True
 						break
 				
-#				if wFlg_Rate == True :
-#					continue
+				if wFlg_Rate == True :
+					continue
 				
 				#############################
 				# パターンチェック
@@ -194,11 +192,6 @@ class CLS_TwitterReader():
 		
 		#############################
 		# トゥート送信
-##		# ・取得処理対象が条件
-##		if self.FLG_Valid==True :
-##			#############################
-##			# トゥート送信
-##			self.Send_Toot()
 		self.Send_Toot()
 		
 		#############################
@@ -252,10 +245,10 @@ class CLS_TwitterReader():
 			wCHR_Toot = wCHR_Title + wCHR_Body + "#" + gVal.STR_MasterConfig['TwitterReaderTag']
 			#############################
 			# トゥートの送信
-#			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=self.CHR_SendRange )
-#			if wRes['Result']!=True :
-#				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_TwitterReader: Send_Trend: Mastodon error: " + wRes['Reason'] )
-#				return
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=self.CHR_SendRange )
+			if wRes['Result']!=True :
+				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_TwitterReader: Send_Trend: Mastodon error: " + wRes['Reason'] )
+				return
 			
 			self.ARR_Twitter[wKey]['sended'] = True
 			#############################
@@ -688,14 +681,7 @@ class CLS_TwitterReader():
 ##			print( "id: " + str(wROW['id']) )
 ##			print( "text: " + str(wROW['text']) )
 ##			print( "user: " + str(wROW['user']['name']) + "(@" + str(wROW['user']['screen_name']) + ")" )
-##			print( "locked: " + str(wROW['user']['protected']) )
 ##			print( "country: " + wROW['lang'] )
-##			
-##			if "possibly_sensitive" not in wROW :
-##				print( "Sensitive: ON" )
-##
-##			print( "----------" )
-			
 #############################
 # ツイート除外(mastodon健全化)
 # ・いかがわしいツイート
