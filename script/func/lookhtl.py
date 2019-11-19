@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/10/28
+#   Update  ：2019/11/19
 #####################################################
 # Private Function:
 #   __run(self):
@@ -36,6 +36,7 @@ class CLS_LookHTL():
 	ARR_AnapTL   = {}		#TL解析パターン
 	ARR_RateTL   = []		#過去TL(id)
 	ARR_UpdateTL = []		#新・過去TL(id)
+	ARR_NoBoost  = []		#ブースト外パターン
 
 	STR_Cope = {				#処理カウンタ
 		"Now_Cope"		: 0,	#処理した新トゥート数
@@ -182,6 +183,16 @@ class CLS_LookHTL():
 			self.STR_Cope['OffTime'] += 1
 			return	#反応時間外
 		wGetTime = str(wGetLag['InputTime'])
+		
+		#############################
+		# ブースト外パターンが含まれるか
+		for wLine in self.ARR_NoBoost :
+			### マッチチェック
+			wPatt = "#" + wLine
+			wRes = CLS_OSIF.sRe_Search( wPatt, wCont )
+			if wRes :
+				##パターンマッチ
+				return
 		
 		#############################
 		#解析種類の判定
@@ -530,6 +541,7 @@ class CLS_LookHTL():
 		#############################
 		# 読み出し先初期化
 		self.ARR_AnapTL = {}
+		self.ARR_NoBoost = []
 		wAnapList = []	#解析パターンファイル
 		
 		#############################
@@ -548,6 +560,10 @@ class CLS_LookHTL():
 				continue	#フォーマットになってない
 			if wLine[0].find("#")==0 :
 				continue	#コメントアウト
+			
+			if wLine[0]=="n" :	#ブースト外
+				self.ARR_NoBoost.append( wLine[1] )
+				continue
 			
 			self.ARR_AnapTL.update({ wIndex : "" })
 			self.ARR_AnapTL[wIndex] = {}

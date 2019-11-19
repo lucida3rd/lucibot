@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ユーザデータ
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/19
+#   Update  ：2019/11/19
 #####################################################
 # Private Function:
 #   (none)
@@ -20,6 +20,7 @@
 #   sGetFulluser( cls, inUsername, inUrl ):
 #   sCheckTrafficUser( cls, inUsername ):
 #   sChangeTrafficUser( cls, inUsername ):
+#   sGetTrafficUser(cls):
 #   sGetRange( cls, inRange ):
 #   sCheckRange( cls, inRange ):
 #   sChkHitPatt( cls, inHitPatt, inPatt ):
@@ -365,6 +366,32 @@ class CLS_UserData() :
 				return True	#確定
 		
 		return False		#対象ではない
+
+
+
+#####################################################
+# トラヒックユーザ取得
+#####################################################
+	@classmethod
+	def sGetTrafficUser(cls):
+		#############################
+		# 応答形式の取得
+		#   "Result" : False, "Reason" : None, "Responce" : None
+		wRes = CLS_OSIF.sGet_Resp()
+		
+		#############################
+		# 読み出し先初期化
+		wTrafficUser = []
+		
+		#############################
+		# ファイル読み込み
+		wFile_path = gVal.DEF_STR_FILE['TrafficFile']
+		if CLS_File.sReadFile( wFile_path, outLine=wTrafficUser )!=True :
+			return wRes	#失敗
+		
+		wRes['Responce'] = wTrafficUser
+		wRes['Result']   = True
+		return wRes	#OK
 
 
 

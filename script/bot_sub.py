@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：botメイン処理 (Sub用)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/11
+#   Update  ：2019/11/19
 #####################################################
 # Private Function:
 #   (none)
@@ -31,6 +31,7 @@ from lookltl import CLS_LookLTL
 from lookrip import CLS_LookRIP
 from trend import CLS_Trend
 from lookhard import CLS_LookHard
+from twitter_reader import CLS_TwitterReader
 from mylog import CLS_Mylog
 from traffic import CLS_Traffic
 from usercorr import CLS_UserCorr
@@ -184,6 +185,11 @@ class CLS_BOT_Sub() :
 		# ハード監視処理
 		if gVal.STR_MasterConfig['LookHard']=="on" :
 			wOBJ_LookHard = CLS_LookHard( parentObj=cls )
+		
+		#############################
+		# Twitterリーダ処理
+		if gVal.STR_MasterConfig['Twitter']=="on" :
+			wOBJ_TwitterReader = CLS_TwitterReader( parentObj=cls )
 		
 	#############################
 	# 後処理
