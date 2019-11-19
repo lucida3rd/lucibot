@@ -1,0 +1,20 @@
+###＜注意＞
+###  以下に該当しないアカウントを設定することを禁止とします
+###  ・自分のアカウント
+###  ・twitter認証済みアカウント
+
+###公開範囲(r|,|範囲文字)
+###		unlisted ..未収載
+###		private  ..非公開
+r|,|unlisted
+
+###アカウント (P|,|twitterアカウント|,|正規表現パターン(省略可)|,|出力アカウント xxx@xxx)
+#P|,|azurlane_staff|,||,|lucida3free@mstdn.mynoghra.jp
+
+
+
+###twitterトレンド (T|,|出力アカウント xxx@xxx)  複数設定時は一番上のみ有効
+#T|,|lucida3free@mstdn.mynoghra.jp
+
+
+

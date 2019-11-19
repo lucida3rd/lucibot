@@ -79,7 +79,10 @@ class CLS_LookPTL():
 	def __run(self):
 		#############################
 		# 開始ログ
-		self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
+		if gVal.FLG_Test_Mode==False :
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始" )
+		else:
+			self.Obj_Parent.OBJ_Mylog.Log( 'b', self.CHR_LogName + " 開始", inView=True )
 		
 		#############################
 		# TL解析パターン読み込み
