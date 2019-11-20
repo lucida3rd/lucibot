@@ -4,7 +4,7 @@
 # public
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/19
+#   Update  ：2019/11/20
 #####################################################
 # Private Function:
 #   (none)
@@ -180,6 +180,9 @@ class CLS_OSIF() :
 				wTD = wTD[0:wIfind]
 				wTD = wTD.split('T')
 				wTD = wTD[0] + " " + wTD[1]
+				
+				wTD = datetime.strptime( wTD, "%Y-%m-%d %H:%M:%S") + timedelta( hours=inTimezone )
+				wTD = str( wTD )
 				
 				wRes['Format'] = "TrendType"
 			else :
