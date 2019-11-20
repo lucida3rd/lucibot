@@ -1,7 +1,7 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4 (deverop)  
 ::BotDate= 2019/11/20  
-::Version= 4.1.4.1.d  
+::Version= 4.1.4.2.d  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
 
@@ -36,6 +36,7 @@ python3で作成したmastodonクラウド環境下で動くことを前提に�
     * [自動フォロー機能](#iAutoFollow)
     * [手動トゥート機能](#iManualToot)
     * [twitter連携機能](#iTwitter)
+    * [twitterリーダ機能](#iTwitterReader)
     * [ログ機能](#iLogging)
     * [bot排他機能](#iExclusive)
 * [免責事項](#iDisclaimer)
@@ -130,6 +131,7 @@ $ python3 run.py
 | ハード監視機能        | －             |   〇   |   －    |                      |
 | 手動トゥート機能      | －             |   〇   |   △    |Subは同報配信のみ     |
 | Twitter連携機能       | Twitter TL     |   〇   |   －    |                      |
+| Twitterリーダ機能     | Twitter TL     |   〇   |   〇    |状況による            |
 | ログ機能              | －             |   〇   |   〇    |                      |
 | 排他機能              | －             |   〇   |   〇    |                      |
 
@@ -353,14 +355,24 @@ twitterが有効の場合は、twitterに転送することもできます。
 ## twitter連携機能
 APIを取得したアカウントに連携し、トゥートをツイートします。  
 またTwitterタイムライン上の指定ユーザのツイートをmastodonにトゥートします。  
-取得するタイムラインは、ホーム、ユーザ、リストの３種類が設定できます。  
 本機能を有効にするにはTwitter APIを取得する必要があります。（＜twitter APIの取得方法＞参照）  
 　機能有効：Twitter=on  
 
 ＜ツイートされる内容＞  
 * 1時間ごとのmastodonトラヒック  
 * 同報配信トゥート  
-　ツイート指定ファイル：toot/twitter.txt  
+
+
+
+<a id="iTwitterReader"></a>
+## twitterリーダ機能
+twitter上のホームタイムラインからパターンを読み取り、mastodonにトゥートします。  
+また1時間ごとにtwitterのトレンドをmastodonにトゥートします。  
+twitterのパターン、トゥートを送信するアカウントはパターンファイルで指定します。  
+本機能を有効にするにはTwitter連携設定をする必要があります。（＜twitter連携機能＞参照）  
+　機能有効：Twitter=on  
+　　twitterリーダ ファイル：toot/twitter_reader.txt    
+　　　※中身はサンプルを参考にしてください  
 
 
 

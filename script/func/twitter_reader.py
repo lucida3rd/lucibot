@@ -173,6 +173,7 @@ class CLS_TwitterReader():
 				#更新時間 (twitter時間)
 				wTime = CLS_OSIF.sGetTimeformat_Twitter( wROW['created_at'] )
 				if wTime['Result']!=True :
+					self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_TwitterReader: __run: sGetTimeformat_Twitter is failed" )
 					continue
 				self.ARR_Twitter[wIndex]['lupdate'] = wTime['TimeDate']
 				
@@ -286,6 +287,7 @@ class CLS_TwitterReader():
 		wTime = CLS_OSIF.sGetTimeformat_Twitter( wRes['Responce'][0]['created_at'] )
 		wGetTimeDate = None
 		if wTime['Result']!=True :
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_TwitterReader: Send_Trend: sGetTimeformat_Twitter is failed" )
 			return False
 		wGetTimeDate = wTime['TimeDate']
 		
