@@ -1,7 +1,7 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4 (master)  
-::BotDate= 2019/11/20  
-::Version= 4.1.4.2  
+::BotDate= 2019/11/21  
+::Version= 4.1.4.3  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
 
@@ -46,7 +46,7 @@ python3で作成したmastodonクラウド環境下で動くことを前提に�
 <a id="iSetup"></a>
 ## システム要件・セットアップなど
 るしぼっとのシステム要件、セットアップ方法については、別紙のセットアップ手順書に記載しています。よくお読みください。
-* [セットアップ手順書](https://github.com/lucida3rd/lucibot/readme_setup.md)
+* [セットアップ手順書](https://github.com/lucida3rd/lucibot/blob/master/readme_setup.md)
 
 
 
@@ -373,6 +373,11 @@ twitterのパターン、トゥートを送信するアカウントはパター�
 　機能有効：Twitter=on  
 　　twitterリーダ ファイル：toot/twitter_reader.txt    
 　　　※中身はサンプルを参考にしてください  
+
+補足：  
+* twitterトレンドはtwitterサーバ側で5分毎に更新されるため、twitterで表示されているトレンドと異なる場合があります。  
+* twitterから収集するmastodonアカウントは、登録ユーザのうち1つで実行されます。  
+* るしぼっとと連携しているtwitterアカウントを普段使いしている場合、使い方によってはAPI不足によりるしぼっとの処理が失敗する場合があります。  
 
 
 

@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：ワード収集
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/9/29
+#   Update  ：2019/11/21
 #####################################################
 # Private Function:
 #   __selectMeCabDic(self):
@@ -504,10 +504,13 @@ class CLS_WordCorr():
 			
 			#############################
 			# 単語の登録
+			wWord = str(wGetWords[wKey]['word']).replace( "'", "''" )
+			wClaz = str(wGetWords[wKey]['claz']).replace( "'", "''" )
+			wYomi = str(wGetWords[wKey]['yomi']).replace( "'", "''" )
 			wQuery = "insert into TBL_WORD_CORRECT values (" + \
-						"'" + wGetWords[wKey]['word'] + "'," + \
-						"'" + wGetWords[wKey]['claz'] + "'," + \
-						"'" + wGetWords[wKey]['yomi'] + "'," + \
+						"'" + wWord + "'," + \
+						"'" + wClaz + "'," + \
+						"'" + wYomi + "'," + \
 						"'" + wGetWords[wKey]['cla1'] + "'," + \
 						"'" + wGetWords[wKey]['cla2'] + "'," + \
 						"'" + wGetWords[wKey]['cla3'] + "'," + \
