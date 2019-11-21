@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値 (test)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/19
+#   Update  ：2019/11/21
 #####################################################
 
 #####################################################
@@ -158,7 +158,7 @@ class gVal() :
 		"AutoRemoveDays"	: 30,						#未活動時、自動リムーブまでの日数
 		"FollowNum"			: 10,						# 1周で処理するフォロー管理ユーザ数
 		
-		"getTwitTLnum"		: 120,						#TwitterのTL取得数
+		"getTwitTLnum"		: 200,						#TwitterのTL取得数
 		"(dummy)"			: ""
 	}
 

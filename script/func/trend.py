@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：トレンド処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/13
+#   Update  ：2019/11/21
 #####################################################
 # Private Function:
 #   __getTrafficPatt(self):
@@ -165,9 +165,10 @@ class CLS_Trend():
 		wKeyList = self.ARR_Trend.keys()
 		wRank = 1
 		for wKey in self.ARR_Trend :
+			wName = str(self.ARR_Trend[wKey]['name']).replace( "'", "''" )
 			wQuery = "insert into TBL_TREND values (" + \
 						str(wRank) + "," + \
-						"'" + self.ARR_Trend[wKey]['name'] + "'," + \
+						"'" + wName + "'," + \
 						"'" + wDomain + "'," + \
 						str(self.ARR_Trend[wKey]['uses']) + "," + \
 						str(self.ARR_Trend[wKey]['accs']) + "," + \

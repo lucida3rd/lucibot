@@ -113,6 +113,8 @@ $ exit
 　以下 [MeCabのインストール](#iMecabInstall) をご参照ください。  
 
 8.Databaseを作成する。  
+
+```
 # su - [postgreSQLのマスターユーザ]  
 $ psql  
 => create database [ユーザ名];  
@@ -122,6 +124,7 @@ $ psql
 $ psql -l  
   Databaseができていることを確認します。  
 $ exit  
+```
 
 
 
