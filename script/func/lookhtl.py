@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/19
+#   Update  ：2019/11/21
 #####################################################
 # Private Function:
 #   __run(self):
@@ -223,7 +223,8 @@ class CLS_LookHTL():
 					continue
 				### 実行
 ##				if self.TwitterBoost( inROW['id'] )!=True :
-				if self.TwitterBoost( inROW['id'], wFulluser )!=True :
+##				if self.TwitterBoost( inROW['id'], wFulluser )!=True :
+				if self.TwitterBoost( inROW['id'], wFulluser, wCont )!=True :
 					self.STR_Cope['Invalid'] += 1
 				else :
 					self.STR_Cope["Now_Twitter"] += 1
@@ -598,23 +599,50 @@ class CLS_LookHTL():
 #####################################################
 # ついったー転送
 #####################################################
-##	def TwitterBoost( self, inID ) :
-	def TwitterBoost( self, inID, inFulluser ) :
-##		#############################
-##		# ユーザ名の変換
-##		wFulluser = CLS_UserData.sUserCheck( self.Obj_Parent.CHR_Account )
-##		if wFulluser['Result']!=True :
-##			###今のところ通らないルート
-##			return False
-##		wDomain = wFulluser['Domain']
+###	def TwitterBoost( self, inID, inFulluser ) :
+	def TwitterBoost( self, inID, inFulluser, inCont ) :
+		if len(inCont)<=0 :
+			###ありえない
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHTL: TwitterBoost: Content size is zero" )
+			return False
 		
 		#############################
-		# ファボられたトゥートURL
-##		wToot_Url = "https://" + wDomain + gVal.DEF_TOOT_SUBURL + str(inID)
-##		wToot_Url = "https://" + wDomain + "/@" + wFulluser['User'] + "/" + str(inID)
-		wToot_Url = "https://" + inFulluser['Domain'] + "/@" + inFulluser['Username'] + "/" + str(inID)
-		wCHR_Tweet = "mastodonから転送:" + '\n' + wToot_Url
+		# ツイートの組み立て
+		### ファボられたトゥートURL
+		wToot_Url = " https://" + inFulluser['Domain'] + "/@" + inFulluser['Username'] + "/" + str(inID)
 		
+		### 頭とトゥートURLを抜いた文字数
+		wMAX_Tweet = 140 - len( wToot_Url )
+		if wMAX_Tweet<=0 :
+			###ありえない
+			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHTL: TwitterBoost: Tweet Header size is zero" )
+			return False
+		
+		### 本文の短縮化
+		wCHR_Body = inCont
+		
+		wCHR_Body = wCHR_Body.replace( '\n', '' )
+		wIndex = inCont.find("#")
+		wCHR_Body = wCHR_Body[0:wIndex]
+		wCHR_Body = wCHR_Body.strip()
+		
+			# 読点で140字に収まるまで切る
+		wARR_Body = wCHR_Body.split("。")
+		wNew_Body = ""
+		if len(wARR_Body)>2 :
+			for wLine in wARR_Body :
+				if wLine=="" :
+					break	#最終桁
+				wLine = wLine + "。"	#最初に読点補完
+				wComp = wNew_Body + wLine
+				if len(wComp)>wMAX_Tweet :
+					break	#140字超えた
+				wNew_Body = wNew_Body + wLine
+			wCHR_Body = wNew_Body
+		else :
+			wCHR_Body = wCHR_Body[0:wMAX_Tweet]
+		
+		wCHR_Tweet = wCHR_Body + wToot_Url
 		#############################
 		# Twitterへ投稿
 		wRes = self.Obj_Parent.OBJ_Twitter.Tweet( wCHR_Tweet )

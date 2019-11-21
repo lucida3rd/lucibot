@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：Twitterリーダ処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/20
+#   Update  ：2019/11/21
 #####################################################
 # Private Function:
 #   __getTrafficPatt(self):
@@ -232,15 +232,16 @@ class CLS_TwitterReader():
 		for wKey in wKeylist :
 			#############################
 			# トゥートの組み立て
-			wCHR_Title = "Twitterから転送: " + str(self.ARR_Twitter[wKey]['lupdate']) + '\n'
+			wCHR_Title = "Transfer from Twitter:" + '\n'
 			
 			wCHR_Body = ""
-			wCHR_Body = wCHR_Body + "Sender: " + self.ARR_Twitter[wKey]['screen_name'] + '\n' + '\n'
-			
 			### Body
-			wCHR_Body = wCHR_Body + self.ARR_Twitter[wKey]['text'] + '\n'
+			wText = self.ARR_Twitter[wKey]['text'].replace( '\n', '' )
+			wCHR_Body = wCHR_Body + wText + '\n'
 			
-			### URL
+			### Source: User / Timedate / URL
+			wCHR_Body = wCHR_Body + "--[Source: " + str(self.ARR_Twitter[wKey]['lupdate']) + "]--" + '\n'
+			wCHR_Body = wCHR_Body + "User: " + self.ARR_Twitter[wKey]['screen_name'] + " "
 			wCHR_Body = wCHR_Body + "https://twitter.com/" + self.ARR_Twitter[wKey]['screen_name'] + "/status/" + str(self.ARR_Twitter[wKey]['id']) + '\n'
 			
 			wCHR_Toot = wCHR_Title + wCHR_Body + "#" + gVal.STR_MasterConfig['TwitterReaderTag']
@@ -297,7 +298,7 @@ class CLS_TwitterReader():
 		
 		#############################
 		# トゥートの組み立て
-		wCHR_Title = "Twitter Trend: " + wGetTimeDate + '\n'
+		wCHR_Title = "Twitter Trend"
 		
 		wCHR_Body = ""
 		wIndex    = 0
@@ -324,6 +325,7 @@ class CLS_TwitterReader():
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_TwitterReader: Send_Trend: Trend Body size is zero" )
 			return
 		
+		wCHR_Body = wCHR_Body + "[" + wGetTimeDate + "] "
 		wCHR_Body = wCHR_Body + "#" + gVal.STR_MasterConfig['TwitterReaderTag'] + '\n'
 		
 		wCHR_Toot = wCHR_Body + "**上から最新順 (Top " + str(self.DEF_MAX_TREND) + " Tag)" + '\n' + "**() タグ使用数"
@@ -372,13 +374,14 @@ class CLS_TwitterReader():
 				return False
 			
 			wFLG_Update = False
+			wText = str(self.ARR_Twitter[wKey]['text']).replace( "'", "''" )
 			#############################
 			# クエリの作成
 			###なければ追加
 			if len(wDBRes['Responce']['Data'])==0 :
 				wQuery = "insert into TBL_TWITTER_READER values (" + \
 							str( self.ARR_Twitter[wKey]['id'] ) + "," + \
-							"'" + self.ARR_Twitter[wKey]['text'] + "'," + \
+							"'" + wText + "'," + \
 							"'" + self.ARR_Twitter[wKey]['screen_name'] + "'," + \
 							"'" + self.ARR_Twitter[wKey]['send_user'] + "'," + \
 							"'" + self.ARR_Twitter[wKey]['lupdate'] + "'," + \
@@ -396,7 +399,7 @@ class CLS_TwitterReader():
 				wChgList = wChgList[0]	#1行しかないし切る
 				
 				wQuery = "update TBL_TWITTER_READER set " + \
-						"text = '"   + str(self.ARR_Twitter[wKey]['text']) + "', " + \
+						"text = '" + wText + "', " + \
 						"screen_name = '" + str(self.ARR_Twitter[wKey]['screen_name']) + "', " + \
 						"send_user = '"   + str(self.ARR_Twitter[wKey]['send_user']) + "', " + \
 						"lupdate = '" + str(self.ARR_Twitter[wKey]['lupdate']) + "', " + \
@@ -688,8 +691,8 @@ class CLS_TwitterReader():
 # ツイート除外(mastodon健全化)
 # ・いかがわしいツイート
 # ・鍵垢
-			if "possibly_sensitive" not in wROW :
-				continue
+##			if "possibly_sensitive" not in wROW :
+##				continue
 			if wROW['user']['protected']==True :
 				continue
 			
