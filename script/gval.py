@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：グローバル値
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/21
+#   Update  ：2019/11/22
 #####################################################
 
 #####################################################
@@ -13,8 +13,8 @@ class gVal() :
 #############################
 # ※ユーザ自由変更※
 	DEF_EXAMPLE_ACCOUNT = "lucida3rd@mstdn.mynoghra.jp"		#画面に記載例として表示するアカウント
-	DEF_USERDATA_PATH   = '../botdata/'						#ユーザデータフォルダ
-###	DEF_USERDATA_PATH   = '../botdata_test/'				#ユーザデータフォルダ
+###	DEF_USERDATA_PATH   = '../botdata/'						#ユーザデータフォルダ
+	DEF_USERDATA_PATH   = '../botdata_test/'				#ユーザデータフォルダ
 	DEF_TIMEZONE = 9										# 9=日本時間 最終更新日補正用
 	DEF_MOJI_ENCODE = 'utf-8'								#文字エンコード
 
@@ -193,8 +193,8 @@ class gVal() :
 		"CLDataFile"			: "data/ctootd.txt",
 		
 		"MasterConfig_path"		: DEF_MASTERCONFIG,
-		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig.txt",
-###		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig_test.txt",
+###		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig.txt",
+		"MasterConfig"			: DEF_MASTERCONFIG + "mconfig_test.txt",
 		"MasterLog_path"		: DEF_MASTERCONFIG + "log/",
 ##		"MasterNowTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_now.txt",
 ##		"MasterRatTrafficFile"	: DEF_MASTERCONFIG + "data/traffic_rat.txt",
