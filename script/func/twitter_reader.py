@@ -680,19 +680,26 @@ class CLS_TwitterReader():
 		wKeylist = self.ARR_AnapTL.keys()
 		wFlg_Hit = False
 		for wKey in wKeylist :
-			if self.ARR_AnapTL[wKey]['user']==str(inROW['user']['screen_name']) :
-				wFlg_Hit = True
-				break		#対象ツイートユーザ
-			
-			if self.ARR_AnapTL[wKey]['patt']=="" :
+##			if self.ARR_AnapTL[wKey]['user']==str(inROW['user']['screen_name']) :
+##				wFlg_Hit = True
+##				break		#対象ツイートユーザ
+			if self.ARR_AnapTL[wKey]['user']!=str(inROW['user']['screen_name']) :
+				#対象ツイートユーザではない
 				continue
 			
-			wRes = CLS_OSIF.sRe_Search( self.ARR_AnapTL[wKey]['patt'], str(inROW['user']['text']) )
-			if wRes :
+			if self.ARR_AnapTL[wKey]['patt']=="" :
+##				continue
+				#対象ツイートユーザ かつ パターン設定なし：Hitあり
 				wFlg_Hit = True
-				break		#ツイートにパターンあり
+				break
+			
+			wRes_Search = CLS_OSIF.sRe_Search( self.ARR_AnapTL[wKey]['patt'], str(inROW['text']) )
+			if wRes_Search :
+				#対象ツイートユーザ かつ パターンヒット：Hitあり
+				wFlg_Hit = True
+				break
 		
-		### OK
+		### Hitあり
 		if wFlg_Hit==True :
 			wRes['send_user'] = self.ARR_AnapTL[wKey]['send']
 			wRes['tags']      = self.ARR_AnapTL[wKey]['tags']
