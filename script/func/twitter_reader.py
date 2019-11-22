@@ -687,8 +687,8 @@ class CLS_TwitterReader():
 			if self.ARR_AnapTL[wKey]['patt']=="" :
 				continue
 			
-			wRes = CLS_OSIF.sRe_Search( self.ARR_AnapTL[wKey]['patt'], str(inROW['user']['text']) )
-			if wRes :
+			wRes_Search = CLS_OSIF.sRe_Search( self.ARR_AnapTL[wKey]['patt'], str(inROW['text']) )
+			if wRes_Search :
 				wFlg_Hit = True
 				break		#ツイートにパターンあり
 		
