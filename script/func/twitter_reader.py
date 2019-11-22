@@ -4,16 +4,23 @@
 # るしぼっと4
 #   Class   ：Twitterリーダ処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/21
+#   Update  ：2019/11/22
 #####################################################
 # Private Function:
-#   __getTrafficPatt(self):
+#   __checkTwitterPatt( self, inROW ):
+#   __getTwitterPatt(self):
 #
 # Instance Function:
-#   __init__( self, inPath ):
-#   Countup(self):
-#   Update(self):
-#   SendTraffic(self):
+#   __init__( self, parentObj=None ):
+#   __run(self):
+#   Send_Toot(self):
+#   Send_Trend(self):
+#   Set_DBctrl_Twitter(self):
+#   Get_DBctrl_Twitter(self):
+#   Sended_DBctrl_Twitter(self):
+#   Delete_DBctrl_Twitter(self):
+#   Get_TwitterTL(self):
+#   Get_RateTwitterTL(self):
 #
 # Class Function(static):
 #   (none)
@@ -60,7 +67,8 @@ class CLS_TwitterReader():
 	DEF_SENDRANGE_TREND = "private"
 	DEF_MAX_TREND       = 10
 	
-	CHR_SendRange   = "unlisted"
+##	CHR_SendRange   = "unlisted"
+	DEF_SENDRANGE   = "unlisted"
 	CHR_TrendSender = ""
 
 #####################################################
@@ -168,6 +176,7 @@ class CLS_TwitterReader():
 				self.ARR_Twitter[wIndex].update({ "text" : str(wROW['text']) })
 				self.ARR_Twitter[wIndex].update({ "screen_name" : str(wROW['user']['screen_name']) })
 				self.ARR_Twitter[wIndex].update({ "send_user"   : wRes_check['send_user'] })
+				self.ARR_Twitter[wIndex].update({ "tags"        : wRes_check['tags'] })
 				self.ARR_Twitter[wIndex].update({ "lupdate" : "" })
 				self.ARR_Twitter[wIndex].update({ "sended" : False })
 				#更新時間 (twitter時間)
@@ -244,10 +253,20 @@ class CLS_TwitterReader():
 			wCHR_Body = wCHR_Body + "User: " + self.ARR_Twitter[wKey]['screen_name'] + " "
 			wCHR_Body = wCHR_Body + "https://twitter.com/" + self.ARR_Twitter[wKey]['screen_name'] + "/status/" + str(self.ARR_Twitter[wKey]['id']) + '\n'
 			
-			wCHR_Toot = wCHR_Title + wCHR_Body + "#" + gVal.STR_MasterConfig['TwitterReaderTag']
+			### add Tags
+			wCHR_Tags = ""
+			if self.ARR_Twitter[wKey]['tags']!="" :
+				wARR_Tags = self.ARR_Twitter[wKey]['tags'].split(",")
+				for wTag in wARR_Tags :
+					wCHR_Tags = wCHR_Tags + " #" + wTag
+			
+##			wCHR_Toot = wCHR_Title + wCHR_Body + "#" + gVal.STR_MasterConfig['TwitterReaderTag']
+			wCHR_Toot = wCHR_Title + wCHR_Body + "#" + gVal.STR_MasterConfig['TwitterReaderTag'] + wCHR_Tags
+			
 			#############################
 			# トゥートの送信
-			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=self.CHR_SendRange )
+##			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=self.CHR_SendRange )
+			wRes = self.Obj_Parent.OBJ_MyDon.Toot( status=wCHR_Toot, visibility=self.DEF_SENDRANGE )
 			if wRes['Result']!=True :
 				self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_TwitterReader: Send_Trend: Mastodon error: " + wRes['Reason'] )
 				return
@@ -377,6 +396,9 @@ class CLS_TwitterReader():
 			wText = str(self.ARR_Twitter[wKey]['text']).replace( "'", "''" )
 			#############################
 			# クエリの作成
+			if self.ARR_Twitter[wKey]['tags']=="" :
+				self.ARR_Twitter[wKey]['tags'] = "(none)"	# SQL用補完
+			
 			###なければ追加
 			if len(wDBRes['Responce']['Data'])==0 :
 				wQuery = "insert into TBL_TWITTER_READER values (" + \
@@ -384,6 +406,7 @@ class CLS_TwitterReader():
 							"'" + wText + "'," + \
 							"'" + self.ARR_Twitter[wKey]['screen_name'] + "'," + \
 							"'" + self.ARR_Twitter[wKey]['send_user'] + "'," + \
+							"'" + self.ARR_Twitter[wKey]['tags'] + "'," + \
 							"'" + self.ARR_Twitter[wKey]['lupdate'] + "'," + \
 							str( self.ARR_Twitter[wKey]['sended'] ) + " " + \
 							") ;"
@@ -402,6 +425,7 @@ class CLS_TwitterReader():
 						"text = '" + wText + "', " + \
 						"screen_name = '" + str(self.ARR_Twitter[wKey]['screen_name']) + "', " + \
 						"send_user = '"   + str(self.ARR_Twitter[wKey]['send_user']) + "', " + \
+						"tags = '"    + str(self.ARR_Twitter[wKey]['tags']) + "', " + \
 						"lupdate = '" + str(self.ARR_Twitter[wKey]['lupdate']) + "', " + \
 						"sended = "   + str(self.ARR_Twitter[wKey]['sended']) + " " + \
 						"where id = '" + wChgList[0] + "' ;"
@@ -476,6 +500,7 @@ class CLS_TwitterReader():
 			wARR_Twitter[wIndex].update({ "text"   : "" })
 			wARR_Twitter[wIndex].update({ "screen_name" : "" })
 			wARR_Twitter[wIndex].update({ "send_user"   : "" })
+			wARR_Twitter[wIndex].update({ "tags"        : "" })
 			wARR_Twitter[wIndex].update({ "lupdate" : "" })
 			wARR_Twitter[wIndex].update({ "sended"  : False })
 			
@@ -487,16 +512,23 @@ class CLS_TwitterReader():
 				## [1] ..text
 				## [2] ..screen_name
 				## [3] ..send_user
-				## [4] ..lupdate
-				## [5] ..sended
+				## [4] ..tags
+				## [5] ..lupdate
+				## [6] ..sended
 			
 			##領域へロード
 			wARR_Twitter[wIndex]['id']   = int( wGetTap[0] )
 			wARR_Twitter[wIndex]['text'] = wGetTap[1].strip()
 			wARR_Twitter[wIndex]['screen_name'] = wGetTap[2].strip()
 			wARR_Twitter[wIndex]['send_user']   = wGetTap[3].strip()
-			wARR_Twitter[wIndex]['lupdate']     = wGetTap[4]
-			wARR_Twitter[wIndex]['sended']      = wGetTap[5]
+			wARR_Twitter[wIndex]['lupdate']     = wGetTap[5]
+			wARR_Twitter[wIndex]['sended']      = wGetTap[6]
+			
+			wGetTap[4] = wGetTap[4].strip()
+			if wGetTap[4]=="(none)" :
+				wGetTap[4] = ""			# null設定
+			wARR_Twitter[wIndex]['tags'] = wGetTap[4]
+			
 			wIndex += 1
 		
 		#############################
@@ -523,6 +555,7 @@ class CLS_TwitterReader():
 			self.ARR_Twitter[wIndex].update({ "text" : wARR_Twitter[wKey]['text'] })
 			self.ARR_Twitter[wIndex].update({ "screen_name" : wARR_Twitter[wKey]['screen_name'] })
 			self.ARR_Twitter[wIndex].update({ "send_user"   : wARR_Twitter[wKey]['send_user'] })
+			self.ARR_Twitter[wIndex].update({ "tags"        : wARR_Twitter[wKey]['tags'] })
 			self.ARR_Twitter[wIndex].update({ "lupdate"     : wARR_Twitter[wKey]['lupdate'] })
 			self.ARR_Twitter[wIndex].update({ "sended"      : False })
 			wIndex += 1
@@ -641,7 +674,8 @@ class CLS_TwitterReader():
 	def __checkTwitterPatt( self, inROW ):
 		wRes = {
 			"result"    : False,
-			"send_user" : "" }
+			"send_user" : "",
+			"tags"      : "" }
 		
 		wKeylist = self.ARR_AnapTL.keys()
 		wFlg_Hit = False
@@ -661,6 +695,7 @@ class CLS_TwitterReader():
 		### OK
 		if wFlg_Hit==True :
 			wRes['send_user'] = self.ARR_AnapTL[wKey]['send']
+			wRes['tags']      = self.ARR_AnapTL[wKey]['tags']
 			wRes['result']    = True
 		
 		return wRes
@@ -767,20 +802,22 @@ class CLS_TwitterReader():
 		for wLine in wARR_TwitterReader :
 			wLine = wLine.split( gVal.DEF_DATA_BOUNDARY )
 			if len(wLine)==2 :
-				#############################
-				# 範囲
-				if wLine[0]=="r" :
-					if wLine[1] in self.DEF_SENDRANGE :
-						self.CHR_SendRange = wLine[1]
-				
+##				#############################
+##				# 範囲
+##				if wLine[0]=="r" :
+##					if wLine[1] in self.DEF_SENDRANGE :
+##						self.CHR_SendRange = wLine[1]
+##				
+##				elif wLine[0]=="T" and self.CHR_TrendSender=="" :
 				#############################
 				# トレンド送信ユーザ
-				elif wLine[0]=="T" and self.CHR_TrendSender=="" :
+				if wLine[0]=="T" and self.CHR_TrendSender=="" :
 					self.CHR_TrendSender = wLine[1]
 				
 				continue
 			
-			if len(wLine)!=4 :
+##			if len(wLine)!=4 :
+			if len(wLine)!=5 :
 				continue	#フォーマットになってない
 			if wLine[0].find("#")==0 :
 				continue	#コメントアウト
@@ -793,6 +830,7 @@ class CLS_TwitterReader():
 				self.ARR_AnapTL[wIndex].update({ "user" : wLine[1] })
 				self.ARR_AnapTL[wIndex].update({ "patt" : wLine[2] })
 				self.ARR_AnapTL[wIndex].update({ "send" : wLine[3] })
+				self.ARR_AnapTL[wIndex].update({ "tags" : wLine[4] })
 				wIndex += 1
 		
 		return True
