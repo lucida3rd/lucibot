@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：Twitterリーダ処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/22
+#   Update  ：2019/11/24
 #####################################################
 # Private Function:
 #   __checkTwitterPatt( self, inROW ):
@@ -246,6 +246,7 @@ class CLS_TwitterReader():
 			wCHR_Body = ""
 			### Body
 			wText = self.ARR_Twitter[wKey]['text'].replace( '\n', '' )
+			wText = CLS_OSIF.sDel_URL( wText )	#URLを除去
 			wCHR_Body = wCHR_Body + wText + '\n'
 			
 			### Source: User / Timedate / URL
