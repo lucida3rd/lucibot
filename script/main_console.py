@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：メイン処理(コンソール)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/19
+#   Update  ：2019/12/17
 #####################################################
 # Private Function:
 #   __getLucibotVer(cls):
@@ -31,6 +31,7 @@ from regist import CLS_Regist
 from userdata import CLS_UserData
 from bot_ctrl import CLS_Bot_Ctrl
 from dbedit import CLS_DBedit
+from logarcive import CLS_LogArcive
 
 from twitter_use import CLS_Twitter_Use
 from gval import gVal
@@ -300,6 +301,12 @@ class CLS_Main_Console() :
 ##			if gVal.STR_MasterConfig['Twitter']=="on" :
 ##				wCLS_Twitter.CnfTimeline( gVal.DEF_STR_FILE['Twitter_File'] )
 ##			
+			wFlg = True
+		#############################
+		# ログアーカイブ
+		elif inCommand=="\\arc" :
+			wCLS_work = CLS_LogArcive()
+			wCLS_work.Run()
 			wFlg = True
 		
 		return wFlg

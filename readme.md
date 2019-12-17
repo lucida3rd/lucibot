@@ -1,7 +1,7 @@
 ## るしぼっと4 Readme（取扱説明書 兼 設計仕様書）
 ::BotName= Lucibot4 (deverop)  
-::BotDate= 2019/11/24  
-::Version= 4.1.5.4.d  
+::BotDate= 2019/12/17  
+::Version= 4.1.6.0.d  
 ::Admin= Lucida（lucida3rd@mstdn.mynoghra.jp）  
 ::github= https://github.com/lucida3rd/lucibot  
 
