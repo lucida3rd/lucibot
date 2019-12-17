@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/21
+#   Update  ：2019/11/24
 #####################################################
 # Private Function:
 #   __run(self):
@@ -330,129 +330,6 @@ class CLS_LookHTL():
 
 
 #####################################################
-# 新トゥートへの対応
-#####################################################
-#	def __cope( self, inROW ) :
-###		wHitPatt = []
-#		
-#		#公開トゥート以外は除外
-#		if inROW['visibility']!="public" :
-#			self.STR_Cope['Outrange'] += 1
-#			return
-#		
-#		wCont = CLS_OSIF.sDel_HTML( inROW['content'] )
-#		#リプライは除外（先頭に@付きトゥート）
-#		if wCont.find('@') == 0 :
-#			self.STR_Cope['Outrange'] += 1
-#			return
-#		
-#		#通知は除外
-##		if wCont.find( gVal.STR_MasterConfig['iFavoTag'] ) >= 0 :
-#		if wCont.find( gVal.STR_MasterConfig['iActionTag'] ) >= 0 :
-#			self.STR_Cope['Outrange'] += 1
-#			return
-#		
-#		#ブーストトゥートは除外
-#		if inROW['reblog']!=None :
-#			self.STR_Cope['Outrange'] += 1
-#			return
-#		
-#		#############################
-#		# 相手ユーザ名
-#		wFulluser = CLS_UserData.sGetFulluser( inROW['account']['username'], inROW['account']['url'] )
-#		if wFulluser['Result']!=True :
-#			self.STR_Cope['Invalid'] += 1
-#			return
-#		wFulluser = wFulluser['Fulluser']
-#		#自分ならスキップ
-#		if wFulluser == self.Obj_Parent.CHR_Account :
-#			self.STR_Cope['Invalid'] += 1
-#			return
-#		
-#		#############################
-#		# トゥートの時間 (変換＆差)
-###		wReaRIPmin = gVal.STR_Config['reaRIPmin'] * 60	#秒に変換
-#		wReaRIPmin = gVal.DEF_STR_TLNUM['reaRIPmin'] * 60	#秒に変換
-#		wGetLag = CLS_OSIF.sTimeLag( str(inROW['created_at']), inThreshold=wReaRIPmin )
-#		if wGetLag['Result']!=True :
-#			self.STR_Cope['Invalid'] += 1
-#			return
-#		if wGetLag['Beyond']==True :
-#			self.STR_Cope['OffTime'] += 1
-#			return	#反応時間外
-#		wGetTime = str(wGetLag['InputTime'])
-#		
-#		wKeylist  = self.ARR_AnapTL.keys()
-#		#############################
-#		#解析種類の判定
-#		for wKey in wKeylist :
-#			wKind = self.ARR_AnapTL[wKey]['Kind']
-#			
-#			#############################
-#			#解析：ブースト
-#			if wKind == 'h' :
-####				#############################
-####				#既に同じ処理をしたか
-###				if CLS_UserData.sChkHitPatt( wHitPatt, wKind )==True :
-###					continue	#既に同じ処理した
-#				
-#				#############################
-#				#自分が指定ユーザか
-#				if self.ARR_AnapTL[wKey]['Fulluser']!="" :
-#					if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
-#						continue
-#				
-#				#############################
-#				#無指定の場合、登録ユーザか(第三者避け)
-#				else :
-#					wUserList = CLS_UserData.sGetUserList()
-#					if wFulluser not in wUserList :
-#						continue
-#				
-#				#############################
-#				#パターンマッチ
-#				wPatt = "#" + self.ARR_AnapTL[wKey]['Tag']
-#				wMatch = CLS_OSIF.sRe_Search( wPatt, wCont )
-#				if wMatch :
-#					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
-#					if wRes['Result']!=True :
-#						self.STR_Cope['Invalid'] += 1
-#						return	#失敗
-#					
-#					self.STR_Cope["Now_Boot"] += 1
-###					wHitPatt.append( wKind )
-#					break	# 1つの実行で止めておく
-#		
-#			#############################
-#			#解析：指定フルブースト
-#			if wKind == 'p' :
-###				#############################
-###				#既に同じ処理をしたか
-###				if CLS_UserData.sChkHitPatt( wHitPatt, wKind )==True :
-###					continue	#既に同じ処理した
-#				
-#				#############################
-#				#自分が指定ユーザではない
-#				if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
-#					continue	#指定ではない
-#				
-#				#############################
-#				#対象のブーストユーザか
-#				if self.ARR_AnapTL[wKey]['Tag']==wFulluser :
-#					wRes = self.Obj_Parent.OBJ_MyDon.Boost( inROW['id'] )
-#					if wRes['Result']!=True :
-#						self.STR_Cope['Invalid'] += 1
-#						return	#失敗
-#					
-#					self.STR_Cope["Now_Boot"] += 1
-###					wHitPatt.append( wKind )
-#					break	# 1つの実行で止めておく
-#		
-#		return
-#
-#
-
-#####################################################
 # HTL取得
 #####################################################
 	def Get_HTL(self):
@@ -625,6 +502,7 @@ class CLS_LookHTL():
 		wIndex = inCont.find("#")
 		wCHR_Body = wCHR_Body[0:wIndex]
 		wCHR_Body = wCHR_Body.strip()
+		wCHR_Body = CLS_OSIF.sDel_URL( wCHR_Body )	#URLを除去
 		
 			# 読点で140字に収まるまで切る
 		wARR_Body = wCHR_Body.split("。")
