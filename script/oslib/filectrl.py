@@ -4,7 +4,7 @@
 # public
 #   Class   ：ファイル制御
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/5/21
+#   Update  ：2019/12/17
 #####################################################
 # Private Function:
 #   (none)
@@ -33,6 +33,8 @@ from datetime import datetime
 import os
 import shutil
 import codecs
+import glob
+import zipfile
 
 #####################################################
 class CLS_File() :
@@ -86,7 +88,8 @@ class CLS_File() :
 		#############################
 		# 存在チェック
 		if cls().sExist( inPath )!=True :
-			return False
+##			return False
+			return []
 		
 		#############################
 		# フォルダリストの取得
@@ -133,6 +136,27 @@ class CLS_File() :
 			return False
 		
 		return True
+
+
+
+#####################################################
+# ファイル一覧取得
+#####################################################
+	@classmethod
+	def sFs( cls, inPath ):
+		#############################
+		# 存在チェック
+		if cls().sExist( inPath )!=True :
+			return []
+		
+		#############################
+		# ファイルリストの取得
+		try:
+			wARR_Filelist = glob.glob( inPath + "*" )
+		except ValueError as err :
+			return []
+		
+		return wARR_Filelist
 
 
 
@@ -189,6 +213,27 @@ class CLS_File() :
 		# リネーム
 		try:
 			os.rename( inSrcPath, inDstPath )
+		except ValueError as err :
+			return False
+		
+		return True
+
+
+
+#####################################################
+# ファイル削除
+#####################################################
+	@classmethod
+	def sRemove( cls, inSrcPath ):
+		#############################
+		# 存在チェック
+		if cls().sExist( inSrcPath )!=True :
+			return False
+		
+		#############################
+		# 削除
+		try:
+			os.remove( inSrcPath )
 		except ValueError as err :
 			return False
 		
@@ -334,6 +379,39 @@ class CLS_File() :
 		except ValueError as err :
 			return False
 		
+		return True
+
+
+
+#####################################################
+# フォルダアーカイブ
+#####################################################
+	@classmethod
+	def sFolderArcive( cls, inDstPath, inFolderList ):
+		#############################
+		# パラメータチェック
+		if len(inFolderList)==0 :
+			return False
+		
+		wFLG_Err = False
+		try:
+			#############################
+			# アーカイブ
+			with zipfile.ZipFile(inDstPath,'w') as wMyzip:
+				for wLine in inFolderList :
+					wMyzip.write( wLine )
+		
+		except ValueError as err :
+			wFLG_Err = True
+		
+		#############################
+		# エラーの場合
+		if wFLG_Err==True :
+			### ***消す
+			return False
+		
+		#############################
+		# OK
 		return True
 
 

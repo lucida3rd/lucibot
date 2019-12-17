@@ -4,7 +4,7 @@
 # public
 #   Class   ：OS I/F (OS向け共通処理)
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/20
+#   Update  ：2019/11/24
 #####################################################
 # Private Function:
 #   (none)
@@ -494,6 +494,17 @@ class CLS_OSIF() :
 				return False
 		
 		return True
+
+
+
+#####################################################
+# row['content']からURLを除去
+#####################################################
+	@classmethod
+	def sDel_URL( cls, inCont ):
+		wPatt = re.compile(r"https?:\/\/[-_\.!~*\'()a-zA-Z0-9;\/?:\@&=\+\$,%#]+")
+		wD_Cont = wPatt.sub( "", inCont )
+		return wD_Cont
 
 
 
