@@ -4,7 +4,7 @@
 # るしぼっと4
 #   Class   ：HTL監視処理
 #   Site URL：https://mynoghra.jp/
-#   Update  ：2019/11/24
+#   Update  ：2020/1/6
 #####################################################
 # Private Function:
 #   __run(self):
@@ -205,9 +205,13 @@ class CLS_LookHTL():
 				if CLS_UserData.sCheckHardUser( self.Obj_Parent.CHR_Account )!=True :
 					continue
 				
-				### 自分が指定ユーザか
+##				### 自分が指定ユーザか
+##				if self.ARR_AnapTL[wKey]['Fulluser']!="" :
+##					if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
+##						continue
+				### 対象トゥートが指定ユーザか
 				if self.ARR_AnapTL[wKey]['Fulluser']!="" :
-					if self.ARR_AnapTL[wKey]['Fulluser']!=self.Obj_Parent.CHR_Account :
+					if self.ARR_AnapTL[wKey]['Fulluser']!=wFulluser['Fulluser'] :
 						continue
 				### 無指定の場合、登録ユーザか(第三者避け)
 				else :
@@ -224,7 +228,8 @@ class CLS_LookHTL():
 				### 実行
 ##				if self.TwitterBoost( inROW['id'] )!=True :
 ##				if self.TwitterBoost( inROW['id'], wFulluser )!=True :
-				if self.TwitterBoost( inROW['id'], wFulluser, wCont )!=True :
+##				if self.TwitterBoost( inROW['id'], wFulluser, wCont )!=True :
+				if self.TwitterBoost( inROW['id'], wFulluser, wCont, self.ARR_AnapTL[wKey]['TwitterTags'] )!=True :
 					self.STR_Cope['Invalid'] += 1
 				else :
 					self.STR_Cope["Now_Twitter"] += 1
@@ -434,7 +439,10 @@ class CLS_LookHTL():
 		wIndex = 0
 		for wLine in wAnapList :
 			wLine = wLine.split( gVal.DEF_DATA_BOUNDARY )
-			if len(wLine)!=3 :
+			if len(wLine)==3 :
+							#旧フォーマット
+				wLine.append("")
+			if len(wLine)!=4 :
 				continue	#フォーマットになってない
 			if wLine[0].find("#")==0 :
 				continue	#コメントアウト
@@ -448,6 +456,7 @@ class CLS_LookHTL():
 			self.ARR_AnapTL[wIndex].update({ "Kind"     : wLine[0] })
 			self.ARR_AnapTL[wIndex].update({ "Tag"      : wLine[1] })
 			self.ARR_AnapTL[wIndex].update({ "Fulluser" : wLine[2] })
+			self.ARR_AnapTL[wIndex].update({ "TwitterTags" : wLine[3] })
 			wIndex += 1
 		
 		if len(self.ARR_AnapTL)==0 :
@@ -477,11 +486,20 @@ class CLS_LookHTL():
 # ついったー転送
 #####################################################
 ###	def TwitterBoost( self, inID, inFulluser ) :
-	def TwitterBoost( self, inID, inFulluser, inCont ) :
+###	def TwitterBoost( self, inID, inFulluser, inCont ) :
+	def TwitterBoost( self, inID, inFulluser, inCont, inTwitterTags ) :
 		if len(inCont)<=0 :
 			###ありえない
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHTL: TwitterBoost: Content size is zero" )
 			return False
+		
+		#############################
+		# Twitterタグ
+		wTwitterTags = ""
+		if inTwitterTags!="" :
+			wARR_TwitterTags = inTwitterTags.split(",")
+			for wLine in wARR_TwitterTags :
+				wTwitterTags = wTwitterTags + " #" + wLine
 		
 		#############################
 		# ツイートの組み立て
@@ -489,7 +507,8 @@ class CLS_LookHTL():
 		wToot_Url = " https://" + inFulluser['Domain'] + "/@" + inFulluser['Username'] + "/" + str(inID)
 		
 		### 頭とトゥートURLを抜いた文字数
-		wMAX_Tweet = 140 - len( wToot_Url )
+##		wMAX_Tweet = 140 - len( wToot_Url )
+		wMAX_Tweet = 140 - len( wToot_Url ) - len( wTwitterTags )
 		if wMAX_Tweet<=0 :
 			###ありえない
 			self.Obj_Parent.OBJ_Mylog.Log( 'a', "CLS_LookHTL: TwitterBoost: Tweet Header size is zero" )
@@ -520,7 +539,8 @@ class CLS_LookHTL():
 		else :
 			wCHR_Body = wCHR_Body[0:wMAX_Tweet]
 		
-		wCHR_Tweet = wCHR_Body + wToot_Url
+##		wCHR_Tweet = wCHR_Body + wToot_Url
+		wCHR_Tweet = wCHR_Body + wTwitterTags + wToot_Url
 		#############################
 		# Twitterへ投稿
 		wRes = self.Obj_Parent.OBJ_Twitter.Tweet( wCHR_Tweet )
