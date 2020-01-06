@@ -397,7 +397,8 @@ class CLS_File() :
 		try:
 			#############################
 			# アーカイブ
-			with zipfile.ZipFile(inDstPath,'w') as wMyzip:
+##			with zipfile.ZipFile(inDstPath,'w') as wMyzip:
+			with zipfile.ZipFile( inDstPath, 'w', compression=zipfile.ZIP_DEFLATED ) as wMyzip:
 				for wLine in inFolderList :
 					wMyzip.write( wLine )
 		
